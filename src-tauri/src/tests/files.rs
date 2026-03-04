@@ -79,3 +79,36 @@ fn read_text_file_returns_error_for_missing_or_non_utf8_files() {
     let utf8_error = read_text_file(binary.to_string_lossy().to_string()).unwrap_err();
     assert!(utf8_error.contains("UTF-8"));
 }
+
+#[test]
+fn format_structured_text_formats_json_input() {
+    let result =
+        format_structured_text("{\"name\":\"teex\"}".to_string(), Some("json".to_string()))
+            .expect("format structured text should succeed");
+
+    assert_eq!(result.detected_kind.as_deref(), Some("json"));
+    assert!(result.changed);
+    assert_eq!(result.formatted, "{\n  \"name\": \"teex\"\n}");
+}
+
+#[test]
+fn format_structured_text_formats_yaml_input() {
+    let input = "root:\n    child: yes\n    count: 1".to_string();
+    let result = format_structured_text(input, Some("yaml".to_string()))
+        .expect("format structured text should succeed");
+
+    assert_eq!(result.detected_kind.as_deref(), Some("yaml"));
+    assert!(result.changed);
+    assert_eq!(result.formatted, "root:\n  child: 'yes'\n  count: 1");
+}
+
+#[test]
+fn format_structured_text_returns_unchanged_for_plain_text() {
+    let input = "hello world".to_string();
+    let result =
+        format_structured_text(input.clone(), None).expect("format structured text should succeed");
+
+    assert_eq!(result.detected_kind, None);
+    assert!(!result.changed);
+    assert_eq!(result.formatted, input);
+}

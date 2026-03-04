@@ -16,6 +16,55 @@ pub(crate) struct FilePayload {
     pub(crate) writable: bool,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct FormatStructuredTextResult {
+    pub(crate) formatted: String,
+    pub(crate) detected_kind: Option<String>,
+    pub(crate) changed: bool,
+}
+
+fn format_json(content: &str) -> Option<String> {
+    let value: serde_json::Value = serde_json::from_str(content).ok()?;
+    serde_json::to_string_pretty(&value).ok()
+}
+
+fn format_yaml(content: &str) -> Option<String> {
+    let value: serde_yml::Value = serde_yml::from_str(content).ok()?;
+    match &value {
+        serde_yml::Value::Mapping(_) | serde_yml::Value::Sequence(_) => {}
+        _ => return None,
+    }
+    let formatted = serde_yml::to_string(&value).ok()?;
+    Some(formatted.trim_end_matches('\n').to_string())
+}
+
+fn format_structured(
+    content: &str,
+    preferred_kind: Option<&str>,
+) -> (Option<String>, Option<String>) {
+    let preferred = preferred_kind.map(|value| value.trim().to_ascii_lowercase());
+    let candidates: &[&str] = match preferred.as_deref() {
+        Some("json") => &["json", "yaml"],
+        Some("yaml") => &["yaml", "json"],
+        _ => &["json", "yaml"],
+    };
+
+    for candidate in candidates {
+        let formatted = match *candidate {
+            "json" => format_json(content),
+            "yaml" => format_yaml(content),
+            _ => None,
+        };
+
+        if let Some(formatted) = formatted {
+            return (Some(formatted), Some((*candidate).to_string()));
+        }
+    }
+
+    (None, None)
+}
+
 #[tauri::command]
 pub(crate) fn list_project_entries(root: String) -> Result<Vec<ProjectEntry>, String> {
     let root_path = PathBuf::from(root);
@@ -86,4 +135,26 @@ pub(crate) fn read_text_file(path: String) -> Result<FilePayload, String> {
 #[tauri::command]
 pub(crate) fn write_text_file(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(|e| format!("Unable to write file: {e}"))
+}
+
+#[tauri::command]
+pub(crate) fn format_structured_text(
+    content: String,
+    preferred_kind: Option<String>,
+) -> Result<FormatStructuredTextResult, String> {
+    let (formatted, detected_kind) = format_structured(&content, preferred_kind.as_deref());
+    let Some(formatted) = formatted else {
+        return Ok(FormatStructuredTextResult {
+            formatted: content,
+            detected_kind: None,
+            changed: false,
+        });
+    };
+
+    let changed = formatted != content;
+    Ok(FormatStructuredTextResult {
+        formatted,
+        detected_kind,
+        changed,
+    })
 }

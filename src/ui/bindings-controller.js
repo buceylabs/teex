@@ -1,6 +1,7 @@
 import { clamp } from "../app-utils.js";
 import { hasFileDragData } from "../path-input.js";
 import { renderMarkdown } from "./markdown-renderer.js";
+import { detectStructuredPasteKind, formatStructuredPasteText } from "./paste-format.js";
 
 export function bindElements(el) {
   el.workspace = document.querySelector("#workspace");
@@ -41,21 +42,31 @@ export function bindUiEvents({
     }
   });
 
-  el.editor.addEventListener("paste", (event) => {
+  el.editor.addEventListener("paste", async (event) => {
     const text = event.clipboardData?.getData("text/plain");
     if (!text) {
       return;
     }
-    try {
-      const parsed = JSON.parse(text);
-      const formatted = JSON.stringify(parsed, null, 2);
-      if (formatted === text) {
-        return;
-      }
-      event.preventDefault();
-      document.execCommand("insertText", false, formatted);
-    } catch {
-      // Not valid JSON — let default paste proceed.
+
+    const detectedKind = detectStructuredPasteKind({
+      activePath: state.activePath,
+      text,
+    });
+    if (!detectedKind) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const formatResult = await formatStructuredPasteText({
+      invoke,
+      text,
+      activePath: state.activePath,
+    });
+    document.execCommand("insertText", false, formatResult?.formatted || text);
+
+    if (!formatResult?.detectedKind) {
+      setStatus(`Unable to auto-format pasted ${detectedKind.toUpperCase()} (invalid syntax)`, true);
     }
   });
 

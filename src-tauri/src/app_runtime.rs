@@ -22,6 +22,7 @@ pub(crate) fn run_app() {
             list_project_entries,
             read_text_file,
             write_text_file,
+            format_structured_text,
             set_window_title,
             set_menu_state,
             close_current_window,
@@ -89,13 +90,7 @@ fn build_app_menu(
         true,
         Some("CmdOrCtrl+N"),
     )?;
-    let new_tab_item = MenuItem::with_id(
-        app,
-        MENU_NEW_TAB,
-        "New Tab",
-        true,
-        Some("CmdOrCtrl+T"),
-    )?;
+    let new_tab_item = MenuItem::with_id(app, MENU_NEW_TAB, "New Tab", true, Some("CmdOrCtrl+T"))?;
     let merge_all_windows_item = MenuItem::with_id(
         app,
         MENU_MERGE_ALL_WINDOWS_INTO_THIS_WINDOW,
@@ -278,7 +273,12 @@ fn handle_mac_service_request(app: &tauri::AppHandle, request: mac_services::Ser
     match request.action {
         mac_services::ServiceAction::NewFileTabHere => {
             if let Some(window) = target_window(app) {
-                emit_to_window(app, window.label(), EVENT_OPEN_FILE_SELECTED, path_to_string(&path));
+                emit_to_window(
+                    app,
+                    window.label(),
+                    EVENT_OPEN_FILE_SELECTED,
+                    path_to_string(&path),
+                );
                 return;
             }
 
@@ -314,7 +314,9 @@ pub(crate) fn apply_theme(app: &tauri::AppHandle, theme: &str) {
         let _ = window.set_theme(native_theme);
     }
     let items = app.state::<ThemeMenuState>();
-    let _ = items.system.set_checked(theme != "light" && theme != "dark");
+    let _ = items
+        .system
+        .set_checked(theme != "light" && theme != "dark");
     let _ = items.light.set_checked(theme == "light");
     let _ = items.dark.set_checked(theme == "dark");
 }

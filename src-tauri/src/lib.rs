@@ -27,17 +27,17 @@ mod app_runtime;
 mod apple_events;
 #[cfg(target_os = "macos")]
 mod cli_install;
-#[cfg(target_os = "macos")]
-mod mac_services;
 mod files;
 mod launch;
+#[cfg(target_os = "macos")]
+mod mac_services;
 mod menu_events;
 mod path_utils;
 mod tab_transfer;
 mod watchers;
 mod window_title;
 
-use files::{list_project_entries, read_text_file, write_text_file};
+use files::{format_structured_text, list_project_entries, read_text_file, write_text_file};
 use launch::{
     categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths,
     take_pending_open_paths,
