@@ -11,6 +11,7 @@ function getMarkdownParser() {
   const md = markdownItFactory({
     html: false,
     linkify: true,
+    breaks: true,
   });
 
   const taskListsPlugin = globalThis.markdownitTaskLists;

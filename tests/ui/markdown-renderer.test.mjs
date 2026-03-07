@@ -55,3 +55,13 @@ test("renders mermaid fences as mermaid blocks with source mapping", () => {
   assert.match(html, /graph TD/);
   assert.match(html, /A--&gt;B/);
 });
+
+test("preserves single newlines as line breaks in paragraphs", () => {
+  const html = renderMarkdown(
+    "# March 2026 Monthly Plan\n\n**Period:** March 1-31, 2026 (31 days, ~4.5 weeks)\n**Theme:** \"Deliver\"\n**Context:** Q1 closes March 31.",
+  );
+  assert.match(html, /<h1 data-src-line-start="1" data-src-line-end="1">March 2026 Monthly Plan<\/h1>/);
+  assert.match(html, /<strong>Period:<\/strong>[\s\S]*<br/);
+  assert.match(html, /<strong>Theme:<\/strong>[\s\S]*<br/);
+  assert.match(html, /<strong>Context:<\/strong>/);
+});
