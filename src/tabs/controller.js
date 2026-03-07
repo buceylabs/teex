@@ -23,6 +23,14 @@ async function clearProjectFolderWatch(invoke) {
   }
 }
 
+function isEmptyUntitledActiveState(state) {
+  if (state.activePath || state.isDirty) {
+    return false;
+  }
+
+  return typeof state.content === "string" && state.content.trim().length === 0;
+}
+
 export function createTabController({
   state,
   invoke,
@@ -196,6 +204,15 @@ export function createTabController({
     }
 
     if (state.mode === "files") {
+      const hasOnlyEmptyUntitledTab = (
+        state.openFiles.length === 1
+        && state.activeTabIndex === 0
+        && isEmptyUntitledActiveState(state)
+      );
+      if (hasOnlyEmptyUntitledTab) {
+        await openFile(path);
+        return;
+      }
       await openFileAsTab(path);
       return;
     }
@@ -208,8 +225,6 @@ export function createTabController({
     if (state.activePath === path) {
       return;
     }
-
-    await saveNow();
 
     try {
       const payload = await invoke("read_text_file", { path });

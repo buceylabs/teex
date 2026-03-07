@@ -7,6 +7,7 @@ function createControllerHarness({
   stateOverrides = {},
   saveNow = async () => {},
   invoke = async () => {},
+  openFile = async () => {},
   promptCloseDirty = async () => "cancel",
 } = {}) {
   const state = {
@@ -32,7 +33,7 @@ function createControllerHarness({
     updateMenuState: () => {},
     markSidebarTreeDirty: () => {},
     saveNow,
-    openFile: async () => {},
+    openFile,
     applyFilePayload: () => {},
     clearActiveFile: () => {
       state.activePath = null;
@@ -218,6 +219,142 @@ test("createNewTab in folder mode preserves selected file as first tab", () => {
   assert.equal(state.openFiles[1].path, null);
   assert.equal(state.activeTabIndex, 1);
   assert.equal(state.activePath, null);
+});
+
+test("openFileInTabs replaces a single empty untitled tab with opened file", async () => {
+  let openedPath = null;
+  let readCalls = 0;
+  const { state, controller } = createControllerHarness({
+    stateOverrides: {
+      mode: "files",
+      openFiles: [
+        {
+          path: null,
+          kind: "markdown",
+          content: "",
+          writable: true,
+          isDirty: false,
+          markdownViewMode: "edit",
+          scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+        },
+      ],
+      activeTabIndex: 0,
+      activePath: null,
+      activeKind: "markdown",
+      content: "",
+      isDirty: false,
+      markdownViewMode: "edit",
+    },
+    openFile: async (path) => {
+      openedPath = path;
+    },
+    invoke: async (command) => {
+      if (command === "read_text_file") {
+        readCalls += 1;
+      }
+    },
+  });
+
+  await controller.openFileInTabs("/tmp/a.md");
+
+  assert.equal(openedPath, "/tmp/a.md");
+  assert.equal(readCalls, 0);
+  assert.equal(state.openFiles.length, 1);
+  assert.equal(state.openFiles[0].path, null);
+});
+
+test("openFileInTabs does not replace when active untitled is dirty in live state", async () => {
+  let openedPath = null;
+  const { state, controller } = createControllerHarness({
+    stateOverrides: {
+      mode: "files",
+      openFiles: [
+        {
+          path: null,
+          kind: "markdown",
+          content: "",
+          writable: true,
+          isDirty: false,
+          markdownViewMode: "edit",
+          scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+        },
+      ],
+      activeTabIndex: 0,
+      activePath: null,
+      activeKind: "markdown",
+      content: "# draft",
+      isDirty: true,
+      markdownViewMode: "edit",
+    },
+    openFile: async (path) => {
+      openedPath = path;
+    },
+    invoke: async (command, payload) => {
+      if (command === "read_text_file" && payload?.path === "/tmp/new.md") {
+        return {
+          path: "/tmp/new.md",
+          content: "# new",
+          kind: "markdown",
+          writable: true,
+        };
+      }
+      return undefined;
+    },
+  });
+
+  await controller.openFileInTabs("/tmp/new.md");
+
+  assert.equal(openedPath, null);
+  assert.equal(state.openFiles.length, 2);
+  assert.equal(state.openFiles[0].path, null);
+  assert.equal(state.openFiles[0].content, "# draft");
+  assert.equal(state.openFiles[0].isDirty, true);
+  assert.equal(state.openFiles[1].path, "/tmp/new.md");
+  assert.equal(state.activeTabIndex, 1);
+  assert.equal(state.activePath, "/tmp/new.md");
+});
+
+test("openFileInTabs from dirty single-file mode does not save before opening new tab", async () => {
+  let saveCalls = 0;
+  const { state, controller } = createControllerHarness({
+    stateOverrides: {
+      mode: "file",
+      openFiles: [],
+      activePath: "/tmp/current.md",
+      activeKind: "markdown",
+      content: "# unsaved",
+      isDirty: true,
+      markdownViewMode: "edit",
+      activeEditorScrollTop: 12,
+      activePreviewScrollTop: 34,
+    },
+    saveNow: async () => {
+      saveCalls += 1;
+    },
+    invoke: async (command, payload) => {
+      if (command === "read_text_file" && payload?.path === "/tmp/new.md") {
+        return {
+          path: "/tmp/new.md",
+          content: "# new",
+          kind: "markdown",
+          writable: true,
+        };
+      }
+      return undefined;
+    },
+  });
+
+  await controller.openFileInTabs("/tmp/new.md");
+
+  assert.equal(saveCalls, 0);
+  assert.equal(state.mode, "files");
+  assert.equal(state.openFiles.length, 2);
+  assert.equal(state.openFiles[0].path, "/tmp/current.md");
+  assert.equal(state.openFiles[0].content, "# unsaved");
+  assert.equal(state.openFiles[0].isDirty, true);
+  assert.equal(state.openFiles[1].path, "/tmp/new.md");
+  assert.equal(state.activeTabIndex, 1);
+  assert.equal(state.activePath, "/tmp/new.md");
 });
 
 test("closeTab keeps dirty tab open when close prompt is canceled", async () => {
