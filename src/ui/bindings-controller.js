@@ -42,9 +42,11 @@ export function bindUiEvents({
     }
   });
 
+  let pasteFormatting = false;
+
   el.editor.addEventListener("paste", async (event) => {
     const text = event.clipboardData?.getData("text/plain");
-    if (!text) {
+    if (!text || pasteFormatting) {
       return;
     }
 
@@ -57,16 +59,27 @@ export function bindUiEvents({
     }
 
     event.preventDefault();
+    pasteFormatting = true;
 
-    const formatResult = await formatStructuredPasteText({
-      invoke,
-      text,
-      activePath: state.activePath,
-    });
-    document.execCommand("insertText", false, formatResult?.formatted || text);
+    try {
+      const formatResult = await formatStructuredPasteText({
+        invoke,
+        text,
+        activePath: state.activePath,
+      });
+      document.execCommand("insertText", false, formatResult?.formatted || text);
 
-    if (!formatResult?.detectedKind) {
-      setStatus(`Unable to auto-format pasted ${detectedKind.toUpperCase()} (invalid syntax)`, true);
+      state.content = el.editor.value;
+      state.isDirty = true;
+      if (typeof onDirtyStateChanged === "function") {
+        onDirtyStateChanged();
+      }
+
+      if (!formatResult?.detectedKind) {
+        setStatus(`Unable to auto-format pasted ${detectedKind.toUpperCase()} (invalid syntax)`, true);
+      }
+    } finally {
+      pasteFormatting = false;
     }
   });
 
