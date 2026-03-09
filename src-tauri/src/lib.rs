@@ -147,10 +147,26 @@ fn next_window_label() -> String {
     )
 }
 
+fn focused_window_position(app: &tauri::AppHandle) -> Option<(f64, f64)> {
+    let tracker = app.state::<FocusTracker>();
+    let label = tracker.label.lock().ok()?.clone()?;
+    let window = app.webview_windows().get(&label)?.clone();
+    let pos = window.outer_position().ok()?;
+    let scale = window.scale_factor().ok()?;
+    Some((pos.x as f64 / scale, pos.y as f64 / scale))
+}
+
 fn build_new_window(app: &tauri::AppHandle, label: String) -> Result<tauri::WebviewWindow, String> {
-    let new_window = tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::default())
+    let mut builder = tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::default())
         .title("Teex")
-        .inner_size(800.0, 600.0)
+        .inner_size(800.0, 600.0);
+
+    // Cascade: offset from the focused window so new windows don't stack exactly on top
+    if let Some(pos) = focused_window_position(app) {
+        builder = builder.position(pos.0 + 22.0, pos.1 + 22.0);
+    }
+
+    let new_window = builder
         .build()
         .map_err(|e| format!("Unable to create window: {e}"))?;
 
