@@ -11,6 +11,7 @@ export function createUiRenderer({
   switchTab,
   moveTab,
   closeTab,
+  crossWindowDrag,
 }) {
   function syncWindowTitle() {
     const { nextTitle, nextRepresentedPath } = buildWindowTitleState(state);
@@ -140,6 +141,15 @@ export function createUiRenderer({
       }
     }
 
+    function isCursorOutsideWindow(event) {
+      return (
+        event.clientX < 0 ||
+        event.clientX > window.innerWidth ||
+        event.clientY < 0 ||
+        event.clientY > window.innerHeight
+      );
+    }
+
     function onMouseMove(event) {
       if (!dragState) {
         return;
@@ -154,8 +164,28 @@ export function createUiRenderer({
         dragState.sourceEl.classList.add("tab-dragging");
         dragState.ghost = createGhost(dragState.sourceEl, event.clientX, event.clientY);
         document.documentElement.classList.add("tab-reordering");
+        if (crossWindowDrag) {
+          crossWindowDrag.activate(dragState.fromIndex);
+        }
       }
+
+      const outside = isCursorOutsideWindow(event);
+
+      if (outside && crossWindowDrag) {
+        clearDropIndicators();
+        if (dragState.ghost) {
+          dragState.ghost.classList.add("hidden");
+        }
+        crossWindowDrag.reportPosition(event.screenX, event.screenY);
+        return;
+      }
+
+      if (!outside && crossWindowDrag && crossWindowDrag.currentTargetLabel()) {
+        crossWindowDrag.cancel();
+      }
+
       if (dragState.ghost) {
+        dragState.ghost.classList.remove("hidden");
         const rect = dragState.sourceEl.getBoundingClientRect();
         dragState.ghost.style.left = (event.clientX - rect.width / 2) + "px";
       }
@@ -167,6 +197,22 @@ export function createUiRenderer({
         return;
       }
       if (dragState.dragging) {
+        if (crossWindowDrag && crossWindowDrag.currentTargetLabel()) {
+          dragState.sourceEl.classList.remove("tab-dragging");
+          if (dragState.ghost) {
+            dragState.ghost.remove();
+          }
+          document.documentElement.classList.remove("tab-reordering");
+          dragState = null;
+          clearDropIndicators();
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+          crossWindowDrag.completeDrop();
+          return;
+        }
+        if (crossWindowDrag) {
+          crossWindowDrag.cancel();
+        }
         finishDrag(event.clientX);
       } else {
         dragState = null;

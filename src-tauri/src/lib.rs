@@ -35,6 +35,7 @@ mod launch;
 mod mac_services;
 mod menu_events;
 mod path_utils;
+mod cross_window_drag;
 mod tab_transfer;
 mod watchers;
 mod window_title;
@@ -50,6 +51,10 @@ use menu_events::{
 #[cfg(test)]
 use menu_events::{next_transfer_request_id, window_event};
 use path_utils::{file_kind, is_text_like, path_to_string, should_traverse};
+use cross_window_drag::{
+    cancel_cross_window_drag_hover, cleanup_drag_entries_for_window, report_drag_position,
+    CrossWindowDragRegistry,
+};
 use tab_transfer::{route_tab_transfer, route_tab_transfer_result, RequestExportAllTabsPayload};
 use watchers::{
     clear_project_file_watch_for_label, clear_project_folder_watch_for_label,
@@ -69,6 +74,8 @@ const EVENT_NEW_TAB: &str = "teex://new-tab";
 const EVENT_REQUEST_EXPORT_ALL_TABS: &str = "teex://request-export-all-tabs";
 const EVENT_RECEIVE_TRANSFERRED_TABS: &str = "teex://receive-transferred-tabs";
 const EVENT_TAB_TRANSFER_RESULT: &str = "teex://tab-transfer-result";
+const EVENT_CROSS_WINDOW_DRAG_ENTER: &str = "teex://cross-window-drag-enter";
+const EVENT_CROSS_WINDOW_DRAG_LEAVE: &str = "teex://cross-window-drag-leave";
 
 const MENU_OPEN_FILE: &str = "open_file";
 const MENU_OPEN_FOLDER: &str = "open_folder";

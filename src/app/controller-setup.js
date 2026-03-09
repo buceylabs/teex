@@ -7,6 +7,7 @@ import { createFileController } from "../files/controller.js";
 import { createOpenPathsController } from "./open-paths-controller.js";
 import { createDragDropController } from "./drag-drop-controller.js";
 import { createAppEventsController } from "./events-controller.js";
+import { createCrossWindowDragController } from "../tabs/cross-window-drag-controller.js";
 
 export function setupControllers({
   state,
@@ -25,6 +26,15 @@ export function setupControllers({
   let sidebarController;
   let uiRenderer;
 
+  const crossWindowDragController = createCrossWindowDragController({
+    state,
+    pendingOutgoingTabTransfers,
+    invoke,
+    el,
+    render: callbacks.render,
+    setStatus: callbacks.setStatus,
+  });
+
   uiRenderer = createUiRenderer({
     state,
     el,
@@ -33,6 +43,7 @@ export function setupControllers({
     switchTab: callbacks.switchTab,
     moveTab: callbacks.moveTab,
     closeTab: callbacks.closeTab,
+    crossWindowDrag: crossWindowDragController,
   });
 
   const editorController = createEditorController({
@@ -156,6 +167,8 @@ export function setupControllers({
     handleReceiveTransferredTabs: callbacks.handleReceiveTransferredTabs,
     handleTabTransferResult: callbacks.handleTabTransferResult,
     restoreLastSession: callbacks.restoreLastSession,
+    handleCrossWindowDragEnter: () => crossWindowDragController.handleDragEnter(),
+    handleCrossWindowDragLeave: () => crossWindowDragController.handleDragLeave(),
     bindWindowDragDropEvents: () => dragDropController.bindWindowDragDropEvents(),
   });
 
@@ -168,6 +181,7 @@ export function setupControllers({
     fileController,
     openPathsController,
     dragDropController,
+    crossWindowDragController,
     appEventsController,
   };
 }

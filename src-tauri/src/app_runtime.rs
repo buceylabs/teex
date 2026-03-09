@@ -36,7 +36,9 @@ pub(crate) fn run_app() {
             clear_project_folder_watch,
             watch_project_files,
             open_paths_in_new_window,
-            set_theme
+            set_theme,
+            report_drag_position,
+            cancel_cross_window_drag_hover
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
@@ -263,6 +265,7 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(FileWatchRegistry {
         by_window: Mutex::new(HashMap::new()),
     });
+    app.manage(CrossWindowDragRegistry::new());
 
     #[cfg(target_os = "macos")]
     {
@@ -316,6 +319,7 @@ fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     if let tauri::WindowEvent::Destroyed = event {
         clear_project_folder_watch_for_label(window.app_handle(), window.label());
         clear_project_file_watch_for_label(window.app_handle(), window.label());
+        cleanup_drag_entries_for_window(window.app_handle(), window.label());
     }
 }
 

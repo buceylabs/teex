@@ -17,6 +17,8 @@ export function createAppEventsController({
   bindWindowDragDropEvents,
   createNewTab,
   restoreLastSession,
+  handleCrossWindowDragEnter,
+  handleCrossWindowDragLeave,
 }) {
   async function bindAppEvents() {
     const label = await invoke("get_window_label");
@@ -60,6 +62,12 @@ export function createAppEventsController({
       }),
       listen(`${events.restoreSession}/${label}`, async () => {
         await restoreLastSession();
+      }),
+      listen(`${events.crossWindowDragEnter}/${label}`, () => {
+        handleCrossWindowDragEnter();
+      }),
+      listen(`${events.crossWindowDragLeave}/${label}`, () => {
+        handleCrossWindowDragLeave();
       }),
       bindWindowDragDropEvents(),
     ]);

@@ -143,6 +143,32 @@ export function createTabTransferController({
         state.mode = "empty";
         markSidebarTreeDirty();
       }
+    } else if (pending.kind === "single-drag") {
+      if (hasTabSession()) {
+        const idx = pending.fromIndex;
+        if (idx >= 0 && idx < state.openFiles.length) {
+          state.openFiles.splice(idx, 1);
+          if (state.openFiles.length === 0) {
+            state.activeTabIndex = 0;
+            clearActiveFile();
+            if (state.mode !== "folder") {
+              state.mode = "empty";
+              markSidebarTreeDirty();
+            }
+          } else {
+            if (state.activeTabIndex >= state.openFiles.length) {
+              state.activeTabIndex = state.openFiles.length - 1;
+            }
+            syncActiveTabToState();
+          }
+        }
+      } else {
+        clearActiveFile();
+        if (state.mode !== "folder") {
+          state.mode = "empty";
+          markSidebarTreeDirty();
+        }
+      }
     } else if (pending.kind === "single") {
       if (!hasTabSession() && (!pending.singlePath || state.activePath === pending.singlePath)) {
         clearActiveFile();

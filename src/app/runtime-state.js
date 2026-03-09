@@ -12,6 +12,8 @@ export const EVENTS = {
   receiveTransferredTabs: "teex://receive-transferred-tabs",
   tabTransferResult: "teex://tab-transfer-result",
   restoreSession: "teex://restore-session",
+  crossWindowDragEnter: "teex://cross-window-drag-enter",
+  crossWindowDragLeave: "teex://cross-window-drag-leave",
 };
 
 export function createRuntimeState() {
