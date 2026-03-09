@@ -27,6 +27,8 @@ mod app_runtime;
 mod apple_events;
 #[cfg(target_os = "macos")]
 mod cli_install;
+#[cfg(target_os = "macos")]
+mod default_handler;
 mod files;
 mod launch;
 #[cfg(target_os = "macos")]
@@ -73,6 +75,7 @@ const MENU_OPEN_FOLDER: &str = "open_folder";
 const MENU_NEW_WINDOW: &str = "new_window";
 const MENU_MERGE_ALL_WINDOWS_INTO_THIS_WINDOW: &str = "merge_all_windows_into_this_window";
 const MENU_INSTALL_CLI: &str = "install_cli";
+const MENU_SET_DEFAULT_MARKDOWN: &str = "set_default_markdown";
 const MENU_CLOSE_ACTIVE_FILE: &str = "close_active_file";
 const MENU_CLOSE_WINDOW: &str = "close_window";
 const MENU_TOGGLE_SIDEBAR: &str = "toggle_sidebar";

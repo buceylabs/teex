@@ -230,6 +230,10 @@ pub(super) fn handle_app_menu_event(app: &tauri::AppHandle, event: tauri::menu::
             #[cfg(target_os = "macos")]
             cli_install::install_cli_from_menu(app);
         }
+        MENU_SET_DEFAULT_MARKDOWN => {
+            #[cfg(target_os = "macos")]
+            default_handler::set_default_markdown_from_menu(app);
+        }
         MENU_TOGGLE_SIDEBAR => {
             if let Some(window) = target_window(app) {
                 emit_to_window(app, window.label(), EVENT_TOGGLE_SIDEBAR, ());

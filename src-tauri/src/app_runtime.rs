@@ -106,6 +106,14 @@ fn build_app_menu(
         true,
         None::<&str>,
     )?;
+    #[cfg(target_os = "macos")]
+    let set_default_markdown_item = MenuItem::with_id(
+        app,
+        MENU_SET_DEFAULT_MARKDOWN,
+        "Set as Default for Markdown...",
+        true,
+        None::<&str>,
+    )?;
     let close_active_file_item = MenuItem::with_id(
         app,
         MENU_CLOSE_ACTIVE_FILE,
@@ -194,6 +202,7 @@ fn build_app_menu(
             &PredefinedMenuItem::about(app, None, None)?,
             &PredefinedMenuItem::separator(app)?,
             &install_cli_item,
+            &set_default_markdown_item,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::services(app, None)?,
             &PredefinedMenuItem::separator(app)?,
