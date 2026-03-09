@@ -85,6 +85,8 @@ const MENU_THEME_SYSTEM: &str = "theme_system";
 const MENU_THEME_LIGHT: &str = "theme_light";
 const MENU_THEME_DARK: &str = "theme_dark";
 const EVENT_SET_THEME: &str = "teex://set-theme";
+const MENU_RESTORE_SESSION: &str = "restore_session";
+const EVENT_RESTORE_SESSION: &str = "teex://restore-session";
 static NEXT_WINDOW_ID: AtomicUsize = AtomicUsize::new(1);
 static NEXT_TRANSFER_REQUEST_ID: AtomicUsize = AtomicUsize::new(1);
 const FOLDER_WATCH_DEBOUNCE: Duration = Duration::from_millis(250);
@@ -165,6 +167,11 @@ fn build_new_window(app: &tauri::AppHandle, label: String) -> Result<tauri::Webv
 struct MenuState {
     can_toggle_sidebar: bool,
     can_toggle_markdown_mode: bool,
+}
+
+#[tauri::command]
+fn get_all_window_labels(app: tauri::AppHandle) -> Vec<String> {
+    app.webview_windows().keys().cloned().collect()
 }
 
 #[tauri::command]

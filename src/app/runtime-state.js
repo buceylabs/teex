@@ -11,6 +11,7 @@ export const EVENTS = {
   requestExportAllTabs: "teex://request-export-all-tabs",
   receiveTransferredTabs: "teex://receive-transferred-tabs",
   tabTransferResult: "teex://tab-transfer-result",
+  restoreSession: "teex://restore-session",
 };
 
 export function createRuntimeState() {

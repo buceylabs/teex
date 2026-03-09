@@ -15,6 +15,12 @@ import {
 } from "./tabs/session.js";
 import { setupControllers } from "./app/controller-setup.js";
 import { createRuntimeState, EVENTS } from "./app/runtime-state.js";
+import {
+  saveWindowSession,
+  loadAllSessions,
+  pruneStaleWindows,
+  clearAllSessions,
+} from "./app/session-persistence.js";
 import { createScrollSyncController } from "./ui/scroll-sync.js";
 
 const { invoke } = window.__TAURI__.core;
@@ -39,6 +45,7 @@ let openPathsController;
 let dragDropController;
 let appEventsController;
 let scrollSyncController;
+let sessionSaveEnabled = false;
 const externalFileWatchState = {
   signature: "",
   syncPromise: null,
@@ -104,6 +111,7 @@ const externalFileWatchState = {
     handleRequestExportAllTabs,
     handleReceiveTransferredTabs,
     handleTabTransferResult,
+    restoreLastSession,
     onFileSaved,
     onBeforeToggleMarkdownMode,
     onAfterToggleMarkdownMode,
@@ -127,6 +135,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   bindUiEvents();
   await bindAppEvents();
   await bootstrap();
+  sessionSaveEnabled = true;
   startPendingOpenPathPoller();
 
   const savedTheme = localStorage.getItem("teex-theme");
@@ -297,6 +306,59 @@ async function handleTabTransferResult(payload) {
   await tabTransferController.handleTabTransferResult(payload);
 }
 
+async function restoreLastSession() {
+  const sessions = loadAllSessions();
+  if (sessions.length === 0) {
+    return;
+  }
+
+  clearAllSessions();
+
+  await restoreSessionInCurrentWindow(sessions[0]);
+
+  for (let i = 1; i < sessions.length; i++) {
+    const paths = sessionPaths(sessions[i]);
+    if (paths.length > 0) {
+      await invoke("open_paths_in_new_window", { paths });
+    }
+  }
+}
+
+async function restoreSessionInCurrentWindow(session) {
+  if (session.mode === "folder" && session.folderPath) {
+    await openFolder(session.folderPath);
+    return;
+  }
+
+  const paths = sessionPaths(session);
+  if (!paths.length) {
+    return;
+  }
+
+  if (paths.length === 1) {
+    await openFile(paths[0]);
+  } else {
+    await openMultipleFiles(paths);
+    const targetIndex = session.activeTabIndex ?? 0;
+    if (targetIndex > 0 && targetIndex < state.openFiles.length) {
+      switchTab(targetIndex);
+    }
+  }
+}
+
+function sessionPaths(session) {
+  if (session.mode === "folder" && session.folderPath) {
+    return [session.folderPath];
+  }
+  return (session.tabs ?? []).map((t) => t.path).filter(Boolean);
+}
+
+function pruneStaleWindowsAsync() {
+  invoke("get_all_window_labels")
+    .then((labels) => pruneStaleWindows(labels))
+    .catch(() => {});
+}
+
 async function openMultipleFiles(paths) {
   scrollSyncController?.beforeContextReplace();
   await tabController.openMultipleFiles(paths);
@@ -374,6 +436,11 @@ function render(options = {}) {
   uiRenderer.render(options);
   scrollSyncController?.scheduleRestoreAfterRender();
   syncWatchedProjectFiles();
+  if (sessionSaveEnabled) {
+    flushStateToActiveTab();
+    saveWindowSession(state, state.windowLabel);
+    pruneStaleWindowsAsync();
+  }
 }
 
 function renderChrome() {

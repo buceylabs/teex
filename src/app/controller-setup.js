@@ -155,6 +155,7 @@ export function setupControllers({
     handleRequestExportAllTabs: callbacks.handleRequestExportAllTabs,
     handleReceiveTransferredTabs: callbacks.handleReceiveTransferredTabs,
     handleTabTransferResult: callbacks.handleTabTransferResult,
+    restoreLastSession: callbacks.restoreLastSession,
     bindWindowDragDropEvents: () => dragDropController.bindWindowDragDropEvents(),
   });
 

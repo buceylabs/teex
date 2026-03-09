@@ -16,6 +16,7 @@ export function createAppEventsController({
   handleTabTransferResult,
   bindWindowDragDropEvents,
   createNewTab,
+  restoreLastSession,
 }) {
   async function bindAppEvents() {
     const label = await invoke("get_window_label");
@@ -56,6 +57,9 @@ export function createAppEventsController({
       }),
       listen(`${events.tabTransferResult}/${label}`, async (event) => {
         await handleTabTransferResult(event.payload);
+      }),
+      listen(`${events.restoreSession}/${label}`, async () => {
+        await restoreLastSession();
       }),
       bindWindowDragDropEvents(),
     ]);

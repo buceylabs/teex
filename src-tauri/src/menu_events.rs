@@ -181,6 +181,11 @@ pub(super) fn handle_app_menu_event(app: &tauri::AppHandle, event: tauri::menu::
                 emit_to_window(app, window.label(), EVENT_CLOSE_ACTIVE_FILE, ());
             }
         }
+        MENU_RESTORE_SESSION => {
+            if let Some(window) = target_window(app) {
+                emit_to_window(app, window.label(), EVENT_RESTORE_SESSION, ());
+            }
+        }
         MENU_CLOSE_WINDOW => {
             if let Some(window) = target_window(app) {
                 let _ = window.close();

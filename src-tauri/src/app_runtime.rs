@@ -19,6 +19,7 @@ pub(crate) fn run_app() {
             get_launch_context,
             categorize_paths,
             get_window_label,
+            get_all_window_labels,
             list_project_entries,
             read_text_file,
             write_text_file,
@@ -114,6 +115,13 @@ fn build_app_menu(
         true,
         None::<&str>,
     )?;
+    let restore_session_item = MenuItem::with_id(
+        app,
+        MENU_RESTORE_SESSION,
+        "Restore Last Session",
+        true,
+        None::<&str>,
+    )?;
     let close_active_file_item = MenuItem::with_id(
         app,
         MENU_CLOSE_ACTIVE_FILE,
@@ -160,6 +168,8 @@ fn build_app_menu(
             &new_window_item,
             &open_file_item,
             &open_folder_item,
+            &PredefinedMenuItem::separator(app)?,
+            &restore_session_item,
             &PredefinedMenuItem::separator(app)?,
             &close_active_file_item,
             &close_window_item,
