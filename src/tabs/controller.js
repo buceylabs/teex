@@ -261,6 +261,35 @@ export function createTabController({
     }
   }
 
+  async function replaceActiveTab(path) {
+    if (!path) {
+      return;
+    }
+
+    const existing = state.openFiles.findIndex((f) => f.path === path);
+    if (existing !== -1) {
+      flushStateToActiveTab();
+      state.activeTabIndex = existing;
+      syncActiveTabToState();
+      render();
+      updateMenuState();
+      return;
+    }
+
+    try {
+      const payload = await invoke("read_text_file", { path });
+      const tab = buildTabFromPayload(payload);
+      flushStateToActiveTab();
+      state.openFiles[state.activeTabIndex] = tab;
+      syncActiveTabToState();
+      setStatus(`Opened ${baseName(path)}`);
+      render();
+      updateMenuState();
+    } catch (error) {
+      setStatus(String(error), true);
+    }
+  }
+
   function createNewTab() {
     flushStateToActiveTab();
 
@@ -423,6 +452,7 @@ export function createTabController({
     openMultipleFiles,
     openFileAsTab,
     openFileInTabs,
+    replaceActiveTab,
     switchTab,
     moveTab,
     closeTab,

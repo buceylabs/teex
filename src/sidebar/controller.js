@@ -20,7 +20,7 @@ export function createSidebarController({
   hasTabSession,
   syncActiveTabToState,
   saveNow,
-  openFileAsTab,
+  replaceActiveTab,
   openEntry,
   openFolderEntryInTabs,
   render,
@@ -173,7 +173,7 @@ export function createSidebarController({
               openFilesCount: state.openFiles.length,
             })
           ) {
-            await openFileAsTab(path);
+            await replaceActiveTab(path);
             return;
           }
 

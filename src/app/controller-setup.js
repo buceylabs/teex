@@ -72,6 +72,7 @@ export function setupControllers({
     syncActiveTabToState: callbacks.syncActiveTabToState,
     saveNow: callbacks.saveNow,
     openFileAsTab: callbacks.openFileAsTab,
+    replaceActiveTab: (path) => tabController.replaceActiveTab(path),
     openEntry: callbacks.openEntry,
     openFolderEntryInTabs: callbacks.openFolderEntryInTabs,
     render: () => uiRenderer.render(),
