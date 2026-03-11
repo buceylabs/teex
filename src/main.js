@@ -6,6 +6,7 @@ import {
   pruneStaleWindows,
   saveWindowSession,
 } from "./app/session-persistence.js";
+import { loadSidebarWidth } from "./app/sidebar-width-persistence.js";
 import { baseName } from "./app-utils.js";
 import {
   applyFilePayloadToState,
@@ -134,8 +135,13 @@ function applySavedTheme() {
   }
 }
 
+function applySavedSidebarWidth() {
+  state.sidebarWidth = loadSidebarWidth();
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   applySavedTheme();
+  applySavedSidebarWidth();
   bindElements();
   scrollSyncController = createScrollSyncController({ state, el });
   bindUiEvents();

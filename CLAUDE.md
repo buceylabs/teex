@@ -67,6 +67,7 @@ Node tests mirror `src/` layout: `src/ui/` → `tests/ui/`, `src/sidebar/` → `
 - **Prefer native UI over custom HTML/CSS** when a native equivalent exists and accomplishes the goal (e.g., use Tauri's native popup menus via `window.popup_menu()` instead of custom HTML context menus, native dialogs instead of custom modals)
 - No JS bundler — frontend is static files served directly by Tauri (`src/index.html` is the entry)
 - **TDD is required**: write or update tests before implementing. For every change, write a failing test first, then make it pass. Run `./test.sh` after each step to confirm.
+- **After completing a feature**, run `./test.sh` and `./lint.sh` to verify everything passes before considering the work done.
 - Extract pure helper functions from UI code and cover with Node tests before wiring into event handlers
 - For large refactors, split into small phases and run `./test.sh` after each
 - When changing file-open flows, manually test file types from `tauri.conf.json` (md, txt, json, yaml, toml, csv, xml) across entry paths: app UI, OS "Open With", and drag-drop

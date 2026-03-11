@@ -1,3 +1,4 @@
+import { saveSidebarWidth } from "../app/sidebar-width-persistence.js";
 import { clamp } from "../app-utils.js";
 import { hasFileDragData } from "../path-input.js";
 import { renderMarkdown } from "./markdown-renderer.js";
@@ -221,6 +222,7 @@ export function bindUiEvents({
     const onUp = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      saveSidebarWidth(state.sidebarWidth);
     };
 
     window.addEventListener("pointermove", onMove);
