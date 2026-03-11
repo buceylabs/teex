@@ -499,7 +499,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
-  overflow: auto;
+  overflow-x: auto;
 }
 
 .preview :not(pre) > code {
