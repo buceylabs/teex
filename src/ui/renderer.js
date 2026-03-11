@@ -261,12 +261,8 @@ export function createUiRenderer({
       el.editor.classList.add("hidden");
       el.preview.classList.remove("hidden");
       el.preview.innerHTML = renderMarkdown(state.content);
-      if (state.activePath && window.__TAURI__?.core?.convertFileSrc) {
-        rewritePreviewImages(
-          el.preview,
-          dirName(state.activePath),
-          window.__TAURI__.core.convertFileSrc,
-        );
+      if (state.activePath) {
+        rewritePreviewImages(el.preview, dirName(state.activePath));
       }
       renderMermaidDiagrams(el.preview).catch((error) => {
         console.error(String(error));

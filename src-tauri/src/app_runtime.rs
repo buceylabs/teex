@@ -10,6 +10,9 @@ pub(crate) fn run_app() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .register_uri_scheme_protocol("localimage", |_ctx, request| {
+            serve_local_image(request)
+        })
         .setup(setup_app)
         .on_window_event(handle_window_event)
         .on_menu_event(|app, event| {
@@ -350,6 +353,43 @@ pub(crate) fn apply_theme(app: &tauri::AppHandle, theme: &str) {
         .set_checked(theme != "light" && theme != "dark");
     let _ = items.light.set_checked(theme == "light");
     let _ = items.dark.set_checked(theme == "dark");
+}
+
+fn serve_local_image(request: http::Request<Vec<u8>>) -> http::Response<Vec<u8>> {
+    let path = percent_encoding::percent_decode_str(request.uri().path())
+        .decode_utf8_lossy()
+        .into_owned();
+    let file_path = std::path::Path::new(&path);
+
+    let Ok(data) = std::fs::read(file_path) else {
+        return http::Response::builder()
+            .status(404)
+            .body(Vec::new())
+            .unwrap();
+    };
+
+    let mime = match file_path
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "svg" => "image/svg+xml",
+        "webp" => "image/webp",
+        "bmp" => "image/bmp",
+        "ico" => "image/x-icon",
+        _ => "application/octet-stream",
+    };
+
+    http::Response::builder()
+        .status(200)
+        .header("Content-Type", mime)
+        .body(data)
+        .unwrap()
 }
 
 #[tauri::command]
