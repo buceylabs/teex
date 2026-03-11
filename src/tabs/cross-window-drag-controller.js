@@ -59,11 +59,13 @@ export function createCrossWindowDragController({
     try {
       const physicalX = Math.round(screenX * window.devicePixelRatio);
       const physicalY = Math.round(screenY * window.devicePixelRatio);
+      const info = getTabPreviewInfo(fromIndex);
       const result = await invoke("report_drag_position", {
         dragId,
         sourceLabel: state.windowLabel,
         physicalX,
         physicalY,
+        tabName: info.title,
       });
       targetLabel = result ?? null;
 
@@ -73,7 +75,6 @@ export function createCrossWindowDragController({
           previewVisible = false;
         }
       } else {
-        const info = getTabPreviewInfo(fromIndex);
         invoke("show_tab_drag_preview", {
           physicalX,
           physicalY,
@@ -87,6 +88,14 @@ export function createCrossWindowDragController({
     } finally {
       reporting = false;
     }
+  }
+
+  function clearPreview() {
+    if (previewVisible) {
+      invoke("hide_tab_drag_preview").catch(() => {});
+      previewVisible = false;
+    }
+    targetLabel = null;
   }
 
   async function cancel() {
@@ -159,6 +168,8 @@ export function createCrossWindowDragController({
       pendingOutgoingTabTransfers.delete(requestId);
       setStatus(String(error), true);
     }
+
+    invoke("focus_window", { label: savedTargetLabel }).catch(() => {});
 
     try {
       await invoke("cancel_cross_window_drag_hover", { dragId: savedDragId });
@@ -248,18 +259,42 @@ export function createCrossWindowDragController({
     }
   }
 
-  function showDropZone() {
+  let savedTabLabel = null;
+
+  function isEmptyUntitledTab() {
+    return state.openFiles.length === 1
+      && !state.openFiles[0].path
+      && !state.openFiles[0].isDirty
+      && !state.openFiles[0].content;
+  }
+
+  function showDropZone(incomingTabName) {
     el.tabBar.classList.remove("hidden");
     el.tabBar.classList.add("tab-bar-drop-target");
+
+    if (incomingTabName && isEmptyUntitledTab()) {
+      const labelEl = el.tabBar.querySelector(".tab-label");
+      if (labelEl) {
+        savedTabLabel = labelEl.textContent;
+        labelEl.textContent = incomingTabName;
+      }
+    }
   }
 
   function hideDropZone() {
+    if (savedTabLabel !== null) {
+      const labelEl = el.tabBar.querySelector(".tab-label");
+      if (labelEl) {
+        labelEl.textContent = savedTabLabel;
+      }
+      savedTabLabel = null;
+    }
     el.tabBar.classList.remove("tab-bar-drop-target");
     el.tabBar.classList.toggle("hidden", !shouldShowTabBar(state.openFiles.length));
   }
 
-  function handleDragEnter() {
-    showDropZone();
+  function handleDragEnter(tabName) {
+    showDropZone(tabName);
   }
 
   function handleDragLeave() {
@@ -270,6 +305,7 @@ export function createCrossWindowDragController({
     activate,
     isActive,
     currentTargetLabel,
+    clearPreview,
     reportPosition,
     cancel,
     completeDrop,

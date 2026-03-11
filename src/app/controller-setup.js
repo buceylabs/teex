@@ -170,7 +170,7 @@ export function setupControllers({
     handleReceiveTransferredTabs: callbacks.handleReceiveTransferredTabs,
     handleTabTransferResult: callbacks.handleTabTransferResult,
     restoreLastSession: callbacks.restoreLastSession,
-    handleCrossWindowDragEnter: () => crossWindowDragController.handleDragEnter(),
+    handleCrossWindowDragEnter: (tabName) => crossWindowDragController.handleDragEnter(tabName),
     handleCrossWindowDragLeave: () => crossWindowDragController.handleDragLeave(),
     handleContextMenuDelete: callbacks.handleContextMenuDelete,
     bindWindowDragDropEvents: () => dragDropController.bindWindowDragDropEvents(),

@@ -247,6 +247,18 @@ fn set_menu_state(app: tauri::AppHandle, state: MenuState) -> Result<(), String>
 }
 
 #[tauri::command]
+fn focus_window(app: tauri::AppHandle, label: String) -> Result<(), String> {
+    let window = app
+        .webview_windows()
+        .get(&label)
+        .cloned()
+        .ok_or_else(|| format!("Window not found: {label}"))?;
+    window
+        .set_focus()
+        .map_err(|e| format!("Unable to focus window: {e}"))
+}
+
+#[tauri::command]
 fn close_current_window(window: tauri::Window) -> Result<(), String> {
     window
         .close()

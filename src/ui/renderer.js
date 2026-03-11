@@ -180,8 +180,8 @@ export function createUiRenderer({
         return;
       }
 
-      if (!outside && crossWindowDrag && crossWindowDrag.currentTargetLabel()) {
-        crossWindowDrag.cancel();
+      if (!outside && crossWindowDrag) {
+        crossWindowDrag.clearPreview();
       }
 
       if (dragState.ghost) {

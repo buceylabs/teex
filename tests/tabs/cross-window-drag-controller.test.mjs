@@ -53,6 +53,7 @@ function createHarness({ invokeResults = {} } = {}) {
     return undefined;
   }
 
+  const tabLabelEl = { textContent: "Untitled" };
   const el = {
     tabBar: {
       classList: {
@@ -61,6 +62,7 @@ function createHarness({ invokeResults = {} } = {}) {
         remove(c) { this._classes.delete(c); },
         toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
       },
+      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
     },
   };
 
@@ -85,6 +87,9 @@ test("reportPosition shows preview with content when no target window found", as
 
   controller.activate(0);
   await controller.reportPosition(400, 300);
+
+  const dragCalls = calls.filter((c) => c.command === "report_drag_position");
+  assert.equal(dragCalls[0].args.tabName, "test.md");
 
   const previewCalls = calls.filter((c) => c.command === "show_tab_drag_preview");
   assert.equal(previewCalls.length, 1);
@@ -265,4 +270,115 @@ test("removeTabFromSource clears state when last tab removed in non-folder mode"
   assert.equal(state.openFiles.length, 0);
   assert.equal(state.mode, "empty");
   assert.equal(state.activePath, null);
+});
+
+test("handleDragEnter replaces Untitled label with incoming tab name", () => {
+  const tabLabelEl = { textContent: "Untitled" };
+  const state = {
+    windowLabel: "teex-window-1",
+    mode: "files",
+    activePath: null,
+    activeKind: null,
+    content: "",
+    isDirty: false,
+    markdownViewMode: "edit",
+    activeEditorScrollTop: 0,
+    activePreviewScrollTop: 0,
+    openFiles: [
+      {
+        path: null,
+        content: "",
+        kind: "text",
+        writable: true,
+        isDirty: false,
+        markdownViewMode: "edit",
+        scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+      },
+    ],
+    activeTabIndex: 0,
+  };
+
+  const el = {
+    tabBar: {
+      classList: {
+        _classes: new Set(),
+        add(c) { this._classes.add(c); },
+        remove(c) { this._classes.delete(c); },
+        toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+      },
+      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
+    },
+  };
+
+  const controller = createCrossWindowDragController({
+    state,
+    pendingOutgoingTabTransfers: new Map(),
+    invoke: async () => {},
+    el,
+    render: () => {},
+    setStatus: () => {},
+    updateMenuState: () => {},
+    markSidebarTreeDirty: () => {},
+  });
+
+  controller.handleDragEnter("readme.md");
+  assert.equal(tabLabelEl.textContent, "readme.md");
+  assert.ok(el.tabBar.classList._classes.has("tab-bar-drop-target"));
+
+  controller.handleDragLeave();
+  assert.equal(tabLabelEl.textContent, "Untitled");
+  assert.ok(!el.tabBar.classList._classes.has("tab-bar-drop-target"));
+});
+
+test("handleDragEnter does not replace label when tab has content", () => {
+  const tabLabelEl = { textContent: "Untitled" };
+  const state = {
+    windowLabel: "teex-window-1",
+    mode: "files",
+    activePath: null,
+    activeKind: null,
+    content: "some content",
+    isDirty: true,
+    markdownViewMode: "edit",
+    activeEditorScrollTop: 0,
+    activePreviewScrollTop: 0,
+    openFiles: [
+      {
+        path: null,
+        content: "some content",
+        kind: "text",
+        writable: true,
+        isDirty: true,
+        markdownViewMode: "edit",
+        scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+      },
+    ],
+    activeTabIndex: 0,
+  };
+
+  const el = {
+    tabBar: {
+      classList: {
+        _classes: new Set(),
+        add(c) { this._classes.add(c); },
+        remove(c) { this._classes.delete(c); },
+        toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+      },
+      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
+    },
+  };
+
+  const controller = createCrossWindowDragController({
+    state,
+    pendingOutgoingTabTransfers: new Map(),
+    invoke: async () => {},
+    el,
+    render: () => {},
+    setStatus: () => {},
+    updateMenuState: () => {},
+    markSidebarTreeDirty: () => {},
+  });
+
+  controller.handleDragEnter("readme.md");
+  assert.equal(tabLabelEl.textContent, "Untitled");
 });

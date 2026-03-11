@@ -3,6 +3,7 @@ use super::*;
 pub(crate) struct CrossWindowDragEntry {
     source_label: String,
     current_target_label: Option<String>,
+    tab_name: Option<String>,
 }
 
 pub(crate) struct CrossWindowDragRegistry {
@@ -59,6 +60,7 @@ pub(crate) fn report_drag_position(
     source_label: String,
     physical_x: i32,
     physical_y: i32,
+    tab_name: Option<String>,
 ) -> Option<String> {
     let new_target = find_window_at_position(&app, &source_label, physical_x, physical_y);
 
@@ -68,7 +70,12 @@ pub(crate) fn report_drag_position(
     let entry = map.entry(drag_id).or_insert_with(|| CrossWindowDragEntry {
         source_label,
         current_target_label: None,
+        tab_name: None,
     });
+
+    if tab_name.is_some() {
+        entry.tab_name = tab_name;
+    }
 
     let old_target = entry.current_target_label.clone();
 
@@ -81,7 +88,8 @@ pub(crate) fn report_drag_position(
     }
 
     if let Some(ref next) = new_target {
-        emit_to_window(&app, next, EVENT_CROSS_WINDOW_DRAG_ENTER, ());
+        let payload = entry.tab_name.clone().unwrap_or_default();
+        emit_to_window(&app, next, EVENT_CROSS_WINDOW_DRAG_ENTER, payload);
     }
 
     entry.current_target_label = new_target.clone();

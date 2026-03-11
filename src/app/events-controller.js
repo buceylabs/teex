@@ -64,8 +64,8 @@ export function createAppEventsController({
       listen(`${events.restoreSession}/${label}`, async () => {
         await restoreLastSession();
       }),
-      listen(`${events.crossWindowDragEnter}/${label}`, () => {
-        handleCrossWindowDragEnter();
+      listen(`${events.crossWindowDragEnter}/${label}`, (event) => {
+        handleCrossWindowDragEnter(event.payload);
       }),
       listen(`${events.crossWindowDragLeave}/${label}`, () => {
         handleCrossWindowDragLeave();
