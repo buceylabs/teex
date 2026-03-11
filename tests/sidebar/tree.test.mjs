@@ -45,3 +45,12 @@ test("renderTreeHtml renders folders/files and respects collapsed set", () => {
   assert.match(collapsedHtml, /aria-expanded="false"/);
   assert.doesNotMatch(collapsedHtml, /guide\.md/);
 });
+
+test("folder buttons have a title attribute with the folder name", () => {
+  const tree = buildEntryTree([
+    { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+  ]);
+
+  const html = renderTreeHtml(tree, 0, new Set());
+  assert.match(html, /folder-toggle[^>]*title="docs"/);
+});
