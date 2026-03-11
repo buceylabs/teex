@@ -6,6 +6,7 @@ import {
   shouldSidebarSingleClickOpenAsTab,
   sidebarClickModifierAction,
 } from "../ui/behavior.js";
+import { bindSidebarDragEvents } from "./drag.js";
 import { buildEntryTree, renderTreeHtml } from "./tree.js";
 
 export function createSidebarController({
@@ -25,6 +26,7 @@ export function createSidebarController({
   render,
   updateMenuState,
   invoke,
+  crossWindowDrag,
 }) {
   function markTreeDirty() {
     sidebarRenderState.treeDirty = true;
@@ -218,6 +220,19 @@ export function createSidebarController({
         invoke("show_sidebar_context_menu", { path });
       });
     });
+
+    if (crossWindowDrag) {
+      bindSidebarDragEvents({
+        projectList: el.projectList,
+        state,
+        el,
+        invoke,
+        crossWindowDrag,
+        openFolderEntryInTabs,
+        render,
+        updateMenuState,
+      });
+    }
 
     el.projectList.querySelectorAll(".folder-toggle").forEach((button) => {
       button.addEventListener("click", () => {

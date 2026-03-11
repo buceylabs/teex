@@ -26,6 +26,9 @@ export function createCrossWindowDragController({
   let targetLabel = null;
   let reporting = false;
   let previewVisible = false;
+  let dragMode = "tab";
+  let dragPath = null;
+  let dragPreviewInfo = null;
 
   function activate(index) {
     dragId = `cwdrag-${nextDragId++}`;
@@ -33,6 +36,26 @@ export function createCrossWindowDragController({
     targetLabel = null;
     reporting = false;
     previewVisible = false;
+    dragMode = "tab";
+    dragPath = null;
+    dragPreviewInfo = null;
+  }
+
+  function activateForPath(path, previewInfo) {
+    dragId = `cwdrag-${nextDragId++}`;
+    dragMode = "path";
+    dragPath = path;
+    dragPreviewInfo = previewInfo || { title: baseName(path), content: "" };
+    fromIndex = -1;
+    targetLabel = null;
+    reporting = false;
+    previewVisible = false;
+  }
+
+  function setPreviewInfo(info) {
+    if (dragId && dragMode === "path" && info) {
+      dragPreviewInfo = info;
+    }
   }
 
   function isActive() {
@@ -63,7 +86,8 @@ export function createCrossWindowDragController({
     try {
       const physicalX = Math.round(screenX * window.devicePixelRatio);
       const physicalY = Math.round(screenY * window.devicePixelRatio);
-      const info = getTabPreviewInfo(fromIndex);
+      const info =
+        dragMode === "path" ? dragPreviewInfo : getTabPreviewInfo(fromIndex);
       const result = await invoke("report_drag_position", {
         dragId,
         sourceLabel: state.windowLabel,
@@ -112,6 +136,9 @@ export function createCrossWindowDragController({
     targetLabel = null;
     reporting = false;
     previewVisible = false;
+    dragMode = "tab";
+    dragPath = null;
+    dragPreviewInfo = null;
     try {
       await Promise.all([
         invoke("cancel_cross_window_drag_hover", { dragId: id }),
@@ -140,7 +167,18 @@ export function createCrossWindowDragController({
       return;
     }
 
-    const tab = snapshotSingleTab(fromIndex);
+    const isPathMode = dragMode === "path";
+    const tab = isPathMode
+      ? {
+          path: dragPath,
+          content: dragPreviewInfo?.content ?? "",
+          kind: "text",
+          writable: true,
+          isDirty: false,
+          markdownViewMode: "edit",
+          scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+        }
+      : snapshotSingleTab(fromIndex);
     if (!tab) {
       await cancel();
       return;
@@ -148,9 +186,9 @@ export function createCrossWindowDragController({
 
     const requestId = `cwdrag-transfer-${nextDragId++}`;
     pendingOutgoingTabTransfers.set(requestId, {
-      kind: "single-drag",
+      kind: isPathMode ? "sidebar-drag" : "single-drag",
       tabCount: 1,
-      fromIndex,
+      fromIndex: isPathMode ? -1 : fromIndex,
     });
 
     const savedDragId = dragId;
@@ -160,6 +198,9 @@ export function createCrossWindowDragController({
     targetLabel = null;
     reporting = false;
     previewVisible = false;
+    dragMode = "tab";
+    dragPath = null;
+    dragPreviewInfo = null;
 
     try {
       await invoke("route_tab_transfer", {
@@ -221,8 +262,9 @@ export function createCrossWindowDragController({
       return;
     }
 
-    const tab = snapshotSingleTab(fromIndex);
-    if (!tab || !tab.path) {
+    const isPathMode = dragMode === "path";
+    const path = isPathMode ? dragPath : snapshotSingleTab(fromIndex)?.path;
+    if (!path) {
       await cancel();
       return;
     }
@@ -237,12 +279,15 @@ export function createCrossWindowDragController({
     targetLabel = null;
     reporting = false;
     previewVisible = false;
+    dragMode = "tab";
+    dragPath = null;
+    dragPreviewInfo = null;
 
     try {
       await invoke("create_window_from_drag", {
         physicalX,
         physicalY,
-        path: tab.path,
+        path,
       });
     } catch (error) {
       setStatus(String(error), true);
@@ -254,7 +299,9 @@ export function createCrossWindowDragController({
       return;
     }
 
-    removeTabFromSource(savedFromIndex);
+    if (!isPathMode) {
+      removeTabFromSource(savedFromIndex);
+    }
 
     try {
       await invoke("cancel_cross_window_drag_hover", { dragId: savedDragId });
@@ -312,6 +359,8 @@ export function createCrossWindowDragController({
 
   return {
     activate,
+    activateForPath,
+    setPreviewInfo,
     isActive,
     currentTargetLabel,
     clearPreview,

@@ -391,6 +391,27 @@ body {
   min-height: 36px;
 }
 
+.sidebar-item-dragging,
+.sidebar-item-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.sidebar-drag-ghost {
+  position: fixed;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
 .empty-state {
   flex: 1;
   min-height: 0;

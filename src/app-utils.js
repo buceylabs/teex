@@ -7,3 +7,12 @@ export function baseName(path) {
 export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
+
+export function isCursorOutsideWindow(clientX, clientY) {
+  return (
+    clientX < 0 ||
+    clientX > window.innerWidth ||
+    clientY < 0 ||
+    clientY > window.innerHeight
+  );
+}

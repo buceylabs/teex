@@ -1,4 +1,4 @@
-import { baseName } from "../app-utils.js";
+import { baseName, isCursorOutsideWindow } from "../app-utils.js";
 import { shouldShowTabBar } from "./behavior.js";
 import { escapeAttr, escapeHtml } from "./html-utils.js";
 import { renderMarkdown, renderMermaidDiagrams } from "./markdown-renderer.js";
@@ -143,15 +143,6 @@ export function createUiRenderer({
       }
     }
 
-    function isCursorOutsideWindow(event) {
-      return (
-        event.clientX < 0 ||
-        event.clientX > window.innerWidth ||
-        event.clientY < 0 ||
-        event.clientY > window.innerHeight
-      );
-    }
-
     function onMouseMove(event) {
       if (!dragState) {
         return;
@@ -175,7 +166,7 @@ export function createUiRenderer({
         }
       }
 
-      const outside = isCursorOutsideWindow(event);
+      const outside = isCursorOutsideWindow(event.clientX, event.clientY);
 
       if (outside && crossWindowDrag) {
         clearDropIndicators();
@@ -222,7 +213,10 @@ export function createUiRenderer({
           crossWindowDrag.completeDrop();
           return;
         }
-        if (crossWindowDrag && isCursorOutsideWindow(event)) {
+        if (
+          crossWindowDrag &&
+          isCursorOutsideWindow(event.clientX, event.clientY)
+        ) {
           cleanupDragUi();
           crossWindowDrag.completeDropAsNewWindow(event.screenX, event.screenY);
           return;

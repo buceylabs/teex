@@ -428,3 +428,115 @@ test("handleDragEnter does not replace label when tab has content", () => {
   controller.handleDragEnter("readme.md");
   assert.equal(tabLabelEl.textContent, "Untitled");
 });
+
+// --- Path-mode (sidebar drag) tests ---
+
+test("activateForPath sets active state", () => {
+  const { controller } = createHarness();
+  assert.equal(controller.isActive(), false);
+  controller.activateForPath("/tmp/foo.md", {
+    title: "foo.md",
+    content: "# Foo",
+  });
+  assert.equal(controller.isActive(), true);
+});
+
+test("reportPosition in path mode uses provided preview info", async () => {
+  const { controller, calls } = createHarness({
+    invokeResults: { report_drag_position: null },
+  });
+
+  controller.activateForPath("/tmp/foo.md", {
+    title: "foo.md",
+    content: "# Foo",
+  });
+  await controller.reportPosition(400, 300);
+
+  const dragCalls = calls.filter((c) => c.command === "report_drag_position");
+  assert.equal(dragCalls[0].args.tabName, "foo.md");
+
+  const previewCalls = calls.filter(
+    (c) => c.command === "show_tab_drag_preview",
+  );
+  assert.equal(previewCalls.length, 1);
+  assert.equal(previewCalls[0].args.title, "foo.md");
+  assert.equal(previewCalls[0].args.content, "# Foo");
+});
+
+test("setPreviewInfo updates content for subsequent reportPosition calls", async () => {
+  const { controller, calls } = createHarness({
+    invokeResults: { report_drag_position: null },
+  });
+
+  controller.activateForPath("/tmp/foo.md", { title: "foo.md", content: "" });
+  controller.setPreviewInfo({ title: "foo.md", content: "loaded content" });
+  await controller.reportPosition(400, 300);
+
+  const previewCalls = calls.filter(
+    (c) => c.command === "show_tab_drag_preview",
+  );
+  assert.equal(previewCalls[0].args.content, "loaded content");
+});
+
+test("completeDropAsNewWindow in path mode creates window without removing source tab", async () => {
+  const { state, controller, calls } = createHarness({
+    invokeResults: { create_window_from_drag: "teex-window-new" },
+  });
+
+  const originalOpenFiles = [...state.openFiles];
+  controller.activateForPath("/tmp/foo.md", {
+    title: "foo.md",
+    content: "# Foo",
+  });
+  await controller.completeDropAsNewWindow(400, 300);
+
+  const createCalls = calls.filter(
+    (c) => c.command === "create_window_from_drag",
+  );
+  assert.equal(createCalls.length, 1);
+  assert.equal(createCalls[0].args.path, "/tmp/foo.md");
+
+  // Source tabs unchanged
+  assert.equal(state.openFiles.length, originalOpenFiles.length);
+  assert.equal(state.openFiles[0].path, originalOpenFiles[0].path);
+  assert.equal(state.openFiles[1].path, originalOpenFiles[1].path);
+});
+
+test("completeDrop in path mode transfers with sidebar-drag kind", async () => {
+  const { state, controller, calls } = createHarness({
+    invokeResults: { report_drag_position: "teex-window-2" },
+  });
+
+  const originalOpenFiles = [...state.openFiles];
+  controller.activateForPath("/tmp/foo.md", {
+    title: "foo.md",
+    content: "# Foo",
+  });
+  await controller.reportPosition(400, 300);
+  await controller.completeDrop();
+
+  const transferCalls = calls.filter((c) => c.command === "route_tab_transfer");
+  assert.equal(transferCalls.length, 1);
+  assert.equal(transferCalls[0].args.tabs[0].path, "/tmp/foo.md");
+  assert.equal(transferCalls[0].args.tabs[0].content, "# Foo");
+
+  // Source tabs unchanged
+  assert.equal(state.openFiles.length, originalOpenFiles.length);
+});
+
+test("cancel in path mode cleans up", async () => {
+  const { controller, calls } = createHarness();
+
+  controller.activateForPath("/tmp/foo.md", {
+    title: "foo.md",
+    content: "# Foo",
+  });
+  assert.equal(controller.isActive(), true);
+  await controller.cancel();
+  assert.equal(controller.isActive(), false);
+
+  const cancelCalls = calls.filter(
+    (c) => c.command === "cancel_cross_window_drag_hover",
+  );
+  assert.ok(cancelCalls.length >= 1);
+});

@@ -77,6 +77,7 @@ export function setupControllers({
     render: () => uiRenderer.render(),
     updateMenuState: callbacks.updateMenuState,
     invoke,
+    crossWindowDrag: crossWindowDragController,
   });
 
   const tabTransferController = createTabTransferController({
