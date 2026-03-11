@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import {
   detectStructuredPasteKind,
@@ -29,7 +29,10 @@ test("detects JSON by content", () => {
 
 test("detects YAML by content", () => {
   assert.equal(
-    detectStructuredPasteKind({ activePath: null, text: "root:\n  child: yes" }),
+    detectStructuredPasteKind({
+      activePath: null,
+      text: "root:\n  child: yes",
+    }),
     "yaml",
   );
 });
@@ -72,7 +75,11 @@ test("formats structured text through backend command", async () => {
 
 test("returns null when backend says unchanged", async () => {
   const result = await formatStructuredPasteText({
-    invoke: async () => ({ changed: false, formatted: "root:\n  child: yes", detectedKind: "yaml" }),
+    invoke: async () => ({
+      changed: false,
+      formatted: "root:\n  child: yes",
+      detectedKind: "yaml",
+    }),
     text: "root:\n  child: yes",
     activePath: "/tmp/config.yaml",
   });
@@ -100,7 +107,8 @@ test("returns null when detection fails and does not invoke backend", async () =
 
 test("applies heuristic YAML indentation when strict parse fails first", async () => {
   let call = 0;
-  const malformed = "services:\nopenclaw-gateway:\nimage: ghcr.io/phioranex/openclaw-docker:latest";
+  const malformed =
+    "services:\nopenclaw-gateway:\nimage: ghcr.io/phioranex/openclaw-docker:latest";
   const result = await formatStructuredPasteText({
     invoke: async () => {
       call += 1;
@@ -115,7 +123,8 @@ test("applies heuristic YAML indentation when strict parse fails first", async (
     preferredKind: "yaml",
     detectedKind: "yaml",
     changed: true,
-    formatted: "services:\n  openclaw-gateway:\n    image: ghcr.io/phioranex/openclaw-docker:latest",
+    formatted:
+      "services:\n  openclaw-gateway:\n    image: ghcr.io/phioranex/openclaw-docker:latest",
   });
 });
 
@@ -123,14 +132,18 @@ test("heuristic indents lists under empty keys without rewriting inline arrays",
   const malformed = [
     "services:",
     "app:",
-    "command: [\"gateway\"]",
+    'command: ["gateway"]',
     "environment:",
     "- NODE_ENV=production",
     "- DEBUG=false",
   ].join("\n");
 
   const result = await formatStructuredPasteText({
-    invoke: async () => ({ changed: false, formatted: malformed, detectedKind: null }),
+    invoke: async () => ({
+      changed: false,
+      formatted: malformed,
+      detectedKind: null,
+    }),
     text: malformed,
     activePath: "/tmp/docker-compose.yml",
   });
@@ -142,7 +155,7 @@ test("heuristic indents lists under empty keys without rewriting inline arrays",
     formatted: [
       "services:",
       "  app:",
-      "    command: [\"gateway\"]",
+      '    command: ["gateway"]',
       "    environment:",
       "      - NODE_ENV=production",
       "      - DEBUG=false",

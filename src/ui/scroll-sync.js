@@ -15,7 +15,6 @@ import {
   findSourceLineBySnippet,
   getEditorTopTextSnippet,
   getPreviewTopTextSnippet,
-  normalizeSearchText,
   sourceIndexToLineNumber,
 } from "./scroll-text-anchor.js";
 
@@ -41,7 +40,11 @@ export function createScrollSyncController({ state, el }) {
     if (!scrollCaptureGate.blocked) {
       return;
     }
-    if (reason && scrollCaptureGate.reason && scrollCaptureGate.reason !== reason) {
+    if (
+      reason &&
+      scrollCaptureGate.reason &&
+      scrollCaptureGate.reason !== reason
+    ) {
       return;
     }
     scrollCaptureGate.blocked = false;
@@ -49,11 +52,17 @@ export function createScrollSyncController({ state, el }) {
   }
 
   function setEditorScrollTop(value) {
-    state.activeEditorScrollTop = Math.max(0, Number.isFinite(value) ? value : 0);
+    state.activeEditorScrollTop = Math.max(
+      0,
+      Number.isFinite(value) ? value : 0,
+    );
   }
 
   function setPreviewScrollTop(value) {
-    state.activePreviewScrollTop = Math.max(0, Number.isFinite(value) ? value : 0);
+    state.activePreviewScrollTop = Math.max(
+      0,
+      Number.isFinite(value) ? value : 0,
+    );
   }
 
   function rememberActiveFileScroll() {
@@ -68,8 +77,12 @@ export function createScrollSyncController({ state, el }) {
 
   function loadFileScroll(path) {
     const entry = path ? state.fileScrollMemory.get(path) : null;
-    state.activeEditorScrollTop = Number.isFinite(entry?.editorScrollTop) ? entry.editorScrollTop : 0;
-    state.activePreviewScrollTop = Number.isFinite(entry?.previewScrollTop) ? entry.previewScrollTop : 0;
+    state.activeEditorScrollTop = Number.isFinite(entry?.editorScrollTop)
+      ? entry.editorScrollTop
+      : 0;
+    state.activePreviewScrollTop = Number.isFinite(entry?.previewScrollTop)
+      ? entry.previewScrollTop
+      : 0;
     state.activeMarkdownScrollAnchor = null;
   }
 
@@ -148,7 +161,7 @@ export function createScrollSyncController({ state, el }) {
     const maxScrollTop = getMaxScrollTop(el.editor);
     const lineHeight = getEditorLineHeight(el.editor);
     const editorScrollTop = el.editor?.scrollTop || 0;
-    const lineValue = lineHeight > 0 ? (editorScrollTop / lineHeight) : 0;
+    const lineValue = lineHeight > 0 ? editorScrollTop / lineHeight : 0;
     pendingToggleAnchor = {
       fromMode: "edit",
       sourceLine: Math.floor(lineValue) + 1,
@@ -166,9 +179,13 @@ export function createScrollSyncController({ state, el }) {
   function alignPreviewToEditAnchor(anchor) {
     const blocks = getPreviewBlocks(el.preview);
     const maxScrollTop = getMaxScrollTop(el.preview);
-    const textMatchedBlock = findPreviewBlockBySnippet(blocks, anchor.textSnippet, {
-      nearLine: anchor.sourceLine,
-    });
+    const textMatchedBlock = findPreviewBlockBySnippet(
+      blocks,
+      anchor.textSnippet,
+      {
+        nearLine: anchor.sourceLine,
+      },
+    );
     if (textMatchedBlock) {
       const target = clamp(textMatchedBlock.top, 0, maxScrollTop);
       setPreviewScrollTop(target);
@@ -178,7 +195,8 @@ export function createScrollSyncController({ state, el }) {
         method: "snippet-preview-block",
         textSnippet: anchor.textSnippet,
         found: true,
-        matchedText: textMatchedBlock.text || textMatchedBlock.node?.textContent || "",
+        matchedText:
+          textMatchedBlock.text || textMatchedBlock.node?.textContent || "",
         matchedTop: textMatchedBlock.top,
         targetScrollTop: target,
         fallbackRatio: anchor.ratio,
@@ -209,10 +227,17 @@ export function createScrollSyncController({ state, el }) {
   function alignEditToPreviewAnchor(anchor) {
     const maxScrollTop = getMaxScrollTop(el.editor);
     const lineHeight = getEditorLineHeight(el.editor);
-    const rawMatchedIndex = findSourceIndexBySnippet(state.content, anchor.textSnippet, {
-      nearLine: anchor.sourceLine,
-    });
-    const rawMatchedLine = sourceIndexToLineNumber(state.content, rawMatchedIndex);
+    const rawMatchedIndex = findSourceIndexBySnippet(
+      state.content,
+      anchor.textSnippet,
+      {
+        nearLine: anchor.sourceLine,
+      },
+    );
+    const rawMatchedLine = sourceIndexToLineNumber(
+      state.content,
+      rawMatchedIndex,
+    );
     if (Number.isFinite(rawMatchedLine)) {
       const target = computeEditorScrollTopFromSourceLine({
         sourceLine: rawMatchedLine,
@@ -236,9 +261,13 @@ export function createScrollSyncController({ state, el }) {
       };
     }
 
-    const matchedSourceLine = findSourceLineBySnippet(state.content, anchor.textSnippet, {
-      nearLine: anchor.sourceLine,
-    });
+    const matchedSourceLine = findSourceLineBySnippet(
+      state.content,
+      anchor.textSnippet,
+      {
+        nearLine: anchor.sourceLine,
+      },
+    );
     if (Number.isFinite(matchedSourceLine)) {
       const target = computeEditorScrollTopFromSourceLine({
         sourceLine: matchedSourceLine,
@@ -275,7 +304,10 @@ export function createScrollSyncController({ state, el }) {
     return {
       phase: "apply",
       toMode: "edit",
-      method: anchor.fromMode === "preview" ? "source-line-fallback" : "ratio-fallback",
+      method:
+        anchor.fromMode === "preview"
+          ? "source-line-fallback"
+          : "ratio-fallback",
       textSnippet: anchor.textSnippet,
       found: false,
       sourceLine: anchor.sourceLine,
@@ -307,13 +339,25 @@ export function createScrollSyncController({ state, el }) {
     blockScrollCapture("render-restore");
 
     const apply = () => {
-      if (state.activeKind === "markdown" && state.markdownViewMode === "preview" && el.preview) {
-        el.preview.scrollTop = clamp(state.activePreviewScrollTop || 0, 0, getMaxScrollTop(el.preview));
+      if (
+        state.activeKind === "markdown" &&
+        state.markdownViewMode === "preview" &&
+        el.preview
+      ) {
+        el.preview.scrollTop = clamp(
+          state.activePreviewScrollTop || 0,
+          0,
+          getMaxScrollTop(el.preview),
+        );
         return;
       }
 
       if (el.editor) {
-        el.editor.scrollTop = clamp(state.activeEditorScrollTop || 0, 0, getMaxScrollTop(el.editor));
+        el.editor.scrollTop = clamp(
+          state.activeEditorScrollTop || 0,
+          0,
+          getMaxScrollTop(el.editor),
+        );
       }
     };
 

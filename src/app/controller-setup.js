@@ -1,13 +1,13 @@
-import { createSidebarController } from "../sidebar/controller.js";
-import { createUiRenderer } from "../ui/renderer.js";
-import { createEditorController } from "../ui/editor-controller.js";
-import { createTabTransferController } from "../tabs/transfer-controller.js";
-import { createTabController } from "../tabs/controller.js";
 import { createFileController } from "../files/controller.js";
-import { createOpenPathsController } from "./open-paths-controller.js";
+import { createSidebarController } from "../sidebar/controller.js";
+import { createTabController } from "../tabs/controller.js";
+import { createCrossWindowDragController } from "../tabs/cross-window-drag-controller.js";
+import { createTabTransferController } from "../tabs/transfer-controller.js";
+import { createEditorController } from "../ui/editor-controller.js";
+import { createUiRenderer } from "../ui/renderer.js";
 import { createDragDropController } from "./drag-drop-controller.js";
 import { createAppEventsController } from "./events-controller.js";
-import { createCrossWindowDragController } from "../tabs/cross-window-drag-controller.js";
+import { createOpenPathsController } from "./open-paths-controller.js";
 
 export function setupControllers({
   state,
@@ -170,10 +170,13 @@ export function setupControllers({
     handleReceiveTransferredTabs: callbacks.handleReceiveTransferredTabs,
     handleTabTransferResult: callbacks.handleTabTransferResult,
     restoreLastSession: callbacks.restoreLastSession,
-    handleCrossWindowDragEnter: (tabName) => crossWindowDragController.handleDragEnter(tabName),
-    handleCrossWindowDragLeave: () => crossWindowDragController.handleDragLeave(),
+    handleCrossWindowDragEnter: (tabName) =>
+      crossWindowDragController.handleDragEnter(tabName),
+    handleCrossWindowDragLeave: () =>
+      crossWindowDragController.handleDragLeave(),
     handleContextMenuDelete: callbacks.handleContextMenuDelete,
-    bindWindowDragDropEvents: () => dragDropController.bindWindowDragDropEvents(),
+    bindWindowDragDropEvents: () =>
+      dragDropController.bindWindowDragDropEvents(),
   });
 
   return {

@@ -1,13 +1,12 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-
-import { createScrollSyncController } from "../../src/ui/scroll-sync.js";
+import test from "node:test";
 import {
   computeEditorScrollTopFromSourceLine,
   computePreviewScrollTopFromSourceLine,
   getScrollRatio,
   scrollTopFromRatio,
 } from "../../src/ui/scroll-math.js";
+import { createScrollSyncController } from "../../src/ui/scroll-sync.js";
 import {
   findPreviewBlockBySnippet,
   findSourceIndexBySnippet,
@@ -75,21 +74,27 @@ test("preview mapping falls back to ratio when blocks are missing", () => {
 });
 
 test("maps source line to editor scroll and clamps", () => {
-  assert.equal(computeEditorScrollTopFromSourceLine({
-    sourceLine: 5,
-    lineFraction: 0.5,
-    lineHeight: 20,
-    fallbackRatio: 0,
-    maxScrollTop: 1000,
-  }), 90);
+  assert.equal(
+    computeEditorScrollTopFromSourceLine({
+      sourceLine: 5,
+      lineFraction: 0.5,
+      lineHeight: 20,
+      fallbackRatio: 0,
+      maxScrollTop: 1000,
+    }),
+    90,
+  );
 
-  assert.equal(computeEditorScrollTopFromSourceLine({
-    sourceLine: 200,
-    lineFraction: 0,
-    lineHeight: 20,
-    fallbackRatio: 0,
-    maxScrollTop: 100,
-  }), 100);
+  assert.equal(
+    computeEditorScrollTopFromSourceLine({
+      sourceLine: 200,
+      lineFraction: 0,
+      lineHeight: 20,
+      fallbackRatio: 0,
+      maxScrollTop: 100,
+    }),
+    100,
+  );
 });
 
 test("normalizes lightweight search text and finds source line by snippet", () => {
@@ -110,19 +115,36 @@ test("normalizes lightweight search text and finds source line by snippet", () =
 });
 
 test("finds preview block by normalized text snippet", () => {
-  const block = findPreviewBlockBySnippet([
-    { top: 0, text: "Intro text" },
-    { top: 120, text: "This is a paragraph with More spacing" },
-  ], "paragraph   with more");
+  const block = findPreviewBlockBySnippet(
+    [
+      { top: 0, text: "Intro text" },
+      { top: 120, text: "This is a paragraph with More spacing" },
+    ],
+    "paragraph   with more",
+  );
 
   assert.equal(block?.top, 120);
 });
 
 test("finds preview block nearest to source line when snippet duplicates", () => {
-  const block = findPreviewBlockBySnippet([
-    { top: 0, startLine: 1, endLine: 3, text: "repeated heading repeated heading" },
-    { top: 320, startLine: 40, endLine: 45, text: "repeated heading repeated heading" },
-  ], "repeated heading", { nearLine: 42 });
+  const block = findPreviewBlockBySnippet(
+    [
+      {
+        top: 0,
+        startLine: 1,
+        endLine: 3,
+        text: "repeated heading repeated heading",
+      },
+      {
+        top: 320,
+        startLine: 40,
+        endLine: 45,
+        text: "repeated heading repeated heading",
+      },
+    ],
+    "repeated heading",
+    { nearLine: 42 },
+  );
 
   assert.equal(block?.top, 320);
 });
@@ -144,7 +166,11 @@ test("finds source snippet nearest to source line when exact text duplicates", (
     "tail",
   ].join("\n");
 
-  const index = findSourceIndexBySnippet(content, "duplicate text duplicate text", { nearLine: 4 });
+  const index = findSourceIndexBySnippet(
+    content,
+    "duplicate text duplicate text",
+    { nearLine: 4 },
+  );
   assert.equal(sourceIndexToLineNumber(content, index), 4);
 });
 
@@ -159,7 +185,11 @@ test("finds normalized source snippet nearest to source line when duplicates exi
     "omega",
   ].join("\n");
 
-  const line = findSourceLineBySnippet(content, "repeat block start repeat block end", { nearLine: 5 });
+  const line = findSourceLineBySnippet(
+    content,
+    "repeat block start repeat block end",
+    { nearLine: 5 },
+  );
   assert.equal(line, 5);
 });
 
@@ -203,7 +233,10 @@ test("ignores stale editor scroll event during non-tab file switch until restore
 
     el.editor.scrollTop = 150;
     ctrl.onEditorScroll();
-    assert.equal(state.fileScrollMemory.get("/folder/file2.md")?.editorScrollTop, 150);
+    assert.equal(
+      state.fileScrollMemory.get("/folder/file2.md")?.editorScrollTop,
+      150,
+    );
   });
 });
 
@@ -219,8 +252,14 @@ test("ignores stale editor scroll event during tab switch until restore runs", (
       activeMarkdownScrollAnchor: null,
       fileScrollMemory: new Map(),
       openFiles: [
-        { path: "/folder/file1.md", scrollState: { editorScrollTop: 240, previewScrollTop: 0 } },
-        { path: "/folder/file2.md", scrollState: { editorScrollTop: 0, previewScrollTop: 0 } },
+        {
+          path: "/folder/file1.md",
+          scrollState: { editorScrollTop: 240, previewScrollTop: 0 },
+        },
+        {
+          path: "/folder/file2.md",
+          scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+        },
       ],
     };
     const el = {
@@ -256,8 +295,14 @@ test("folder to tabs promotion preserves first file scroll and repeated tab swit
       activeMarkdownScrollAnchor: null,
       fileScrollMemory: new Map(),
       openFiles: [
-        { path: "/folder/file1.md", scrollState: { editorScrollTop: 220, previewScrollTop: 0 } },
-        { path: "/folder/file2.md", scrollState: { editorScrollTop: 0, previewScrollTop: 0 } },
+        {
+          path: "/folder/file1.md",
+          scrollState: { editorScrollTop: 220, previewScrollTop: 0 },
+        },
+        {
+          path: "/folder/file2.md",
+          scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+        },
       ],
     };
     const el = {
@@ -268,7 +313,8 @@ test("folder to tabs promotion preserves first file scroll and repeated tab swit
 
     // Switch to file2 and ensure stale file1 scroll does not leak.
     state.activePath = "/folder/file2.md";
-    state.activeEditorScrollTop = state.openFiles[1].scrollState.editorScrollTop;
+    state.activeEditorScrollTop =
+      state.openFiles[1].scrollState.editorScrollTop;
     el.editor.scrollTop = 220; // stale DOM value from file1
     ctrl.afterRender();
     ctrl.onEditorScroll();
@@ -284,7 +330,8 @@ test("folder to tabs promotion preserves first file scroll and repeated tab swit
 
     // Switch back to file1 and restore 220.
     state.activePath = "/folder/file1.md";
-    state.activeEditorScrollTop = state.openFiles[0].scrollState.editorScrollTop;
+    state.activeEditorScrollTop =
+      state.openFiles[0].scrollState.editorScrollTop;
     el.editor.scrollTop = 180; // stale DOM value from file2
     ctrl.afterRender();
     ctrl.onEditorScroll();
@@ -294,7 +341,8 @@ test("folder to tabs promotion preserves first file scroll and repeated tab swit
 
     // Switch again to file2 and restore 180 (not top, not file1 value).
     state.activePath = "/folder/file2.md";
-    state.activeEditorScrollTop = state.openFiles[1].scrollState.editorScrollTop;
+    state.activeEditorScrollTop =
+      state.openFiles[1].scrollState.editorScrollTop;
     el.editor.scrollTop = 220; // stale DOM value from file1
     ctrl.afterRender();
     ctrl.onEditorScroll();

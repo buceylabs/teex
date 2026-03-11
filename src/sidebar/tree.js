@@ -52,7 +52,9 @@ export function collectFolderPaths(entries) {
 }
 
 export function renderTreeHtml(node, depth, collapsedFolders) {
-  const folders = [...node.folders.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const folders = [...node.folders.values()].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
   node.files.sort((a, b) => a.name.localeCompare(b.name));
 
   let html = "";

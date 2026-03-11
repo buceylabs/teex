@@ -1,14 +1,14 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import {
-  getSingleFileUiOpenMode,
   getSidebarSelectedPath,
-  shouldShowTabBar,
-  shouldSidebarSingleClickOpenAsTab,
-  shouldSidebarSingleClickIgnoreSamePath,
+  getSingleFileUiOpenMode,
   shouldCapturePreviousSingleFolderFile,
   shouldCollapseHiddenSingleTabForSidebarOpen,
+  shouldShowTabBar,
+  shouldSidebarSingleClickIgnoreSamePath,
+  shouldSidebarSingleClickOpenAsTab,
   shouldSuppressDropOverlayForSelfHover,
   sidebarClickModifierAction,
 } from "../../src/ui/behavior.js";
@@ -209,23 +209,38 @@ test("sidebar single-click captures previous file only in no-tab folder browsing
 
 test("sidebar single-click collapses hidden single-tab sessions before openEntry", () => {
   assert.equal(
-    shouldCollapseHiddenSingleTabForSidebarOpen({ mode: "folder", openFilesCount: 1 }),
+    shouldCollapseHiddenSingleTabForSidebarOpen({
+      mode: "folder",
+      openFilesCount: 1,
+    }),
     true,
   );
   assert.equal(
-    shouldCollapseHiddenSingleTabForSidebarOpen({ mode: "folder", openFilesCount: 0 }),
+    shouldCollapseHiddenSingleTabForSidebarOpen({
+      mode: "folder",
+      openFilesCount: 0,
+    }),
     false,
   );
   assert.equal(
-    shouldCollapseHiddenSingleTabForSidebarOpen({ mode: "folder", openFilesCount: 2 }),
+    shouldCollapseHiddenSingleTabForSidebarOpen({
+      mode: "folder",
+      openFilesCount: 2,
+    }),
     false,
   );
   assert.equal(
-    shouldCollapseHiddenSingleTabForSidebarOpen({ mode: "folder", openFilesCount: "1" }),
+    shouldCollapseHiddenSingleTabForSidebarOpen({
+      mode: "folder",
+      openFilesCount: "1",
+    }),
     true,
   );
   assert.equal(
-    shouldCollapseHiddenSingleTabForSidebarOpen({ mode: "file", openFilesCount: 1 }),
+    shouldCollapseHiddenSingleTabForSidebarOpen({
+      mode: "file",
+      openFilesCount: 1,
+    }),
     false,
   );
 });
@@ -239,39 +254,63 @@ test("tab bar only shows with two or more open files", () => {
 
 test("sidebar click with metaKey returns new-tab action", () => {
   assert.equal(
-    sidebarClickModifierAction({ metaKey: true, ctrlKey: false, shiftKey: false }),
+    sidebarClickModifierAction({
+      metaKey: true,
+      ctrlKey: false,
+      shiftKey: false,
+    }),
     "new-tab",
   );
 });
 
 test("sidebar click with ctrlKey returns new-tab action", () => {
   assert.equal(
-    sidebarClickModifierAction({ metaKey: false, ctrlKey: true, shiftKey: false }),
+    sidebarClickModifierAction({
+      metaKey: false,
+      ctrlKey: true,
+      shiftKey: false,
+    }),
     "new-tab",
   );
 });
 
 test("sidebar click with metaKey+shiftKey returns new-window action", () => {
   assert.equal(
-    sidebarClickModifierAction({ metaKey: true, ctrlKey: false, shiftKey: true }),
+    sidebarClickModifierAction({
+      metaKey: true,
+      ctrlKey: false,
+      shiftKey: true,
+    }),
     "new-window",
   );
 });
 
 test("sidebar click with ctrlKey+shiftKey returns new-window action", () => {
   assert.equal(
-    sidebarClickModifierAction({ metaKey: false, ctrlKey: true, shiftKey: true }),
+    sidebarClickModifierAction({
+      metaKey: false,
+      ctrlKey: true,
+      shiftKey: true,
+    }),
     "new-window",
   );
 });
 
 test("sidebar click without modifier returns null", () => {
   assert.equal(
-    sidebarClickModifierAction({ metaKey: false, ctrlKey: false, shiftKey: false }),
+    sidebarClickModifierAction({
+      metaKey: false,
+      ctrlKey: false,
+      shiftKey: false,
+    }),
     null,
   );
   assert.equal(
-    sidebarClickModifierAction({ metaKey: false, ctrlKey: false, shiftKey: true }),
+    sidebarClickModifierAction({
+      metaKey: false,
+      ctrlKey: false,
+      shiftKey: true,
+    }),
     null,
   );
 });

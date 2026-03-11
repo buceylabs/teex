@@ -1,9 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import {
-  shouldSkipDuplicateOsOpenForDeduper,
   createOpenPathsController,
+  shouldSkipDuplicateOsOpenForDeduper,
 } from "../../src/app/open-paths-controller.js";
 
 test("OS open deduper suppresses only matching signatures within time window", () => {
@@ -57,10 +57,16 @@ test("bootstrap creates a new tab when no paths are pending and launch context i
     openSingleFileFromUi: async () => {},
     openMultipleFiles: async () => {},
     openFolder: async () => {},
-    createNewTab: () => { newTabCalled = true; },
+    createNewTab: () => {
+      newTabCalled = true;
+    },
     deduper: { signature: "", timestamp: 0 },
   });
 
   await controller.bootstrap();
-  assert.equal(newTabCalled, true, "createNewTab should be called on empty launch");
+  assert.equal(
+    newTabCalled,
+    true,
+    "createNewTab should be called on empty launch",
+  );
 });

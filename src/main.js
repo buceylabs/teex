@@ -1,8 +1,12 @@
-import { baseName } from "./app-utils.js";
+import { setupControllers } from "./app/controller-setup.js";
+import { createRuntimeState, EVENTS } from "./app/runtime-state.js";
 import {
-  bindElements as bindElementsImported,
-  bindUiEvents as bindUiEventsImported,
-} from "./ui/bindings-controller.js";
+  clearAllSessions,
+  loadAllSessions,
+  pruneStaleWindows,
+  saveWindowSession,
+} from "./app/session-persistence.js";
+import { baseName } from "./app-utils.js";
 import {
   applyFilePayloadToState,
   clearActiveFileInState,
@@ -13,16 +17,15 @@ import {
   snapshotAllOpenTabsForTransfer as snapshotAllTransfers,
   syncActiveTabToStateFromTabs,
 } from "./tabs/session.js";
-import { setupControllers } from "./app/controller-setup.js";
-import { createRuntimeState, EVENTS } from "./app/runtime-state.js";
 import {
-  saveWindowSession,
-  loadAllSessions,
-  pruneStaleWindows,
-  clearAllSessions,
-} from "./app/session-persistence.js";
+  bindElements as bindElementsImported,
+  bindUiEvents as bindUiEventsImported,
+} from "./ui/bindings-controller.js";
+import {
+  confirmDelete,
+  confirmReloadExternalChange,
+} from "./ui/native-dialog.js";
 import { createScrollSyncController } from "./ui/scroll-sync.js";
-import { confirmDelete, confirmReloadExternalChange } from "./ui/native-dialog.js";
 
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
@@ -186,7 +189,7 @@ async function bindAppEvents() {
   await appEventsController.bindAppEvents();
 }
 
-async function bindWindowDragDropEvents() {
+async function _bindWindowDragDropEvents() {
   return dragDropController.bindWindowDragDropEvents();
 }
 
@@ -194,7 +197,7 @@ async function bootstrap() {
   await openPathsController.bootstrap();
 }
 
-async function drainPendingOpenPaths() {
+async function _drainPendingOpenPaths() {
   return openPathsController.drainPendingOpenPaths();
 }
 
@@ -371,7 +374,7 @@ async function openFileAsTab(path) {
   await tabController.openFileAsTab(path);
 }
 
-async function openFileInTabs(path) {
+async function _openFileInTabs(path) {
   await tabController.openFileInTabs(path);
 }
 
@@ -448,7 +451,7 @@ async function saveNow() {
   await editorController.saveNow();
 }
 
-function isEditable() {
+function _isEditable() {
   return editorController.isEditable();
 }
 
@@ -518,7 +521,10 @@ function syncWatchedProjectFiles() {
   const paths = collectWatchedProjectFilePaths();
   const signature = buildWatchedProjectFileSignature(paths);
 
-  if (externalFileWatchState.signature === signature && !externalFileWatchState.pendingSync) {
+  if (
+    externalFileWatchState.signature === signature &&
+    !externalFileWatchState.pendingSync
+  ) {
     return;
   }
 
@@ -564,17 +570,25 @@ async function reloadExternallyChangedFile(path) {
   const hasTabs = hasTabSession();
   const activePath = state.activePath;
   const isActive = activePath === path;
-  const isDirty = hasTabs ? isOpenTabDirtyForPath(path) : isActiveFileDirtyForPath(path);
+  const isDirty = hasTabs
+    ? isOpenTabDirtyForPath(path)
+    : isActiveFileDirtyForPath(path);
 
   if (isDirty) {
     if (isActive) {
       const confirmed = await confirmReloadExternalChange(baseName(path));
       if (!confirmed) {
-        setStatus(`External change detected for ${baseName(path)} (kept local edits)`, true);
+        setStatus(
+          `External change detected for ${baseName(path)} (kept local edits)`,
+          true,
+        );
         return;
       }
     } else {
-      setStatus(`External change detected for dirty tab ${baseName(path)}`, true);
+      setStatus(
+        `External change detected for dirty tab ${baseName(path)}`,
+        true,
+      );
       return;
     }
   }

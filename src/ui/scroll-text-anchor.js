@@ -37,8 +37,18 @@ function getNextTextNode(root, current) {
   return null;
 }
 
-function collectTextFromTextPosition(root, startNode, startOffset, maxChars = 120) {
-  if (!root || !startNode || typeof Node === "undefined" || startNode.nodeType !== Node.TEXT_NODE) {
+function collectTextFromTextPosition(
+  root,
+  startNode,
+  startOffset,
+  maxChars = 120,
+) {
+  if (
+    !root ||
+    !startNode ||
+    typeof Node === "undefined" ||
+    startNode.nodeType !== Node.TEXT_NODE
+  ) {
     return "";
   }
 
@@ -66,14 +76,21 @@ function collectTextFromTextPosition(root, startNode, startOffset, maxChars = 12
 }
 
 function getCaretTextPositionFromPoint(containerEl, x, y) {
-  if (!containerEl || typeof document === "undefined" || typeof Node === "undefined") {
+  if (
+    !containerEl ||
+    typeof document === "undefined" ||
+    typeof Node === "undefined"
+  ) {
     return null;
   }
 
   if (typeof document.caretPositionFromPoint === "function") {
     const pos = document.caretPositionFromPoint(x, y);
     if (pos?.offsetNode) {
-      const node = pos.offsetNode.nodeType === Node.TEXT_NODE ? pos.offsetNode : pos.offsetNode.firstChild;
+      const node =
+        pos.offsetNode.nodeType === Node.TEXT_NODE
+          ? pos.offsetNode
+          : pos.offsetNode.firstChild;
       if (node?.nodeType === Node.TEXT_NODE) {
         return { node, offset: pos.offset };
       }
@@ -83,9 +100,10 @@ function getCaretTextPositionFromPoint(containerEl, x, y) {
   if (typeof document.caretRangeFromPoint === "function") {
     const range = document.caretRangeFromPoint(x, y);
     if (range?.startContainer) {
-      const node = range.startContainer.nodeType === Node.TEXT_NODE
-        ? range.startContainer
-        : range.startContainer.firstChild;
+      const node =
+        range.startContainer.nodeType === Node.TEXT_NODE
+          ? range.startContainer
+          : range.startContainer.firstChild;
       if (node?.nodeType === Node.TEXT_NODE) {
         return { node, offset: range.startOffset };
       }
@@ -100,7 +118,11 @@ function getPreviewTopExactTextSnippet(previewEl) {
     return "";
   }
   const rect = previewEl.getBoundingClientRect();
-  const point = getCaretTextPositionFromPoint(previewEl, rect.left + 16, rect.top + 8);
+  const point = getCaretTextPositionFromPoint(
+    previewEl,
+    rect.left + 16,
+    rect.top + 8,
+  );
   if (!point) {
     return "";
   }
@@ -134,7 +156,10 @@ export function getEditorTopTextSnippet({ content, scrollTop, lineHeight }) {
     return "";
   }
   const lines = source.split("\n");
-  const lineIndex = Math.max(0, Math.floor((scrollTop || 0) / Math.max(lineHeight || 1, 1)));
+  const lineIndex = Math.max(
+    0,
+    Math.floor((scrollTop || 0) / Math.max(lineHeight || 1, 1)),
+  );
   const start = Math.max(0, lineIndex - 1);
   const snippet = normalizeSearchText(lines.slice(start, start + 5).join(" "));
   return snippet.slice(0, 180);
@@ -172,7 +197,11 @@ export function findSourceIndexBySnippet(content, snippet, options = {}) {
       break;
     }
     const line = indexToLineNumber(source, index);
-    matches.push({ index, line, distance: distanceToTargetLine(line, options.nearLine) });
+    matches.push({
+      index,
+      line,
+      distance: distanceToTargetLine(line, options.nearLine),
+    });
     from = index + 1;
   }
 
@@ -210,7 +239,10 @@ export function findSourceLineBySnippet(content, snippet, options = {}) {
     const windowText = lines.slice(i, i + 5).join(" ");
     if (normalizeSearchText(windowText).includes(normalizedNeedle)) {
       const line = i + 1;
-      matches.push({ line, distance: distanceToTargetLine(line, options.nearLine) });
+      matches.push({
+        line,
+        distance: distanceToTargetLine(line, options.nearLine),
+      });
     }
   }
 
@@ -244,13 +276,19 @@ function lineDistanceToBlock(block, nearLine) {
 
 export function findPreviewBlockBySnippet(blocks, snippet, options = {}) {
   const normalizedNeedle = normalizeSearchText(snippet);
-  if (!Array.isArray(blocks) || blocks.length === 0 || normalizedNeedle.length < 8) {
+  if (
+    !Array.isArray(blocks) ||
+    blocks.length === 0 ||
+    normalizedNeedle.length < 8
+  ) {
     return null;
   }
 
   let best = null;
   for (const block of blocks) {
-    const haystack = normalizeSearchText(block.text || block.node?.textContent || "");
+    const haystack = normalizeSearchText(
+      block.text || block.node?.textContent || "",
+    );
     const index = haystack.indexOf(normalizedNeedle);
     if (index === -1) {
       continue;
@@ -273,7 +311,10 @@ export function findPreviewBlockBySnippet(blocks, snippet, options = {}) {
       best = candidate;
       continue;
     }
-    if (candidate.index === best.index && (candidate.block.top || 0) < (best.block.top || 0)) {
+    if (
+      candidate.index === best.index &&
+      (candidate.block.top || 0) < (best.block.top || 0)
+    ) {
       best = candidate;
     }
   }

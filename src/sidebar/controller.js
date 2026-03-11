@@ -1,13 +1,12 @@
 import {
   getSidebarSelectedPath,
-  shouldSidebarSingleClickOpenAsTab,
-  shouldSidebarSingleClickIgnoreSamePath,
   shouldCapturePreviousSingleFolderFile,
   shouldCollapseHiddenSingleTabForSidebarOpen,
+  shouldSidebarSingleClickIgnoreSamePath,
+  shouldSidebarSingleClickOpenAsTab,
   sidebarClickModifierAction,
 } from "../ui/behavior.js";
 import { buildEntryTree, renderTreeHtml } from "./tree.js";
-
 
 export function createSidebarController({
   state,
@@ -42,7 +41,9 @@ export function createSidebarController({
   }
 
   function rememberSidebarPreviousSingleTab(tab) {
-    sidebarClickState.previousSingleTab = tab ? normalizeTransferTab(tab) : null;
+    sidebarClickState.previousSingleTab = tab
+      ? normalizeTransferTab(tab)
+      : null;
   }
 
   function consumeSidebarDoubleClickPromotion(path) {
@@ -56,7 +57,9 @@ export function createSidebarController({
       return false;
     }
 
-    const previousTab = normalizeTransferTab(sidebarClickState.previousSingleTab);
+    const previousTab = normalizeTransferTab(
+      sidebarClickState.previousSingleTab,
+    );
     const currentTab = snapshotActiveFileAsTransferTab();
     if (!previousTab || !currentTab || previousTab.path === currentTab.path) {
       return false;
@@ -137,21 +140,24 @@ export function createSidebarController({
         const openPromise = (async () => {
           const openFilesCount = state.openFiles.length;
 
-          if (shouldSidebarSingleClickIgnoreSamePath({
-            mode: state.mode,
-            openFilesCount,
-            activePath: state.activePath,
-            nextPath: path,
-          })) {
+          if (
+            shouldSidebarSingleClickIgnoreSamePath({
+              mode: state.mode,
+              openFilesCount,
+              activePath: state.activePath,
+              nextPath: path,
+            })
+          ) {
             return;
           }
 
-          const shouldCapturePreviousSingleTab = shouldCapturePreviousSingleFolderFile({
-            mode: state.mode,
-            openFilesCount,
-            activePath: state.activePath,
-            nextPath: path,
-          });
+          const shouldCapturePreviousSingleTab =
+            shouldCapturePreviousSingleFolderFile({
+              mode: state.mode,
+              openFilesCount,
+              activePath: state.activePath,
+              nextPath: path,
+            });
 
           await saveNow();
 
@@ -159,18 +165,22 @@ export function createSidebarController({
             rememberSidebarPreviousSingleTab(snapshotActiveFileAsTransferTab());
           }
 
-          if (shouldSidebarSingleClickOpenAsTab({
-            mode: state.mode,
-            openFilesCount: state.openFiles.length,
-          })) {
+          if (
+            shouldSidebarSingleClickOpenAsTab({
+              mode: state.mode,
+              openFilesCount: state.openFiles.length,
+            })
+          ) {
             await openFileAsTab(path);
             return;
           }
 
-          if (shouldCollapseHiddenSingleTabForSidebarOpen({
-            mode: state.mode,
-            openFilesCount: state.openFiles.length,
-          })) {
+          if (
+            shouldCollapseHiddenSingleTabForSidebarOpen({
+              mode: state.mode,
+              openFilesCount: state.openFiles.length,
+            })
+          ) {
             state.openFiles = [];
             state.activeTabIndex = 0;
           }
@@ -248,7 +258,11 @@ export function createSidebarController({
 
     if (sidebarRenderState.treeDirty) {
       const tree = buildEntryTree(state.entries);
-      el.projectList.innerHTML = renderTreeHtml(tree, 0, state.collapsedFolders);
+      el.projectList.innerHTML = renderTreeHtml(
+        tree,
+        0,
+        state.collapsedFolders,
+      );
       bindSidebarItemEvents();
       sidebarRenderState.treeDirty = false;
     }

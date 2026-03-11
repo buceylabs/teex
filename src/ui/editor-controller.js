@@ -1,6 +1,9 @@
 export function isEditableState(state) {
   const openFiles = state.openFiles || [];
-  const isUntitled = !state.activePath && openFiles.length > 0 && openFiles[state.activeTabIndex]?.path === null;
+  const isUntitled =
+    !state.activePath &&
+    openFiles.length > 0 &&
+    openFiles[state.activeTabIndex]?.path === null;
   if (!state.activePath && !isUntitled) {
     return false;
   }
@@ -54,14 +57,20 @@ export function createEditorController({
     if (shouldAutosaveOnToggle(state)) {
       saveNow();
     }
-    state.markdownViewMode = state.markdownViewMode === "preview" ? "edit" : "preview";
-    const disableEditorFocus = previousMode === "preview" && state.markdownViewMode === "edit";
+    state.markdownViewMode =
+      state.markdownViewMode === "preview" ? "edit" : "preview";
+    const disableEditorFocus =
+      previousMode === "preview" && state.markdownViewMode === "edit";
     render({ focusEditor: !disableEditorFocus });
     if (typeof onAfterToggleMarkdownMode === "function") {
       onAfterToggleMarkdownMode();
     }
     updateMenuState();
-    setStatus(state.markdownViewMode === "preview" ? "Markdown preview" : "Markdown source edit");
+    setStatus(
+      state.markdownViewMode === "preview"
+        ? "Markdown preview"
+        : "Markdown source edit",
+    );
   }
 
   function toggleSidebarVisibility() {
@@ -78,7 +87,10 @@ export function createEditorController({
       return;
     }
 
-    const isUntitled = !state.activePath && hasTabSession() && state.openFiles[state.activeTabIndex]?.path === null;
+    const isUntitled =
+      !state.activePath &&
+      hasTabSession() &&
+      state.openFiles[state.activeTabIndex]?.path === null;
 
     if (isUntitled && state.isDirty) {
       return saveAsUntitled();
@@ -127,12 +139,15 @@ export function createEditorController({
 
     state.isSaving = true;
     try {
-      await invoke("write_text_file", { path: chosenPath, content: state.content });
+      await invoke("write_text_file", {
+        path: chosenPath,
+        content: state.content,
+      });
       state.activePath = chosenPath;
       state.isDirty = false;
 
       const ext = chosenPath.split(".").pop()?.toLowerCase();
-      const kind = (ext === "md" || ext === "markdown") ? "markdown" : "text";
+      const kind = ext === "md" || ext === "markdown" ? "markdown" : "text";
       state.activeKind = kind;
 
       const tab = state.openFiles[state.activeTabIndex];

@@ -3,7 +3,11 @@ export function normalizeIncomingPaths(paths) {
     return [];
   }
 
-  return [...new Set(paths.filter((path) => typeof path === "string" && path.trim() !== ""))];
+  return [
+    ...new Set(
+      paths.filter((path) => typeof path === "string" && path.trim() !== ""),
+    ),
+  ];
 }
 
 export function extractDragDropPaths(payload) {

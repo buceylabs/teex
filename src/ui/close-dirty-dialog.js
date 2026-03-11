@@ -26,7 +26,11 @@ export function promptToSaveBeforeClose(label) {
 
   const cancelButton = buildButton("Cancel", "cancel", "close-dirty-btn");
   const discardButton = buildButton("Don't Save", "discard", "close-dirty-btn");
-  const saveButton = buildButton("Save", "save", "close-dirty-btn close-dirty-btn-primary");
+  const saveButton = buildButton(
+    "Save",
+    "save",
+    "close-dirty-btn close-dirty-btn-primary",
+  );
 
   actions.append(cancelButton, discardButton, saveButton);
   body.append(title, message, actions);

@@ -7,8 +7,12 @@
   --line: #3a3f4b;
   --accent: #7aa6da;
   --warn: #d54e53;
-  --mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", monospace;
-  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, sans-serif;
+  --mono:
+    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    monospace;
+  --ui:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
+    Helvetica, sans-serif;
   color-scheme: dark;
 }
 
@@ -157,7 +161,9 @@ body {
   font-size: 13px;
   cursor: pointer;
   user-select: none;
-  transition: background 100ms ease, color 100ms ease;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
 }
 
 .folder-toggle:hover {
@@ -173,7 +179,9 @@ body {
   border-bottom: 3.5px solid transparent;
   border-left: 5px solid currentColor;
   opacity: 0.45;
-  transition: transform 150ms ease, opacity 150ms ease;
+  transition:
+    transform 150ms ease,
+    opacity 150ms ease;
 }
 
 .folder-toggle:hover .disclosure {
@@ -192,7 +200,9 @@ body {
   border-radius: 2px;
   background: color-mix(in oklab, var(--ink) 4%, transparent);
   position: relative;
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
 }
 
 .folder-toggle .folder-icon::before {
@@ -206,7 +216,9 @@ body {
   border-bottom: 0;
   border-radius: 2px 2px 0 0;
   background: color-mix(in oklab, var(--ink) 6%, transparent);
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
 }
 
 .folder-toggle[aria-expanded="true"] .folder-icon {
@@ -240,7 +252,9 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background 100ms ease, color 100ms ease;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
 }
 
 .project-item:hover {

@@ -3,7 +3,8 @@ export function hasTabSession(state) {
 }
 
 export function applyFilePayloadToState(state, payload, options) {
-  const defaultMarkdownMode = options?.defaultMarkdownMode === "edit" ? "edit" : "preview";
+  const defaultMarkdownMode =
+    options?.defaultMarkdownMode === "edit" ? "edit" : "preview";
   const preserveMarkdownMode = options?.preserveMarkdownMode === true;
   const previousPath = state.activePath;
   const previousKind = state.activeKind;
@@ -21,10 +22,12 @@ export function applyFilePayloadToState(state, payload, options) {
 
   if (state.activeKind === "markdown") {
     const shouldPreserveMarkdownMode =
-      preserveMarkdownMode
-      && previousKind === "markdown"
-      && previousPath === payload.path;
-    state.markdownViewMode = shouldPreserveMarkdownMode ? previousMarkdownMode : defaultMarkdownMode;
+      preserveMarkdownMode &&
+      previousKind === "markdown" &&
+      previousPath === payload.path;
+    state.markdownViewMode = shouldPreserveMarkdownMode
+      ? previousMarkdownMode
+      : defaultMarkdownMode;
   } else {
     state.markdownViewMode = "edit";
   }
@@ -55,8 +58,12 @@ export function flushStateToActiveTabInState(state) {
   tab.isDirty = state.isDirty;
   tab.markdownViewMode = state.markdownViewMode;
   tab.scrollState = {
-    editorScrollTop: Number.isFinite(state.activeEditorScrollTop) ? state.activeEditorScrollTop : 0,
-    previewScrollTop: Number.isFinite(state.activePreviewScrollTop) ? state.activePreviewScrollTop : 0,
+    editorScrollTop: Number.isFinite(state.activeEditorScrollTop)
+      ? state.activeEditorScrollTop
+      : 0,
+    previewScrollTop: Number.isFinite(state.activePreviewScrollTop)
+      ? state.activePreviewScrollTop
+      : 0,
   };
 }
 
@@ -73,10 +80,14 @@ export function syncActiveTabToStateFromTabs(state) {
   state.content = tab.content;
   state.isDirty = tab.isDirty;
   state.markdownViewMode = tab.markdownViewMode;
-  state.activeEditorScrollTop = Number.isFinite(tab.scrollState?.editorScrollTop)
+  state.activeEditorScrollTop = Number.isFinite(
+    tab.scrollState?.editorScrollTop,
+  )
     ? tab.scrollState.editorScrollTop
     : 0;
-  state.activePreviewScrollTop = Number.isFinite(tab.scrollState?.previewScrollTop)
+  state.activePreviewScrollTop = Number.isFinite(
+    tab.scrollState?.previewScrollTop,
+  )
     ? tab.scrollState.previewScrollTop
     : 0;
   state.activeMarkdownScrollAnchor = null;
@@ -99,7 +110,9 @@ export function normalizeTransferTab(rawTab) {
     markdownViewMode:
       kind === "markdown" && rawTab.markdownViewMode === "edit"
         ? "edit"
-        : (kind === "markdown" ? "preview" : "edit"),
+        : kind === "markdown"
+          ? "preview"
+          : "edit",
     scrollState: {
       editorScrollTop: Number.isFinite(rawTab.scrollState?.editorScrollTop)
         ? rawTab.scrollState.editorScrollTop
@@ -124,8 +137,12 @@ export function snapshotActiveFileAsTransferTab(state) {
     isDirty: state.isDirty,
     markdownViewMode: state.markdownViewMode,
     scrollState: {
-      editorScrollTop: Number.isFinite(state.activeEditorScrollTop) ? state.activeEditorScrollTop : 0,
-      previewScrollTop: Number.isFinite(state.activePreviewScrollTop) ? state.activePreviewScrollTop : 0,
+      editorScrollTop: Number.isFinite(state.activeEditorScrollTop)
+        ? state.activeEditorScrollTop
+        : 0,
+      previewScrollTop: Number.isFinite(state.activePreviewScrollTop)
+        ? state.activePreviewScrollTop
+        : 0,
     },
   });
 }

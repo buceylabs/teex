@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import { createCrossWindowDragController } from "../../src/tabs/cross-window-drag-controller.js";
 
@@ -58,11 +58,19 @@ function createHarness({ invokeResults = {} } = {}) {
     tabBar: {
       classList: {
         _classes: new Set(),
-        add(c) { this._classes.add(c); },
-        remove(c) { this._classes.delete(c); },
-        toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+        add(c) {
+          this._classes.add(c);
+        },
+        remove(c) {
+          this._classes.delete(c);
+        },
+        toggle(c, force) {
+          force ? this._classes.add(c) : this._classes.delete(c);
+        },
       },
-      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
+      querySelector(sel) {
+        return sel === ".tab-label" ? tabLabelEl : null;
+      },
     },
   };
 
@@ -71,13 +79,21 @@ function createHarness({ invokeResults = {} } = {}) {
     pendingOutgoingTabTransfers,
     invoke,
     el,
-    render: () => { renderCount++; },
+    render: () => {
+      renderCount++;
+    },
     setStatus: () => {},
     updateMenuState: () => {},
     markSidebarTreeDirty: () => {},
   });
 
-  return { state, controller, calls, pendingOutgoingTabTransfers, getRenderCount: () => renderCount };
+  return {
+    state,
+    controller,
+    calls,
+    pendingOutgoingTabTransfers,
+    getRenderCount: () => renderCount,
+  };
 }
 
 test("reportPosition shows preview with content when no target window found", async () => {
@@ -91,7 +107,9 @@ test("reportPosition shows preview with content when no target window found", as
   const dragCalls = calls.filter((c) => c.command === "report_drag_position");
   assert.equal(dragCalls[0].args.tabName, "test.md");
 
-  const previewCalls = calls.filter((c) => c.command === "show_tab_drag_preview");
+  const previewCalls = calls.filter(
+    (c) => c.command === "show_tab_drag_preview",
+  );
   assert.equal(previewCalls.length, 1);
   assert.equal(previewCalls[0].args.physicalX, 800);
   assert.equal(previewCalls[0].args.physicalY, 600);
@@ -149,7 +167,9 @@ test("cancel hides preview and clears drag hover", async () => {
   const hideCalls = calls.filter((c) => c.command === "hide_tab_drag_preview");
   assert.ok(hideCalls.length >= 1);
 
-  const cancelCalls = calls.filter((c) => c.command === "cancel_cross_window_drag_hover");
+  const cancelCalls = calls.filter(
+    (c) => c.command === "cancel_cross_window_drag_hover",
+  );
   assert.ok(cancelCalls.length >= 1);
 });
 
@@ -165,7 +185,9 @@ test("completeDropAsNewWindow creates window with path and removes source tab", 
   controller.activate(0);
   await controller.completeDropAsNewWindow(400, 300);
 
-  const createCalls = calls.filter((c) => c.command === "create_window_from_drag");
+  const createCalls = calls.filter(
+    (c) => c.command === "create_window_from_drag",
+  );
   assert.equal(createCalls.length, 1);
   assert.equal(createCalls[0].args.physicalX, 800);
   assert.equal(createCalls[0].args.physicalY, 600);
@@ -192,7 +214,9 @@ test("completeDropAsNewWindow cancels for untitled tabs (no path)", async () => 
   controller.activate(0);
   await controller.completeDropAsNewWindow(400, 300);
 
-  const createCalls = calls.filter((c) => c.command === "create_window_from_drag");
+  const createCalls = calls.filter(
+    (c) => c.command === "create_window_from_drag",
+  );
   assert.equal(createCalls.length, 0);
   assert.equal(state.openFiles.length, 2);
 });
@@ -237,9 +261,15 @@ test("completeDropAsNewWindow does not remove tab when window creation fails", a
       tabBar: {
         classList: {
           _classes: new Set(),
-          add(c) { this._classes.add(c); },
-          remove(c) { this._classes.delete(c); },
-          toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+          add(c) {
+            this._classes.add(c);
+          },
+          remove(c) {
+            this._classes.delete(c);
+          },
+          toggle(c, force) {
+            force ? this._classes.add(c) : this._classes.delete(c);
+          },
         },
       },
     },
@@ -302,11 +332,19 @@ test("handleDragEnter replaces Untitled label with incoming tab name", () => {
     tabBar: {
       classList: {
         _classes: new Set(),
-        add(c) { this._classes.add(c); },
-        remove(c) { this._classes.delete(c); },
-        toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+        add(c) {
+          this._classes.add(c);
+        },
+        remove(c) {
+          this._classes.delete(c);
+        },
+        toggle(c, force) {
+          force ? this._classes.add(c) : this._classes.delete(c);
+        },
       },
-      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
+      querySelector(sel) {
+        return sel === ".tab-label" ? tabLabelEl : null;
+      },
     },
   };
 
@@ -360,11 +398,19 @@ test("handleDragEnter does not replace label when tab has content", () => {
     tabBar: {
       classList: {
         _classes: new Set(),
-        add(c) { this._classes.add(c); },
-        remove(c) { this._classes.delete(c); },
-        toggle(c, force) { force ? this._classes.add(c) : this._classes.delete(c); },
+        add(c) {
+          this._classes.add(c);
+        },
+        remove(c) {
+          this._classes.delete(c);
+        },
+        toggle(c, force) {
+          force ? this._classes.add(c) : this._classes.delete(c);
+        },
       },
-      querySelector(sel) { return sel === ".tab-label" ? tabLabelEl : null; },
+      querySelector(sel) {
+        return sel === ".tab-label" ? tabLabelEl : null;
+      },
     },
   };
 

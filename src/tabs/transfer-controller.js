@@ -19,7 +19,9 @@ export function createTabTransferController({
   snapshotAllOpenTabsForTransfer,
 }) {
   function applyTransferredTabsToCurrentWindow(incomingTabs) {
-    const normalizedIncoming = incomingTabs.map(normalizeTransferTab).filter(Boolean);
+    const normalizedIncoming = incomingTabs
+      .map(normalizeTransferTab)
+      .filter(Boolean);
     if (normalizedIncoming.length === 0) {
       return 0;
     }
@@ -48,7 +50,10 @@ export function createTabTransferController({
     }
 
     state.openFiles = combinedTabs;
-    state.activeTabIndex = Math.min(existingTabs.length, state.openFiles.length - 1);
+    state.activeTabIndex = Math.min(
+      existingTabs.length,
+      state.openFiles.length - 1,
+    );
     syncActiveTabToState();
     render();
     updateMenuState();
@@ -56,7 +61,11 @@ export function createTabTransferController({
     return normalizedIncoming.length;
   }
 
-  async function sendTabTransferResultToSource({ sourceLabel, requestId, acceptedCount }) {
+  async function sendTabTransferResultToSource({
+    sourceLabel,
+    requestId,
+    acceptedCount,
+  }) {
     if (!state.windowLabel || !sourceLabel || !requestId) {
       return;
     }
@@ -72,7 +81,12 @@ export function createTabTransferController({
   async function handleRequestExportAllTabs(payload) {
     const requestId = payload?.requestId;
     const targetLabel = payload?.targetLabel;
-    if (!requestId || !targetLabel || !state.windowLabel || targetLabel === state.windowLabel) {
+    if (
+      !requestId ||
+      !targetLabel ||
+      !state.windowLabel ||
+      targetLabel === state.windowLabel
+    ) {
       return;
     }
 
@@ -118,7 +132,9 @@ export function createTabTransferController({
     try {
       acceptedCount = applyTransferredTabsToCurrentWindow(tabs);
       if (acceptedCount > 0) {
-        setStatus(`Added ${acceptedCount} tab${acceptedCount === 1 ? "" : "s"} from another window`);
+        setStatus(
+          `Added ${acceptedCount} tab${acceptedCount === 1 ? "" : "s"} from another window`,
+        );
       }
     } catch (error) {
       setStatus(String(error), true);
@@ -170,7 +186,10 @@ export function createTabTransferController({
         }
       }
     } else if (pending.kind === "single") {
-      if (!hasTabSession() && (!pending.singlePath || state.activePath === pending.singlePath)) {
+      if (
+        !hasTabSession() &&
+        (!pending.singlePath || state.activePath === pending.singlePath)
+      ) {
         clearActiveFile();
         if (state.mode !== "folder") {
           state.mode = "empty";
@@ -201,18 +220,25 @@ export function createTabTransferController({
     }
     pendingOutgoingTabTransfers.delete(requestId);
 
-    const acceptedCount = Number.isFinite(payload?.acceptedCount) ? payload.acceptedCount : 0;
+    const acceptedCount = Number.isFinite(payload?.acceptedCount)
+      ? payload.acceptedCount
+      : 0;
     if (acceptedCount <= 0) {
       return;
     }
 
     if (acceptedCount !== pending.tabCount) {
-      setStatus("Tab merge completed partially; source window was left unchanged", true);
+      setStatus(
+        "Tab merge completed partially; source window was left unchanged",
+        true,
+      );
       return;
     }
 
     await finalizeOutgoingTabTransfer(pending);
-    setStatus(`Moved ${acceptedCount} tab${acceptedCount === 1 ? "" : "s"} to another window`);
+    setStatus(
+      `Moved ${acceptedCount} tab${acceptedCount === 1 ? "" : "s"} to another window`,
+    );
   }
 
   return {

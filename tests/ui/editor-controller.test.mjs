@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import {
   buildMenuStatePayload,
@@ -11,24 +11,48 @@ import {
 test("isEditableState depends on active file and markdown mode", () => {
   assert.equal(isEditableState({ activePath: null }), false);
   assert.equal(
-    isEditableState({ activePath: "/a.txt", activeKind: "text", markdownViewMode: "preview" }),
+    isEditableState({
+      activePath: "/a.txt",
+      activeKind: "text",
+      markdownViewMode: "preview",
+    }),
     true,
   );
   assert.equal(
-    isEditableState({ activePath: "/a.md", activeKind: "markdown", markdownViewMode: "preview" }),
+    isEditableState({
+      activePath: "/a.md",
+      activeKind: "markdown",
+      markdownViewMode: "preview",
+    }),
     false,
   );
   assert.equal(
-    isEditableState({ activePath: "/a.md", activeKind: "markdown", markdownViewMode: "edit" }),
+    isEditableState({
+      activePath: "/a.md",
+      activeKind: "markdown",
+      markdownViewMode: "edit",
+    }),
     true,
   );
 });
 
 test("shouldAutosaveOnToggle returns true only for saved dirty files", () => {
-  assert.equal(shouldAutosaveOnToggle({ activePath: "/a.md", isDirty: true }), true);
-  assert.equal(shouldAutosaveOnToggle({ activePath: null, isDirty: true }), false);
-  assert.equal(shouldAutosaveOnToggle({ activePath: "/a.md", isDirty: false }), false);
-  assert.equal(shouldAutosaveOnToggle({ activePath: null, isDirty: false }), false);
+  assert.equal(
+    shouldAutosaveOnToggle({ activePath: "/a.md", isDirty: true }),
+    true,
+  );
+  assert.equal(
+    shouldAutosaveOnToggle({ activePath: null, isDirty: true }),
+    false,
+  );
+  assert.equal(
+    shouldAutosaveOnToggle({ activePath: "/a.md", isDirty: false }),
+    false,
+  );
+  assert.equal(
+    shouldAutosaveOnToggle({ activePath: null, isDirty: false }),
+    false,
+  );
 });
 
 test("buildMenuStatePayload reflects folder and markdown toggles", () => {

@@ -1,6 +1,13 @@
 const JSON_EXTENSIONS = new Set(["json", "jsonc", "geojson"]);
 const YAML_EXTENSIONS = new Set(["yaml", "yml"]);
-const COMPOSE_ROOT_KEYS = new Set(["version", "services", "networks", "volumes", "secrets", "configs"]);
+const COMPOSE_ROOT_KEYS = new Set([
+  "version",
+  "services",
+  "networks",
+  "volumes",
+  "secrets",
+  "configs",
+]);
 
 function getExtension(path) {
   if (typeof path !== "string" || !path) {
@@ -17,7 +24,7 @@ function getExtension(path) {
 }
 
 function looksLikeJson(text) {
-  return /^\s*[\[{]/.test(text);
+  return /^\s*[[{]/.test(text);
 }
 
 function looksLikeYaml(text) {
@@ -25,7 +32,9 @@ function looksLikeYaml(text) {
     return false;
   }
 
-  const hasKeyValue = /(^|\n)\s*['"]?[A-Za-z0-9_.-]+['"]?\s*:\s*(\S|$)/.test(text);
+  const hasKeyValue = /(^|\n)\s*['"]?[A-Za-z0-9_.-]+['"]?\s*:\s*(\S|$)/.test(
+    text,
+  );
   const hasListItem = /(^|\n)\s*-\s+\S/.test(text);
   return hasKeyValue || hasListItem;
 }
@@ -162,7 +171,11 @@ async function callStructuredFormatter(invoke, content, preferredKind) {
 }
 
 export async function formatStructuredPasteText({ invoke, text, activePath }) {
-  if (typeof text !== "string" || !text.trim() || typeof invoke !== "function") {
+  if (
+    typeof text !== "string" ||
+    !text.trim() ||
+    typeof invoke !== "function"
+  ) {
     return null;
   }
 
@@ -171,7 +184,11 @@ export async function formatStructuredPasteText({ invoke, text, activePath }) {
     return null;
   }
 
-  const primaryResult = await callStructuredFormatter(invoke, text, preferredKind);
+  const primaryResult = await callStructuredFormatter(
+    invoke,
+    text,
+    preferredKind,
+  );
   if (primaryResult.detectedKind) {
     return {
       preferredKind,

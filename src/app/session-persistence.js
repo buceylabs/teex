@@ -45,7 +45,12 @@ export function loadAllSessions(storage = localStorage) {
     }
     try {
       const session = JSON.parse(raw);
-      if (session && session.version === VERSION && Array.isArray(session.tabs) && session.tabs.length > 0) {
+      if (
+        session &&
+        session.version === VERSION &&
+        Array.isArray(session.tabs) &&
+        session.tabs.length > 0
+      ) {
         sessions.push(session);
       }
     } catch {

@@ -49,12 +49,25 @@ export function getPreviewBlocks(previewEl) {
   const blocks = [];
   const previewRect = previewEl.getBoundingClientRect();
   previewEl.querySelectorAll("[data-src-line-start]").forEach((node) => {
-    const startLine = parseLineAttr(node.getAttribute("data-src-line-start"), 1);
-    const endLine = Math.max(startLine, parseLineAttr(node.getAttribute("data-src-line-end"), startLine));
+    const startLine = parseLineAttr(
+      node.getAttribute("data-src-line-start"),
+      1,
+    );
+    const endLine = Math.max(
+      startLine,
+      parseLineAttr(node.getAttribute("data-src-line-end"), startLine),
+    );
     const nodeRect = node.getBoundingClientRect();
     const top = nodeRect.top - previewRect.top + previewEl.scrollTop;
     const height = Math.max(1, node.offsetHeight);
-    blocks.push({ node, startLine, endLine, top, height, text: node.textContent || "" });
+    blocks.push({
+      node,
+      startLine,
+      endLine,
+      top,
+      height,
+      text: node.textContent || "",
+    });
   });
 
   blocks.sort((a, b) => a.top - b.top);
@@ -86,7 +99,11 @@ export function computePreviewScrollTopFromSourceLine({
   fallbackRatio = 0,
   maxScrollTop = 0,
 }) {
-  if (!Array.isArray(blocks) || blocks.length === 0 || !Number.isFinite(sourceLine)) {
+  if (
+    !Array.isArray(blocks) ||
+    blocks.length === 0 ||
+    !Number.isFinite(sourceLine)
+  ) {
     return scrollTopFromRatio(fallbackRatio, maxScrollTop);
   }
 
@@ -96,8 +113,12 @@ export function computePreviewScrollTopFromSourceLine({
   }
 
   const span = Math.max(1, block.endLine - block.startLine + 1);
-  const relativeLines = clamp(((sourceLine - block.startLine) + lineFraction) / span, 0, 1);
-  const raw = block.top + (relativeLines * block.height);
+  const relativeLines = clamp(
+    (sourceLine - block.startLine + lineFraction) / span,
+    0,
+    1,
+  );
+  const raw = block.top + relativeLines * block.height;
   return clamp(raw, 0, maxScrollTop);
 }
 
@@ -108,7 +129,11 @@ export function computeEditorScrollTopFromSourceLine({
   fallbackRatio = 0,
   maxScrollTop = 0,
 }) {
-  if (!Number.isFinite(sourceLine) || !Number.isFinite(lineHeight) || lineHeight <= 0) {
+  if (
+    !Number.isFinite(sourceLine) ||
+    !Number.isFinite(lineHeight) ||
+    lineHeight <= 0
+  ) {
     return scrollTopFromRatio(fallbackRatio, maxScrollTop);
   }
   const lineIndex = Math.max(0, sourceLine - 1);

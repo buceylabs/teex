@@ -1,7 +1,11 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
-import { buildEntryTree, collectFolderPaths, renderTreeHtml } from "../../src/sidebar/tree.js";
+import {
+  buildEntryTree,
+  collectFolderPaths,
+  renderTreeHtml,
+} from "../../src/sidebar/tree.js";
 
 test("buildEntryTree groups nested folders and files", () => {
   const tree = buildEntryTree([

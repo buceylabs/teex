@@ -1,5 +1,5 @@
-import { shouldSuppressDropOverlayForSelfHover } from "../ui/behavior.js";
 import { extractDragDropPaths } from "../path-input.js";
+import { shouldSuppressDropOverlayForSelfHover } from "../ui/behavior.js";
 
 export function createDragDropController({
   state,
@@ -53,11 +53,13 @@ export function createDragDropController({
             const paths = extractDragDropPaths(dragEvent);
             dropOverlayDragState.suppressOverlay = false;
             setDropOverlayVisible(false);
-            if (shouldSuppressDropOverlayForSelfHover({
-              paths,
-              activePath: state.activePath,
-              rootPath: state.rootPath,
-            })) {
+            if (
+              shouldSuppressDropOverlayForSelfHover({
+                paths,
+                activePath: state.activePath,
+                rootPath: state.rootPath,
+              })
+            ) {
               return;
             }
             await handleDroppedPaths(paths);
@@ -93,11 +95,13 @@ export function createDragDropController({
         const paths = extractDragDropPaths(event.payload);
         dropOverlayDragState.suppressOverlay = false;
         setDropOverlayVisible(false);
-        if (shouldSuppressDropOverlayForSelfHover({
-          paths,
-          activePath: state.activePath,
-          rootPath: state.rootPath,
-        })) {
+        if (
+          shouldSuppressDropOverlayForSelfHover({
+            paths,
+            activePath: state.activePath,
+            rootPath: state.rootPath,
+          })
+        ) {
           return;
         }
         await handleDroppedPaths(paths);

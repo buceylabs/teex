@@ -38,10 +38,14 @@ function getMarkdownParser() {
   const defaultFenceRule = md.renderer.rules.fence;
   md.renderer.rules.fence = (tokens, index, options, env, self) => {
     const token = tokens[index];
-    const info = String(token.info || "").trim().toLowerCase();
+    const info = String(token.info || "")
+      .trim()
+      .toLowerCase();
     if (info === "mermaid") {
       const startLine = token?.map ? token.map[0] + 1 : 1;
-      const endLine = token?.map ? Math.max(startLine, token.map[1]) : startLine;
+      const endLine = token?.map
+        ? Math.max(startLine, token.map[1])
+        : startLine;
       const content = md.utils.escapeHtml(token.content || "");
       return `<div class="mermaid" data-src-line-start="${startLine}" data-src-line-end="${endLine}">${content}</div>\n`;
     }

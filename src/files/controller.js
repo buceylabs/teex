@@ -1,5 +1,5 @@
-import { getSingleFileUiOpenMode } from "../ui/behavior.js";
 import { collectFolderPaths } from "../sidebar/tree.js";
+import { getSingleFileUiOpenMode } from "../ui/behavior.js";
 
 export function didProjectEntriesChange(previousEntries, nextEntries) {
   if (!Array.isArray(previousEntries) || !Array.isArray(nextEntries)) {
@@ -73,7 +73,9 @@ export function createFileController({
 
     refreshInFlight = (async () => {
       try {
-        const entries = await invoke("list_project_entries", { root: state.rootPath });
+        const entries = await invoke("list_project_entries", {
+          root: state.rootPath,
+        });
         if (!didProjectEntriesChange(state.entries, entries)) {
           return;
         }
@@ -82,7 +84,9 @@ export function createFileController({
 
         const validFolderPaths = collectFolderPaths(entries);
         state.collapsedFolders = new Set(
-          [...state.collapsedFolders].filter((folderPath) => validFolderPaths.has(folderPath)),
+          [...state.collapsedFolders].filter((folderPath) =>
+            validFolderPaths.has(folderPath),
+          ),
         );
 
         markSidebarTreeDirty();
@@ -173,7 +177,9 @@ export function createFileController({
       if (entries.length > 0) {
         const previous = state.activePath;
         const fallback = entries[0].path;
-        const nextPath = entries.some((entry) => entry.path === previous) ? previous : fallback;
+        const nextPath = entries.some((entry) => entry.path === previous)
+          ? previous
+          : fallback;
         await openEntry(nextPath);
       } else {
         clearActiveFile();
@@ -219,18 +225,20 @@ export function createFileController({
       return;
     }
 
-    state.openFiles = [{
-      path: state.activePath,
-      content: state.content,
-      kind: state.activeKind,
-      writable: true,
-      isDirty: state.isDirty,
-      markdownViewMode: state.markdownViewMode,
-      scrollState: {
-        editorScrollTop: state.activeEditorScrollTop || 0,
-        previewScrollTop: state.activePreviewScrollTop || 0,
+    state.openFiles = [
+      {
+        path: state.activePath,
+        content: state.content,
+        kind: state.activeKind,
+        writable: true,
+        isDirty: state.isDirty,
+        markdownViewMode: state.markdownViewMode,
+        scrollState: {
+          editorScrollTop: state.activeEditorScrollTop || 0,
+          previewScrollTop: state.activePreviewScrollTop || 0,
+        },
       },
-    }];
+    ];
     state.activeTabIndex = 0;
 
     await openFileAsTab(path);

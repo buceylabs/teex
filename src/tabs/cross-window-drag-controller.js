@@ -1,5 +1,5 @@
-import { shouldShowTabBar } from "../ui/behavior.js";
 import { baseName } from "../app-utils.js";
+import { shouldShowTabBar } from "../ui/behavior.js";
 import {
   clearActiveFileInState,
   flushStateToActiveTabInState,
@@ -46,7 +46,11 @@ export function createCrossWindowDragController({
   function getTabPreviewInfo(index) {
     flushStateToActiveTabInState(state);
     const tab = hasTabSession(state) ? state.openFiles[index] : null;
-    const title = tab?.path ? baseName(tab.path) : (state.activePath ? baseName(state.activePath) : "Untitled");
+    const title = tab?.path
+      ? baseName(tab.path)
+      : state.activePath
+        ? baseName(state.activePath)
+        : "Untitled";
     const content = tab?.content ?? state.content ?? "";
     return { title, content };
   }
@@ -262,10 +266,12 @@ export function createCrossWindowDragController({
   let savedTabLabel = null;
 
   function isEmptyUntitledTab() {
-    return state.openFiles.length === 1
-      && !state.openFiles[0].path
-      && !state.openFiles[0].isDirty
-      && !state.openFiles[0].content;
+    return (
+      state.openFiles.length === 1 &&
+      !state.openFiles[0].path &&
+      !state.openFiles[0].isDirty &&
+      !state.openFiles[0].content
+    );
   }
 
   function showDropZone(incomingTabName) {
@@ -290,7 +296,10 @@ export function createCrossWindowDragController({
       savedTabLabel = null;
     }
     el.tabBar.classList.remove("tab-bar-drop-target");
-    el.tabBar.classList.toggle("hidden", !shouldShowTabBar(state.openFiles.length));
+    el.tabBar.classList.toggle(
+      "hidden",
+      !shouldShowTabBar(state.openFiles.length),
+    );
   }
 
   function handleDragEnter(tabName) {

@@ -1,6 +1,10 @@
 import { normalizeIncomingPaths } from "../path-input.js";
 
-export function shouldSkipDuplicateOsOpenForDeduper(deduper, paths, now = Date.now()) {
+export function shouldSkipDuplicateOsOpenForDeduper(
+  deduper,
+  paths,
+  now = Date.now(),
+) {
   const signature = paths.join("\n");
   if (deduper.signature === signature && now - deduper.timestamp < 2000) {
     return true;
@@ -15,8 +19,6 @@ export function createOpenPathsController({
   state,
   invoke,
   setStatus,
-  render,
-  updateMenuState,
   openFile,
   openFileInTabs,
   openSingleFileFromUi,
@@ -84,7 +86,11 @@ export function createOpenPathsController({
         return;
       }
 
-      if (launch.mode === "files" && Array.isArray(launch.paths) && launch.paths.length >= 2) {
+      if (
+        launch.mode === "files" &&
+        Array.isArray(launch.paths) &&
+        launch.paths.length >= 2
+      ) {
         await openMultipleFiles(launch.paths);
         return;
       }

@@ -1,7 +1,7 @@
-import { renderMarkdown, renderMermaidDiagrams } from "./markdown-renderer.js";
 import { baseName } from "../app-utils.js";
-import { escapeAttr, escapeHtml } from "./html-utils.js";
 import { shouldShowTabBar } from "./behavior.js";
+import { escapeAttr, escapeHtml } from "./html-utils.js";
+import { renderMarkdown, renderMermaidDiagrams } from "./markdown-renderer.js";
 
 export function createUiRenderer({
   state,
@@ -91,19 +91,21 @@ export function createUiRenderer({
         const rect = t.getBoundingClientRect();
         if (clientX >= rect.left && clientX < rect.right) {
           const midX = rect.left + rect.width / 2;
-          t.classList.add(clientX < midX ? "tab-drag-over-left" : "tab-drag-over-right");
+          t.classList.add(
+            clientX < midX ? "tab-drag-over-left" : "tab-drag-over-right",
+          );
           break;
         }
       }
     }
 
-    function createGhost(sourceEl, clientX, clientY) {
+    function createGhost(sourceEl, clientX, _clientY) {
       const ghost = sourceEl.cloneNode(true);
       const rect = sourceEl.getBoundingClientRect();
       ghost.className = "tab tab-active tab-ghost";
-      ghost.style.width = rect.width + "px";
-      ghost.style.left = (clientX - rect.width / 2) + "px";
-      ghost.style.top = rect.top + "px";
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.left = `${clientX - rect.width / 2}px`;
+      ghost.style.top = `${rect.top}px`;
       document.body.appendChild(ghost);
       return ghost;
     }
@@ -162,7 +164,11 @@ export function createUiRenderer({
         }
         dragState.dragging = true;
         dragState.sourceEl.classList.add("tab-dragging");
-        dragState.ghost = createGhost(dragState.sourceEl, event.clientX, event.clientY);
+        dragState.ghost = createGhost(
+          dragState.sourceEl,
+          event.clientX,
+          event.clientY,
+        );
         document.documentElement.classList.add("tab-reordering");
         if (crossWindowDrag) {
           crossWindowDrag.activate(dragState.fromIndex);
@@ -187,7 +193,7 @@ export function createUiRenderer({
       if (dragState.ghost) {
         dragState.ghost.classList.remove("hidden");
         const rect = dragState.sourceEl.getBoundingClientRect();
-        dragState.ghost.style.left = (event.clientX - rect.width / 2) + "px";
+        dragState.ghost.style.left = `${event.clientX - rect.width / 2}px`;
       }
       updateDropIndicator(event.clientX);
     }
@@ -211,7 +217,7 @@ export function createUiRenderer({
         return;
       }
       if (dragState.dragging) {
-        if (crossWindowDrag && crossWindowDrag.currentTargetLabel()) {
+        if (crossWindowDrag?.currentTargetLabel()) {
           cleanupDragUi();
           crossWindowDrag.completeDrop();
           return;
@@ -253,7 +259,10 @@ export function createUiRenderer({
 
   function renderMainPane(options = {}) {
     const shouldFocusEditor = options.focusEditor !== false;
-    if (state.activeKind === "markdown" && state.markdownViewMode === "preview") {
+    if (
+      state.activeKind === "markdown" &&
+      state.markdownViewMode === "preview"
+    ) {
       el.editor.classList.add("hidden");
       el.preview.classList.remove("hidden");
       el.preview.innerHTML = renderMarkdown(state.content);
@@ -286,11 +295,16 @@ export function createUiRenderer({
     renderChrome();
 
     const showSidebar = state.mode === "folder" && state.sidebarVisible;
-    el.workspace.className = showSidebar ? "workspace workspace-folder" : "workspace workspace-empty";
+    el.workspace.className = showSidebar
+      ? "workspace workspace-folder"
+      : "workspace workspace-empty";
     el.sidebar.classList.toggle("hidden", !showSidebar);
     el.sidebarResizer.classList.toggle("hidden", !showSidebar);
     if (showSidebar) {
-      el.workspace.style.setProperty("--sidebar-width", `${state.sidebarWidth}px`);
+      el.workspace.style.setProperty(
+        "--sidebar-width",
+        `${state.sidebarWidth}px`,
+      );
     } else {
       el.workspace.style.removeProperty("--sidebar-width");
     }
@@ -307,12 +321,18 @@ export function createUiRenderer({
 
 export function buildWindowTitleState(state) {
   const nextRepresentedPath =
-    state.mode === "folder" ? (state.rootPath || null) : (state.activePath || null);
-  const isUntitled = !state.activePath
-    && state.openFiles.length > 0
-    && state.openFiles[state.activeTabIndex]?.path === null;
-  const baseTitle = isUntitled ? "Untitled" : (nextRepresentedPath ? baseName(nextRepresentedPath) : "Teex");
-  const hasUnsavedChanges = state.isDirty && (Boolean(state.activePath) || isUntitled);
+    state.mode === "folder" ? state.rootPath || null : state.activePath || null;
+  const isUntitled =
+    !state.activePath &&
+    state.openFiles.length > 0 &&
+    state.openFiles[state.activeTabIndex]?.path === null;
+  const baseTitle = isUntitled
+    ? "Untitled"
+    : nextRepresentedPath
+      ? baseName(nextRepresentedPath)
+      : "Teex";
+  const hasUnsavedChanges =
+    state.isDirty && (Boolean(state.activePath) || isUntitled);
   const nextTitle = hasUnsavedChanges ? `${baseTitle}  ●` : baseTitle;
 
   return {

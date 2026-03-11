@@ -73,7 +73,10 @@ export function createTabController({
 
     if (!isActive && tab.path && tab.writable) {
       try {
-        await invoke("write_text_file", { path: tab.path, content: tab.content });
+        await invoke("write_text_file", {
+          path: tab.path,
+          content: tab.content,
+        });
         tab.isDirty = false;
         return true;
       } catch (error) {
@@ -204,11 +207,10 @@ export function createTabController({
     }
 
     if (state.mode === "files") {
-      const hasOnlyEmptyUntitledTab = (
-        state.openFiles.length === 1
-        && state.activeTabIndex === 0
-        && isEmptyUntitledActiveState(state)
-      );
+      const hasOnlyEmptyUntitledTab =
+        state.openFiles.length === 1 &&
+        state.activeTabIndex === 0 &&
+        isEmptyUntitledActiveState(state);
       if (hasOnlyEmptyUntitledTab) {
         await openFile(path);
         return;
@@ -336,36 +338,36 @@ export function createTabController({
     }
     closeInProgress = true;
     try {
-    const tab = state.openFiles[index];
-    if (!tab) {
-      return;
-    }
-
-    if (!(await canCloseDirtyTab(index))) {
-      return;
-    }
-
-    state.openFiles.splice(index, 1);
-
-    if (state.openFiles.length === 0) {
-      state.openFiles = [];
-      state.activeTabIndex = 0;
-      clearActiveFile();
-      if (state.mode !== "folder") {
-        state.mode = "empty";
-        markSidebarTreeDirty();
+      const tab = state.openFiles[index];
+      if (!tab) {
+        return;
       }
+
+      if (!(await canCloseDirtyTab(index))) {
+        return;
+      }
+
+      state.openFiles.splice(index, 1);
+
+      if (state.openFiles.length === 0) {
+        state.openFiles = [];
+        state.activeTabIndex = 0;
+        clearActiveFile();
+        if (state.mode !== "folder") {
+          state.mode = "empty";
+          markSidebarTreeDirty();
+        }
+        render();
+        updateMenuState();
+        return;
+      }
+
+      if (state.activeTabIndex >= state.openFiles.length) {
+        state.activeTabIndex = state.openFiles.length - 1;
+      }
+      syncActiveTabToState();
       render();
       updateMenuState();
-      return;
-    }
-
-    if (state.activeTabIndex >= state.openFiles.length) {
-      state.activeTabIndex = state.openFiles.length - 1;
-    }
-    syncActiveTabToState();
-    render();
-    updateMenuState();
     } finally {
       closeInProgress = false;
     }
@@ -377,26 +379,26 @@ export function createTabController({
     }
     closeInProgress = true;
     try {
-    if (!state.activePath) {
-      return;
-    }
+      if (!state.activePath) {
+        return;
+      }
 
-    const closingLabel = baseName(state.activePath);
-    if (!(await canCloseSingleActiveFile())) {
-      return;
-    }
+      const closingLabel = baseName(state.activePath);
+      if (!(await canCloseSingleActiveFile())) {
+        return;
+      }
 
-    state.openFiles = [];
-    state.activeTabIndex = 0;
-    clearActiveFile();
-    if (state.mode !== "folder") {
-      state.mode = "empty";
-      markSidebarTreeDirty();
-    }
+      state.openFiles = [];
+      state.activeTabIndex = 0;
+      clearActiveFile();
+      if (state.mode !== "folder") {
+        state.mode = "empty";
+        markSidebarTreeDirty();
+      }
 
-    setStatus(`Closed ${closingLabel}`);
-    render();
-    updateMenuState();
+      setStatus(`Closed ${closingLabel}`);
+      render();
+      updateMenuState();
     } finally {
       closeInProgress = false;
     }

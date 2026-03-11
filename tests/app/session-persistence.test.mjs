@@ -1,11 +1,10 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
-  saveWindowSession,
-  removeWindowSession,
+  clearAllSessions,
   loadAllSessions,
   pruneStaleWindows,
-  clearAllSessions,
+  saveWindowSession,
 } from "../../src/app/session-persistence.js";
 
 function createMockStorage() {
@@ -66,7 +65,9 @@ describe("saveWindowSession", () => {
     const state = createState({
       mode: "folder",
       rootPath: "/projects/my-app",
-      openFiles: [{ path: "/projects/my-app/index.js", markdownViewMode: "edit" }],
+      openFiles: [
+        { path: "/projects/my-app/index.js", markdownViewMode: "edit" },
+      ],
     });
 
     saveWindowSession(state, "win-1", storage);
@@ -95,7 +96,9 @@ describe("saveWindowSession", () => {
   it("removes entry when mode is empty", () => {
     const storage = createMockStorage();
     saveWindowSession(
-      createState({ openFiles: [{ path: "/a.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/a.md", markdownViewMode: "preview" }],
+      }),
       "win-1",
       storage,
     );
@@ -111,12 +114,18 @@ describe("saveWindowSession", () => {
   it("removes entry when no tabs have paths", () => {
     const storage = createMockStorage();
     saveWindowSession(
-      createState({ openFiles: [{ path: "/a.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/a.md", markdownViewMode: "preview" }],
+      }),
       "win-1",
       storage,
     );
 
-    saveWindowSession(createState({ openFiles: [{ path: null }] }), "win-1", storage);
+    saveWindowSession(
+      createState({ openFiles: [{ path: null }] }),
+      "win-1",
+      storage,
+    );
 
     assert.equal(storage.getItem("teex-session:win-1"), null);
   });
@@ -160,7 +169,9 @@ describe("loadAllSessions", () => {
   it("returns sessions from multiple windows", () => {
     const storage = createMockStorage();
     saveWindowSession(
-      createState({ openFiles: [{ path: "/a.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/a.md", markdownViewMode: "preview" }],
+      }),
       "win-1",
       storage,
     );
@@ -182,7 +193,10 @@ describe("loadAllSessions", () => {
 
   it("skips corrupt entries", () => {
     const storage = createMockStorage();
-    storage.setItem("teex-session-labels", JSON.stringify(["win-1", "win-bad"]));
+    storage.setItem(
+      "teex-session-labels",
+      JSON.stringify(["win-1", "win-bad"]),
+    );
     storage.setItem(
       "teex-session:win-1",
       JSON.stringify({ version: 1, tabs: [{ path: "/a.md" }] }),
@@ -198,12 +212,16 @@ describe("pruneStaleWindows", () => {
   it("removes sessions for windows no longer alive", () => {
     const storage = createMockStorage();
     saveWindowSession(
-      createState({ openFiles: [{ path: "/a.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/a.md", markdownViewMode: "preview" }],
+      }),
       "win-1",
       storage,
     );
     saveWindowSession(
-      createState({ openFiles: [{ path: "/b.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/b.md", markdownViewMode: "preview" }],
+      }),
       "win-2",
       storage,
     );
@@ -221,12 +239,16 @@ describe("clearAllSessions", () => {
   it("removes all session data", () => {
     const storage = createMockStorage();
     saveWindowSession(
-      createState({ openFiles: [{ path: "/a.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/a.md", markdownViewMode: "preview" }],
+      }),
       "win-1",
       storage,
     );
     saveWindowSession(
-      createState({ openFiles: [{ path: "/b.md", markdownViewMode: "preview" }] }),
+      createState({
+        openFiles: [{ path: "/b.md", markdownViewMode: "preview" }],
+      }),
       "win-2",
       storage,
     );
@@ -257,7 +279,9 @@ describe("round-trip", () => {
       createState({
         mode: "folder",
         rootPath: "/project",
-        openFiles: [{ path: "/project/readme.md", markdownViewMode: "preview" }],
+        openFiles: [
+          { path: "/project/readme.md", markdownViewMode: "preview" },
+        ],
       }),
       "win-2",
       storage,

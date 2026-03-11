@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import {
   applyFilePayloadToState,
@@ -56,21 +56,18 @@ test("normalizeTransferTab sanitizes invalid and partial tab records", () => {
     },
   );
 
-  assert.deepEqual(
-    normalizeTransferTab({ path: "/a.bin", kind: "other" }),
-    {
-      path: "/a.bin",
-      kind: "text",
-      content: "",
-      writable: true,
-      isDirty: false,
-      markdownViewMode: "edit",
-      scrollState: {
-        editorScrollTop: 0,
-        previewScrollTop: 0,
-      },
+  assert.deepEqual(normalizeTransferTab({ path: "/a.bin", kind: "other" }), {
+    path: "/a.bin",
+    kind: "text",
+    content: "",
+    writable: true,
+    isDirty: false,
+    markdownViewMode: "edit",
+    scrollState: {
+      editorScrollTop: 0,
+      previewScrollTop: 0,
     },
-  );
+  });
 });
 
 test("apply/clear file payload updates active state and markdown mode", () => {
@@ -81,11 +78,15 @@ test("apply/clear file payload updates active state and markdown mode", () => {
     saveTimer: setTimeout(() => {}, 1000),
   });
 
-  applyFilePayloadToState(state, {
-    path: "/a.md",
-    kind: "markdown",
-    content: "# x",
-  }, { defaultMarkdownMode: "preview" });
+  applyFilePayloadToState(
+    state,
+    {
+      path: "/a.md",
+      kind: "markdown",
+      content: "# x",
+    },
+    { defaultMarkdownMode: "preview" },
+  );
   assert.equal(state.activePath, "/a.md");
   assert.equal(state.markdownViewMode, "preview");
   assert.equal(state.isDirty, false);
@@ -94,21 +95,29 @@ test("apply/clear file payload updates active state and markdown mode", () => {
   assert.equal(state.saveTimer, null);
 
   state.markdownViewMode = "edit";
-  applyFilePayloadToState(state, {
-    path: "/a.md",
-    kind: "markdown",
-    content: "# y",
-  }, {
-    defaultMarkdownMode: "preview",
-    preserveMarkdownMode: true,
-  });
+  applyFilePayloadToState(
+    state,
+    {
+      path: "/a.md",
+      kind: "markdown",
+      content: "# y",
+    },
+    {
+      defaultMarkdownMode: "preview",
+      preserveMarkdownMode: true,
+    },
+  );
   assert.equal(state.markdownViewMode, "edit");
 
-  applyFilePayloadToState(state, {
-    path: "/a.txt",
-    kind: "text",
-    content: "x",
-  }, { defaultMarkdownMode: "preview" });
+  applyFilePayloadToState(
+    state,
+    {
+      path: "/a.txt",
+      kind: "text",
+      content: "x",
+    },
+    { defaultMarkdownMode: "preview" },
+  );
   assert.equal(state.markdownViewMode, "edit");
 
   state.saveTimer = setTimeout(() => {}, 1000);
@@ -124,14 +133,16 @@ test("apply/clear file payload updates active state and markdown mode", () => {
 
 test("flush/sync active tab mirror state and tabs", () => {
   const state = makeState({
-    openFiles: [{
-      path: "/a.md",
-      kind: "markdown",
-      content: "old",
-      isDirty: false,
-      markdownViewMode: "preview",
-      scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
-    }],
+    openFiles: [
+      {
+        path: "/a.md",
+        kind: "markdown",
+        content: "old",
+        isDirty: false,
+        markdownViewMode: "preview",
+        scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
+      },
+    ],
     activePath: "/a.md",
     activeKind: "markdown",
     content: "new",
@@ -200,7 +211,13 @@ test("snapshot helpers return none/single/tabs payloads", () => {
 
   const tabs = makeState({
     openFiles: [
-      { path: "/a.md", kind: "markdown", content: "A", isDirty: false, markdownViewMode: "preview" },
+      {
+        path: "/a.md",
+        kind: "markdown",
+        content: "A",
+        isDirty: false,
+        markdownViewMode: "preview",
+      },
       {
         path: "/b.txt",
         kind: "text",

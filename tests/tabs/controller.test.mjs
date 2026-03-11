@@ -1,7 +1,10 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
-import { buildTabFromPayload, createTabController } from "../../src/tabs/controller.js";
+import {
+  buildTabFromPayload,
+  createTabController,
+} from "../../src/tabs/controller.js";
 
 function createControllerHarness({
   stateOverrides = {},

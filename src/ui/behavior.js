@@ -15,7 +15,10 @@ export function getSidebarSelectedPath({ mode, activePath, entries }) {
     return null;
   }
 
-  if (!Array.isArray(entries) || !entries.some((entry) => entry?.path === activePath)) {
+  if (
+    !Array.isArray(entries) ||
+    !entries.some((entry) => entry?.path === activePath)
+  ) {
     return null;
   }
 
@@ -26,7 +29,12 @@ export function shouldSidebarSingleClickOpenAsTab({ mode, openFilesCount }) {
   return mode === "folder" && Number(openFilesCount) >= 2;
 }
 
-export function shouldSidebarSingleClickIgnoreSamePath({ mode, openFilesCount, activePath, nextPath }) {
+export function shouldSidebarSingleClickIgnoreSamePath({
+  mode,
+  openFilesCount,
+  activePath,
+  nextPath,
+}) {
   return (
     mode === "folder" &&
     Number(openFilesCount) < 2 &&
@@ -35,7 +43,12 @@ export function shouldSidebarSingleClickIgnoreSamePath({ mode, openFilesCount, a
   );
 }
 
-export function shouldCapturePreviousSingleFolderFile({ mode, openFilesCount, activePath, nextPath }) {
+export function shouldCapturePreviousSingleFolderFile({
+  mode,
+  openFilesCount,
+  activePath,
+  nextPath,
+}) {
   return (
     mode === "folder" &&
     Number(openFilesCount) === 0 &&
@@ -44,7 +57,10 @@ export function shouldCapturePreviousSingleFolderFile({ mode, openFilesCount, ac
   );
 }
 
-export function shouldCollapseHiddenSingleTabForSidebarOpen({ mode, openFilesCount }) {
+export function shouldCollapseHiddenSingleTabForSidebarOpen({
+  mode,
+  openFilesCount,
+}) {
   return mode === "folder" && Number(openFilesCount) === 1;
 }
 

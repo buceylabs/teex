@@ -1,7 +1,10 @@
 import { clamp } from "../app-utils.js";
 import { hasFileDragData } from "../path-input.js";
 import { renderMarkdown } from "./markdown-renderer.js";
-import { detectStructuredPasteKind, formatStructuredPasteText } from "./paste-format.js";
+import {
+  detectStructuredPasteKind,
+  formatStructuredPasteText,
+} from "./paste-format.js";
 
 export function bindElements(el) {
   el.workspace = document.querySelector("#workspace");
@@ -67,7 +70,11 @@ export function bindUiEvents({
         text,
         activePath: state.activePath,
       });
-      document.execCommand("insertText", false, formatResult?.formatted || text);
+      document.execCommand(
+        "insertText",
+        false,
+        formatResult?.formatted || text,
+      );
 
       state.content = el.editor.value;
       state.isDirty = true;
@@ -76,7 +83,10 @@ export function bindUiEvents({
       }
 
       if (!formatResult?.detectedKind) {
-        setStatus(`Unable to auto-format pasted ${detectedKind.toUpperCase()} (invalid syntax)`, true);
+        setStatus(
+          `Unable to auto-format pasted ${detectedKind.toUpperCase()} (invalid syntax)`,
+          true,
+        );
       }
     } finally {
       pasteFormatting = false;
@@ -129,7 +139,9 @@ export function bindUiEvents({
   });
 
   el.preview.addEventListener("click", (event) => {
-    const checkbox = event.target.closest('input[type="checkbox"], .task-list-item-checkbox');
+    const checkbox = event.target.closest(
+      'input[type="checkbox"], .task-list-item-checkbox',
+    );
     if (checkbox) {
       const listItem = checkbox.closest("li[data-src-line]");
       const srcLine = parseInt(listItem?.dataset?.srcLine, 10);
@@ -169,18 +181,24 @@ export function bindUiEvents({
     }
 
     event.preventDefault();
-    await invoke("open_in_file_manager", { path: state.rootPath }).catch((error) => {
-      setStatus(String(error), true);
-    });
+    await invoke("open_in_file_manager", { path: state.rootPath }).catch(
+      (error) => {
+        setStatus(String(error), true);
+      },
+    );
   });
 
   window.addEventListener("focus", () => {
     invoke("notify_window_focused").catch(() => {});
   });
 
-  window.addEventListener("pointerdown", () => {
-    invoke("notify_window_focused").catch(() => {});
-  }, { capture: true });
+  window.addEventListener(
+    "pointerdown",
+    () => {
+      invoke("notify_window_focused").catch(() => {});
+    },
+    { capture: true },
+  );
 
   el.sidebarResizer.addEventListener("pointerdown", (event) => {
     if (state.mode !== "folder" || !state.sidebarVisible) {
@@ -194,7 +212,10 @@ export function bindUiEvents({
       const rawWidth = moveEvent.clientX - workspaceRect.left;
       const maxWidth = Math.max(220, Math.floor(workspaceRect.width * 0.65));
       state.sidebarWidth = clamp(rawWidth, 180, maxWidth);
-      el.workspace.style.setProperty("--sidebar-width", `${state.sidebarWidth}px`);
+      el.workspace.style.setProperty(
+        "--sidebar-width",
+        `${state.sidebarWidth}px`,
+      );
     };
 
     const onUp = () => {
