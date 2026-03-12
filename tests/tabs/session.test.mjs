@@ -7,6 +7,7 @@ import {
   flushStateToActiveTabInState,
   hasTabSession,
   normalizeTransferTab,
+  reconcileRestoredFolderTabs,
   snapshotActiveFileAsTransferTab,
   snapshotAllOpenTabsForTransfer,
   syncActiveTabToStateFromTabs,
@@ -295,4 +296,84 @@ test("snapshot helpers return none/single/tabs payloads", () => {
     previewScrollTop: 0,
   });
   assert.equal(snapshot.singlePath, null);
+});
+
+test("reconcileRestoredFolderTabs removes auto-opened tab not in saved tabs", () => {
+  const state = makeState({
+    openFiles: [
+      { path: "/auto.md", kind: "markdown", content: "" },
+      { path: "/saved-a.md", kind: "markdown", content: "" },
+      { path: "/saved-b.md", kind: "markdown", content: "" },
+    ],
+    activeTabIndex: 0,
+  });
+
+  const sessionTabs = [{ path: "/saved-a.md" }, { path: "/saved-b.md" }];
+
+  const { switchToIndex } = reconcileRestoredFolderTabs(state, sessionTabs, 1);
+
+  assert.equal(state.openFiles.length, 2);
+  assert.equal(state.openFiles[0].path, "/saved-a.md");
+  assert.equal(state.openFiles[1].path, "/saved-b.md");
+  assert.equal(switchToIndex, 1);
+});
+
+test("reconcileRestoredFolderTabs keeps auto-opened tab when in saved tabs", () => {
+  const state = makeState({
+    openFiles: [
+      { path: "/saved-a.md", kind: "markdown", content: "" },
+      { path: "/saved-b.md", kind: "markdown", content: "" },
+    ],
+    activeTabIndex: 0,
+  });
+
+  const sessionTabs = [{ path: "/saved-a.md" }, { path: "/saved-b.md" }];
+
+  const { switchToIndex } = reconcileRestoredFolderTabs(state, sessionTabs, 0);
+
+  assert.equal(state.openFiles.length, 2);
+  assert.equal(state.openFiles[0].path, "/saved-a.md");
+  assert.equal(switchToIndex, 0);
+});
+
+test("reconcileRestoredFolderTabs returns -1 for empty session tabs", () => {
+  const state = makeState({
+    openFiles: [{ path: "/auto.md", kind: "markdown", content: "" }],
+    activeTabIndex: 0,
+  });
+
+  const { switchToIndex } = reconcileRestoredFolderTabs(state, [], 0);
+  assert.equal(switchToIndex, -1);
+  // No tabs removed when session tabs is empty
+  assert.equal(state.openFiles.length, 1);
+});
+
+test("reconcileRestoredFolderTabs clamps out-of-range activeTabIndex", () => {
+  const state = makeState({
+    openFiles: [{ path: "/a.md", kind: "markdown", content: "" }],
+    activeTabIndex: 0,
+  });
+
+  const { switchToIndex } = reconcileRestoredFolderTabs(
+    state,
+    [{ path: "/a.md" }],
+    5,
+  );
+  assert.equal(switchToIndex, -1);
+});
+
+test("reconcileRestoredFolderTabs adjusts activeTabIndex when splicing", () => {
+  const state = makeState({
+    openFiles: [
+      { path: "/auto.md", kind: "markdown", content: "" },
+      { path: "/saved.md", kind: "markdown", content: "" },
+    ],
+    activeTabIndex: 1,
+  });
+
+  reconcileRestoredFolderTabs(state, [{ path: "/saved.md" }], 0);
+
+  assert.equal(state.openFiles.length, 1);
+  assert.equal(state.openFiles[0].path, "/saved.md");
+  assert.equal(state.activeTabIndex, 0);
 });

@@ -48,6 +48,7 @@ Prerequisites: Rust toolchain, Tauri CLI, and platform-specific Tauri/WebView bu
 - `cargo clippy --all-targets --all-features -D warnings`: lint Rust code (use a non-`-D warnings` variant if the repo is mid-refactor)
 - `cargo test`: run Rust tests (currently minimal/no tests, but use this before PRs)
 - `./test.sh` (repo root): run all automated tests (Rust + Node helper tests)
+- `./lint.sh` (repo root): run the repository lint checks
 - `cargo tauri dev` (repo root or `src-tauri/`): launch the desktop app in development mode (requires Tauri CLI installed)
 - `cargo tauri build`: produce a distributable desktop build
 - `./test-open.sh` (repo root): project-specific manual test helper for opening files (if present/useful for current changes)
@@ -80,6 +81,7 @@ Prerequisites: Rust toolchain, Tauri CLI, and platform-specific Tauri/WebView bu
 - No dedicated frontend test framework is configured yet; verify UI changes manually in `cargo tauri dev`.
 - Frontend logic that can be isolated into pure helper functions should be extracted and covered with lightweight Node tests (for example `node --test`) before wiring into UI event handlers.
 - Prefer `./test.sh` as the default pre-PR/local verification command so both Rust and frontend helper tests run together.
+- Run `./lint.sh` alongside `./test.sh` before finishing changes so lint regressions are caught too.
 - When refactoring `src/main.js`, prefer low-risk extractions into `src/` modules first (pure renderers/helpers/path normalization/state-free logic), then add/expand Node tests for the extracted module in `tests/*.test.mjs`.
 - Continue the folder pattern during `src/main.js` refactors: place sidebar logic in `src/sidebar/`, UI rendering/formatting logic in `src/ui/`, and keep each module under the 200-300 line cap.
 - For large refactors, preserve behavior by splitting into small phases and running `./test.sh` after each phase.

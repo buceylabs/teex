@@ -65,6 +65,17 @@ describe("saveWindowSession", () => {
     const state = createState({
       mode: "folder",
       rootPath: "/projects/my-app",
+      entries: [
+        {
+          path: "/projects/my-app/docs/guide.md",
+          relPath: "docs/guide.md",
+        },
+        {
+          path: "/projects/my-app/docs/api/ref.md",
+          relPath: "docs/api/ref.md",
+        },
+      ],
+      collapsedFolders: new Set(["docs/api"]),
       openFiles: [
         { path: "/projects/my-app/index.js", markdownViewMode: "edit" },
       ],
@@ -75,6 +86,7 @@ describe("saveWindowSession", () => {
     const saved = JSON.parse(storage.getItem("teex-session:win-1"));
     assert.equal(saved.mode, "folder");
     assert.equal(saved.folderPath, "/projects/my-app");
+    assert.deepEqual(saved.expandedFolders, ["docs"]);
   });
 
   it("skips untitled tabs (null path)", () => {
@@ -189,6 +201,22 @@ describe("loadAllSessions", () => {
     assert.equal(sessions.length, 2);
     assert.equal(sessions[0].tabs[0].path, "/a.md");
     assert.equal(sessions[1].mode, "folder");
+    assert.deepEqual(sessions[1].expandedFolders, []);
+  });
+
+  it("skips entries with invalid expandedFolders payload", () => {
+    const storage = createMockStorage();
+    storage.setItem("teex-session-labels", JSON.stringify(["win-1"]));
+    storage.setItem(
+      "teex-session:win-1",
+      JSON.stringify({
+        version: 1,
+        tabs: [{ path: "/a.md" }],
+        expandedFolders: "docs",
+      }),
+    );
+
+    assert.deepEqual(loadAllSessions(storage), []);
   });
 
   it("skips corrupt entries", () => {
@@ -279,6 +307,11 @@ describe("round-trip", () => {
       createState({
         mode: "folder",
         rootPath: "/project",
+        entries: [
+          { path: "/project/docs/readme.md", relPath: "docs/readme.md" },
+          { path: "/project/src/main.js", relPath: "src/main.js" },
+        ],
+        collapsedFolders: new Set(["src"]),
         openFiles: [
           { path: "/project/readme.md", markdownViewMode: "preview" },
         ],
@@ -293,5 +326,6 @@ describe("round-trip", () => {
     assert.equal(sessions[0].activeTabIndex, 1);
     assert.equal(sessions[1].mode, "folder");
     assert.equal(sessions[1].folderPath, "/project");
+    assert.deepEqual(sessions[1].expandedFolders, ["docs"]);
   });
 });

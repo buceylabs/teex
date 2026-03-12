@@ -147,6 +147,36 @@ export function snapshotActiveFileAsTransferTab(state) {
   });
 }
 
+export function reconcileRestoredFolderTabs(
+  state,
+  sessionTabs,
+  activeTabIndex,
+) {
+  const savedPaths = (sessionTabs ?? []).map((t) => t.path).filter(Boolean);
+  if (savedPaths.length === 0) {
+    return { switchToIndex: -1 };
+  }
+
+  // Remove auto-opened first tab if it wasn't in the saved tabs
+  if (
+    state.openFiles.length > 0 &&
+    state.openFiles[0]?.path &&
+    !savedPaths.includes(state.openFiles[0].path)
+  ) {
+    state.openFiles.splice(0, 1);
+    if (state.activeTabIndex > 0) {
+      state.activeTabIndex--;
+    }
+    syncActiveTabToStateFromTabs(state);
+  }
+
+  const targetIndex = activeTabIndex ?? 0;
+  const switchToIndex =
+    targetIndex >= 0 && targetIndex < state.openFiles.length ? targetIndex : -1;
+
+  return { switchToIndex };
+}
+
 export function snapshotAllOpenTabsForTransfer(state) {
   flushStateToActiveTabInState(state);
 

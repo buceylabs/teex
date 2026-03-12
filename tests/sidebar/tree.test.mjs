@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildCollapsedFoldersFromExpanded,
   buildEntryTree,
   collectFolderPaths,
   hasFoldersInEntries,
@@ -86,6 +87,35 @@ test("isAllCollapsed returns false when some folders are expanded", () => {
 test("isAllCollapsed returns true for empty entries (no folders)", () => {
   assert.equal(isAllCollapsed([], new Set()), true);
   assert.equal(isAllCollapsed([{ relPath: "a.md" }], new Set()), true);
+});
+
+test("buildCollapsedFoldersFromExpanded restores only unexpanded folders", () => {
+  const entries = [
+    { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+    { path: "/root/docs/api/ref.md", relPath: "docs/api/ref.md" },
+    { path: "/root/src/index.js", relPath: "src/index.js" },
+  ];
+
+  const collapsedFolders = buildCollapsedFoldersFromExpanded(
+    entries,
+    new Set(["docs"]),
+  );
+
+  assert.deepEqual([...collapsedFolders].sort(), ["docs/api", "src"]);
+});
+
+test("buildCollapsedFoldersFromExpanded collapses all folders for empty expansion set", () => {
+  const entries = [
+    { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+    { path: "/root/src/index.js", relPath: "src/index.js" },
+  ];
+
+  const collapsedFolders = buildCollapsedFoldersFromExpanded(
+    entries,
+    new Set(),
+  );
+
+  assert.deepEqual([...collapsedFolders].sort(), ["docs", "src"]);
 });
 
 test("collapse-all: renderTreeHtml with all folders collapsed hides nested files", () => {

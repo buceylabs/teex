@@ -16,6 +16,7 @@ export function saveWindowSession(state, windowLabel, storage = localStorage) {
     folderPath: state.rootPath ?? null,
     tabs,
     activeTabIndex: state.activeTabIndex ?? 0,
+    expandedFolders: collectExpandedFolders(state),
   };
 
   storage.setItem(SESSION_PREFIX + windowLabel, JSON.stringify(session));
@@ -49,7 +50,9 @@ export function loadAllSessions(storage = localStorage) {
         session &&
         session.version === VERSION &&
         Array.isArray(session.tabs) &&
-        session.tabs.length > 0
+        session.tabs.length > 0 &&
+        (session.expandedFolders === undefined ||
+          Array.isArray(session.expandedFolders))
       ) {
         sessions.push(session);
       }
@@ -115,4 +118,26 @@ function collectTabs(state) {
   }
 
   return tabs;
+}
+
+function collectExpandedFolders(state) {
+  if (state.mode !== "folder" || !Array.isArray(state.entries)) {
+    return [];
+  }
+
+  const collapsedFolders =
+    state.collapsedFolders instanceof Set ? state.collapsedFolders : new Set();
+  const folderPaths = new Set();
+
+  for (const entry of state.entries) {
+    const relPath = typeof entry?.relPath === "string" ? entry.relPath : "";
+    const parts = relPath.split("/").filter(Boolean);
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      folderPaths.add(parts.slice(0, i + 1).join("/"));
+    }
+  }
+
+  return [...folderPaths].filter(
+    (folderPath) => !collapsedFolders.has(folderPath),
+  );
 }

@@ -8,6 +8,7 @@ import {
 } from "./app/session-persistence.js";
 import { loadSidebarWidth } from "./app/sidebar-width-persistence.js";
 import { baseName } from "./app-utils.js";
+import { buildCollapsedFoldersFromExpanded } from "./sidebar/tree.js";
 import { recordNavigation } from "./tabs/navigation.js";
 import {
   applyFilePayloadToState,
@@ -15,6 +16,7 @@ import {
   flushStateToActiveTabInState,
   hasTabSession as hasTabSessionInState,
   normalizeTransferTab as normalizeTransferTabRecord,
+  reconcileRestoredFolderTabs,
   snapshotActiveFileAsTransferTab as snapshotActiveFileTransfer,
   snapshotAllOpenTabsForTransfer as snapshotAllTransfers,
   syncActiveTabToStateFromTabs,
@@ -353,6 +355,8 @@ async function restoreLastSession() {
 async function restoreSessionInCurrentWindow(session) {
   if (session.mode === "folder" && session.folderPath) {
     await openFolder(session.folderPath);
+    restoreFolderExpansionState(session);
+    await restoreFolderTabs(session);
     return;
   }
 
@@ -370,6 +374,39 @@ async function restoreSessionInCurrentWindow(session) {
       switchTab(targetIndex);
     }
   }
+}
+
+async function restoreFolderTabs(session) {
+  const paths = (session.tabs ?? []).map((t) => t.path).filter(Boolean);
+  if (paths.length === 0) {
+    return;
+  }
+
+  for (const path of paths) {
+    await openFolderEntryInTabs(path);
+  }
+
+  const { switchToIndex } = reconcileRestoredFolderTabs(
+    state,
+    session.tabs,
+    session.activeTabIndex,
+  );
+  if (switchToIndex >= 0) {
+    switchTab(switchToIndex);
+  }
+  render();
+}
+
+function restoreFolderExpansionState(session) {
+  const expandedFolders = new Set(
+    (session.expandedFolders ?? []).filter((path) => typeof path === "string"),
+  );
+  state.collapsedFolders = buildCollapsedFoldersFromExpanded(
+    state.entries,
+    expandedFolders,
+  );
+  state.savedCollapsedFolders = null;
+  sidebarController.markTreeDirty();
 }
 
 function sessionPaths(session) {
