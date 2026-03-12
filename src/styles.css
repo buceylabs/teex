@@ -252,6 +252,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
   transition:
     background 100ms ease,
     color 100ms ease;

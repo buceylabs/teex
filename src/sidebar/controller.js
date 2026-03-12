@@ -213,6 +213,7 @@ export function createSidebarController({
 
       button.addEventListener("contextmenu", (event) => {
         event.preventDefault();
+        window.getSelection()?.removeAllRanges();
         const path = button.dataset.path;
         if (!path) {
           return;
