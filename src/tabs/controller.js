@@ -1,20 +1,14 @@
 import { promptToSaveBeforeClose } from "../ui/close-dirty-dialog.js";
 import { goBack, goForward, recordNavigation } from "./navigation.js";
+import {
+  buildTabFromPayload,
+  buildUntitledTab,
+  snapshotActiveStateAsTab,
+  switchToMultiTabFileState,
+  switchToSingleFileState,
+} from "./tab-state.js";
 
-export function buildTabFromPayload(payload) {
-  return {
-    path: payload.path,
-    content: payload.content,
-    kind: payload.kind,
-    writable: payload.writable,
-    isDirty: false,
-    markdownViewMode: payload.kind === "markdown" ? "preview" : "edit",
-    scrollState: {
-      editorScrollTop: 0,
-      previewScrollTop: 0,
-    },
-  };
-}
+export { buildTabFromPayload } from "./tab-state.js";
 
 async function clearProjectFolderWatch(invoke) {
   try {
@@ -145,13 +139,12 @@ export function createTabController({
     if (loaded.length === 1) {
       await clearProjectFolderWatch(invoke);
       const tab = loaded[0];
-      state.mode = "file";
-      state.sidebarVisible = false;
-      state.rootPath = null;
-      state.entries = [];
-      markSidebarTreeDirty();
-      state.openFiles = [];
-      applyFilePayload(tab, { defaultMarkdownMode: "preview" });
+      switchToSingleFileState({
+        state,
+        payload: tab,
+        applyFilePayload,
+        markSidebarTreeDirty,
+      });
       setStatus(`Opened ${baseName(tab.path)}`);
       render();
       updateMenuState();
@@ -159,13 +152,12 @@ export function createTabController({
     }
 
     await clearProjectFolderWatch(invoke);
-    state.mode = "files";
-    state.sidebarVisible = false;
-    state.rootPath = null;
-    state.entries = [];
-    markSidebarTreeDirty();
-    state.openFiles = loaded;
-    state.activeTabIndex = 0;
+    switchToMultiTabFileState({
+      state,
+      tabs: loaded,
+      activeTabIndex: 0,
+      markSidebarTreeDirty,
+    });
     syncActiveTabToState();
     setStatus(`Opened ${loaded.length} files`);
     render();
@@ -231,28 +223,19 @@ export function createTabController({
 
     try {
       const payload = await invoke("read_text_file", { path });
-      const currentTab = {
-        path: state.activePath,
-        content: state.content,
-        kind: state.activeKind,
-        writable: true,
-        isDirty: state.isDirty,
-        markdownViewMode: state.markdownViewMode,
-        scrollState: {
-          editorScrollTop: state.activeEditorScrollTop,
-          previewScrollTop: state.activePreviewScrollTop,
-        },
-      };
+      const currentTab = snapshotActiveStateAsTab(state);
       const nextTab = buildTabFromPayload(payload);
+      if (!currentTab) {
+        return;
+      }
 
       await clearProjectFolderWatch(invoke);
-      state.mode = "files";
-      state.sidebarVisible = false;
-      state.rootPath = null;
-      state.entries = [];
-      markSidebarTreeDirty();
-      state.openFiles = [currentTab, nextTab];
-      state.activeTabIndex = 1;
+      switchToMultiTabFileState({
+        state,
+        tabs: [currentTab, nextTab],
+        activeTabIndex: 1,
+        markSidebarTreeDirty,
+      });
       syncActiveTabToState();
       setStatus(`Opened ${baseName(path)}`);
       render();
@@ -295,32 +278,13 @@ export function createTabController({
     flushStateToActiveTab();
 
     if (state.activePath && state.openFiles.length === 0) {
-      const currentTab = {
-        path: state.activePath,
-        content: state.content,
-        kind: state.activeKind,
-        writable: true,
-        isDirty: state.isDirty,
-        markdownViewMode: state.markdownViewMode,
-        scrollState: {
-          editorScrollTop: state.activeEditorScrollTop,
-          previewScrollTop: state.activePreviewScrollTop,
-        },
-      };
-      state.openFiles = [currentTab];
+      const currentTab = snapshotActiveStateAsTab(state);
+      if (currentTab) {
+        state.openFiles = [currentTab];
+      }
     }
 
-    const untitledTab = {
-      path: null,
-      content: "",
-      kind: "markdown",
-      writable: true,
-      isDirty: false,
-      markdownViewMode: "edit",
-      scrollState: { editorScrollTop: 0, previewScrollTop: 0 },
-    };
-
-    state.openFiles.push(untitledTab);
+    state.openFiles.push(buildUntitledTab());
     state.activeTabIndex = state.openFiles.length - 1;
     if (state.mode === "file" || state.mode === "empty") {
       state.mode = "files";

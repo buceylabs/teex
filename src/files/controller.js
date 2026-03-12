@@ -1,5 +1,9 @@
 import { collectFolderPaths, parentFolderPaths } from "../sidebar/tree.js";
 import { getSingleFileUiOpenMode } from "../ui/behavior.js";
+import {
+  snapshotActiveStateAsTab,
+  switchToSingleFileState,
+} from "../tabs/tab-state.js";
 
 export function didProjectEntriesChange(previousEntries, nextEntries) {
   if (!Array.isArray(previousEntries) || !Array.isArray(nextEntries)) {
@@ -117,14 +121,12 @@ export function createFileController({
 
     try {
       const payload = await invoke("read_text_file", { path });
-      state.mode = "file";
-      state.sidebarVisible = false;
-      state.rootPath = null;
-      state.entries = [];
-      markSidebarTreeDirty();
-      state.openFiles = [];
-      state.activeTabIndex = 0;
-      applyFilePayload(payload, { defaultMarkdownMode: "preview" });
+      switchToSingleFileState({
+        state,
+        payload,
+        applyFilePayload,
+        markSidebarTreeDirty,
+      });
       setStatus(`Opened ${baseName(path)}`);
     } catch (error) {
       setStatus(String(error), true);
@@ -228,20 +230,13 @@ export function createFileController({
       return;
     }
 
-    state.openFiles = [
-      {
-        path: state.activePath,
-        content: state.content,
-        kind: state.activeKind,
-        writable: true,
-        isDirty: state.isDirty,
-        markdownViewMode: state.markdownViewMode,
-        scrollState: {
-          editorScrollTop: state.activeEditorScrollTop || 0,
-          previewScrollTop: state.activePreviewScrollTop || 0,
-        },
-      },
-    ];
+    const currentTab = snapshotActiveStateAsTab(state);
+    if (!currentTab) {
+      await openEntry(path);
+      return;
+    }
+
+    state.openFiles = [currentTab];
     state.activeTabIndex = 0;
 
     await openFileAsTab(path);

@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  buildTabFromPayload,
-  createTabController,
-} from "../../src/tabs/controller.js";
+import { createTabController } from "../../src/tabs/controller.js";
 
 function createControllerHarness({
   stateOverrides = {},
@@ -75,50 +72,6 @@ function createControllerHarness({
 
   return { state, controller };
 }
-
-test("buildTabFromPayload initializes clean tab state and markdown mode", () => {
-  assert.deepEqual(
-    buildTabFromPayload({
-      path: "/a.md",
-      content: "# a",
-      kind: "markdown",
-      writable: true,
-    }),
-    {
-      path: "/a.md",
-      content: "# a",
-      kind: "markdown",
-      writable: true,
-      isDirty: false,
-      markdownViewMode: "preview",
-      scrollState: {
-        editorScrollTop: 0,
-        previewScrollTop: 0,
-      },
-    },
-  );
-
-  assert.deepEqual(
-    buildTabFromPayload({
-      path: "/a.txt",
-      content: "a",
-      kind: "text",
-      writable: false,
-    }),
-    {
-      path: "/a.txt",
-      content: "a",
-      kind: "text",
-      writable: false,
-      isDirty: false,
-      markdownViewMode: "edit",
-      scrollState: {
-        editorScrollTop: 0,
-        previewScrollTop: 0,
-      },
-    },
-  );
-});
 
 test("createNewTab defaults untitled tabs to markdown edit mode", () => {
   const state = {
