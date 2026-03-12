@@ -178,6 +178,9 @@ function bindUiEvents() {
     setStatus,
     toggleMarkdownMode,
     toggleSidebarVisibility,
+    toggleCollapseAllFolders: () =>
+      sidebarController.toggleCollapseAllFolders(),
+    expandAllFolders: () => sidebarController.expandAllFolders(),
     saveNow,
     hasTabSession,
     switchTab,

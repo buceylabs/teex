@@ -122,8 +122,16 @@ body {
   display: none;
 }
 
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin-bottom: 10px;
+}
+
 .sidebar h2 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.07em;
@@ -132,7 +140,8 @@ body {
 }
 
 .sidebar-title {
-  margin-bottom: 14px;
+  flex: 1;
+  min-width: 0;
   letter-spacing: 0.01em;
   text-transform: none;
   white-space: nowrap;
@@ -140,6 +149,38 @@ body {
   text-overflow: ellipsis;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.sidebar-toolbar-btn {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: color-mix(in oklab, var(--subtle) 80%, transparent);
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
+}
+
+.sidebar-toolbar-btn:hover {
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  color: var(--subtle);
+}
+
+/* Collapse mode (default): show collapse icon, hide expand */
+.sidebar-toolbar-btn .expand-icon {
+  display: none;
+}
+
+/* Expand mode: show expand icon, hide collapse */
+.sidebar-toolbar-btn.expand .collapse-icon {
+  display: none;
+}
+
+.sidebar-toolbar-btn.expand .expand-icon {
+  display: block;
 }
 
 .project-list {

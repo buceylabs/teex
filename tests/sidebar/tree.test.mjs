@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   buildEntryTree,
   collectFolderPaths,
+  hasFoldersInEntries,
+  isAllCollapsed,
   renderTreeHtml,
 } from "../../src/sidebar/tree.js";
 
@@ -44,6 +46,75 @@ test("renderTreeHtml renders folders/files and respects collapsed set", () => {
   const collapsedHtml = renderTreeHtml(tree, 0, new Set(["docs"]));
   assert.match(collapsedHtml, /aria-expanded="false"/);
   assert.doesNotMatch(collapsedHtml, /guide\.md/);
+});
+
+test("hasFoldersInEntries returns false for flat entries", () => {
+  assert.equal(
+    hasFoldersInEntries([{ relPath: "a.md" }, { relPath: "b.txt" }]),
+    false,
+  );
+});
+
+test("hasFoldersInEntries returns true for nested entries", () => {
+  assert.equal(
+    hasFoldersInEntries([{ relPath: "a.md" }, { relPath: "docs/guide.md" }]),
+    true,
+  );
+});
+
+test("isAllCollapsed returns true when all folder paths are collapsed", () => {
+  const entries = [
+    { relPath: "docs/guide.md" },
+    { relPath: "docs/api/ref.md" },
+    { relPath: "a.md" },
+  ];
+  const collapsedFolders = new Set(["docs", "docs/api"]);
+  assert.equal(isAllCollapsed(entries, collapsedFolders), true);
+});
+
+test("isAllCollapsed returns false when some folders are expanded", () => {
+  const entries = [
+    { relPath: "docs/guide.md" },
+    { relPath: "docs/api/ref.md" },
+    { relPath: "a.md" },
+  ];
+  const collapsedFolders = new Set(["docs"]);
+  assert.equal(isAllCollapsed(entries, collapsedFolders), false);
+});
+
+test("isAllCollapsed returns true for empty entries (no folders)", () => {
+  assert.equal(isAllCollapsed([], new Set()), true);
+  assert.equal(isAllCollapsed([{ relPath: "a.md" }], new Set()), true);
+});
+
+test("collapse-all: renderTreeHtml with all folders collapsed hides nested files", () => {
+  const entries = [
+    { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+    { path: "/root/docs/api/ref.md", relPath: "docs/api/ref.md" },
+    { path: "/root/a.md", relPath: "a.md" },
+  ];
+  const allFolders = collectFolderPaths(entries);
+  const tree = buildEntryTree(entries);
+  const html = renderTreeHtml(tree, 0, allFolders);
+
+  assert.match(html, /a\.md/);
+  assert.doesNotMatch(html, /guide\.md/);
+  assert.doesNotMatch(html, /ref\.md/);
+});
+
+test("expand-all: renderTreeHtml with empty collapsedFolders shows all nested files", () => {
+  const entries = [
+    { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+    { path: "/root/docs/api/ref.md", relPath: "docs/api/ref.md" },
+    { path: "/root/a.md", relPath: "a.md" },
+  ];
+  const tree = buildEntryTree(entries);
+  const html = renderTreeHtml(tree, 0, new Set());
+
+  assert.match(html, /a\.md/);
+  assert.match(html, /guide\.md/);
+  assert.match(html, /ref\.md/);
+  assert.doesNotMatch(html, /aria-expanded="false"/);
 });
 
 test("folder buttons have a title attribute with the folder name", () => {

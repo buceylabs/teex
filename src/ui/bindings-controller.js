@@ -14,6 +14,7 @@ export function bindElements(el) {
   el.dropOverlay = document.querySelector("#drop-overlay");
   el.projectRootLabel = document.querySelector("#project-root-label");
   el.projectList = document.querySelector("#project-list");
+  el.collapseToggleBtn = document.querySelector("#collapse-toggle-btn");
   el.tabBar = document.querySelector("#tab-bar");
   el.editorState = document.querySelector("#editor-state");
   el.editor = document.querySelector("#editor");
@@ -27,6 +28,8 @@ export function bindUiEvents({
   setStatus,
   toggleMarkdownMode,
   toggleSidebarVisibility,
+  toggleCollapseAllFolders,
+  expandAllFolders,
   saveNow,
   hasTabSession,
   switchTab,
@@ -120,6 +123,12 @@ export function bindUiEvents({
       toggleMarkdownMode();
     }
 
+    if (event.metaKey && event.shiftKey && event.code === "Backslash") {
+      event.preventDefault();
+      toggleCollapseAllFolders();
+      return;
+    }
+
     if (event.metaKey && event.code === "Backslash") {
       event.preventDefault();
       toggleSidebarVisibility();
@@ -175,6 +184,38 @@ export function bindUiEvents({
     link.setAttribute("target", "_blank");
     link.setAttribute("rel", "noreferrer noopener");
   });
+
+  {
+    const LONG_PRESS_MS = 400;
+    let pressTimer = null;
+    let didLongPress = false;
+
+    el.collapseToggleBtn.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      didLongPress = false;
+      pressTimer = setTimeout(() => {
+        didLongPress = true;
+        pressTimer = null;
+        expandAllFolders();
+      }, LONG_PRESS_MS);
+    });
+
+    const cancelPress = () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    };
+
+    el.collapseToggleBtn.addEventListener("pointerup", cancelPress);
+    el.collapseToggleBtn.addEventListener("pointerleave", cancelPress);
+    el.collapseToggleBtn.addEventListener("pointercancel", cancelPress);
+
+    el.collapseToggleBtn.addEventListener("click", () => {
+      if (didLongPress) return;
+      toggleCollapseAllFolders();
+    });
+  }
 
   el.projectRootLabel.addEventListener("dblclick", async (event) => {
     if (state.mode !== "folder" || !state.rootPath) {

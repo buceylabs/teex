@@ -51,6 +51,18 @@ export function collectFolderPaths(entries) {
   return folders;
 }
 
+export function hasFoldersInEntries(entries) {
+  return entries.some((e) => e.relPath.includes("/"));
+}
+
+export function isAllCollapsed(entries, collapsedFolders) {
+  const allFolders = collectFolderPaths(entries);
+  for (const folder of allFolders) {
+    if (!collapsedFolders.has(folder)) return false;
+  }
+  return true;
+}
+
 export function renderTreeHtml(node, depth, collapsedFolders) {
   const folders = [...node.folders.values()].sort((a, b) =>
     a.name.localeCompare(b.name),

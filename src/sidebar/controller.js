@@ -7,7 +7,13 @@ import {
   sidebarClickModifierAction,
 } from "../ui/behavior.js";
 import { bindSidebarDragEvents } from "./drag.js";
-import { buildEntryTree, renderTreeHtml } from "./tree.js";
+import {
+  buildEntryTree,
+  collectFolderPaths,
+  hasFoldersInEntries,
+  isAllCollapsed,
+  renderTreeHtml,
+} from "./tree.js";
 
 export function createSidebarController({
   state,
@@ -254,6 +260,47 @@ export function createSidebarController({
     });
   }
 
+  function toggleCollapseAllFolders() {
+    if (state.mode !== "folder") return;
+    const allCollapsed = isAllCollapsed(state.entries, state.collapsedFolders);
+    if (allCollapsed) {
+      state.collapsedFolders = state.savedCollapsedFolders ?? new Set();
+      state.savedCollapsedFolders = null;
+    } else {
+      state.savedCollapsedFolders = new Set(state.collapsedFolders);
+      state.collapsedFolders = collectFolderPaths(state.entries);
+    }
+    markTreeDirty();
+    renderSidebar();
+  }
+
+  function expandAllFolders() {
+    if (state.mode !== "folder") return;
+    state.collapsedFolders = new Set();
+    state.savedCollapsedFolders = null;
+    markTreeDirty();
+    renderSidebar();
+  }
+
+  function updateCollapseToggleButton() {
+    if (!el.collapseToggleBtn) return;
+    const hasFolders =
+      state.mode === "folder" && hasFoldersInEntries(state.entries);
+    el.collapseToggleBtn.hidden = !hasFolders;
+    if (hasFolders) {
+      const allCollapsed = isAllCollapsed(
+        state.entries,
+        state.collapsedFolders,
+      );
+      el.collapseToggleBtn.classList.toggle("expand", allCollapsed);
+      const label = allCollapsed
+        ? "Expand folders (long press to expand all)"
+        : "Collapse all folders";
+      el.collapseToggleBtn.title = label;
+      el.collapseToggleBtn.setAttribute("aria-label", label);
+    }
+  }
+
   function renderSidebar() {
     if (state.mode !== "folder") {
       el.projectRootLabel.textContent = "Folder";
@@ -261,6 +308,7 @@ export function createSidebarController({
       el.projectList.innerHTML = "";
       sidebarRenderState.activePath = null;
       sidebarRenderState.treeDirty = true;
+      updateCollapseToggleButton();
       return;
     }
 
@@ -284,10 +332,13 @@ export function createSidebarController({
     }
 
     syncSidebarActiveItem();
+    updateCollapseToggleButton();
   }
 
   return {
     markTreeDirty,
     renderSidebar,
+    toggleCollapseAllFolders,
+    expandAllFolders,
   };
 }
