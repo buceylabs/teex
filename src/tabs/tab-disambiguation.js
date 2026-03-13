@@ -27,34 +27,24 @@ export function buildTabDisambiguations(tabs) {
 }
 
 function disambiguateGroup(tabs, indices, result) {
-  // Build path segments arrays for each tab (from innermost to outermost)
   const segmentsList = indices.map((i) => {
     const dir = dirName(tabs[i].path);
-    return dir === "." ? [] : dir.replace(/\\/g, "/").split("/").reverse();
+    return dir === "." ? [] : dir.split("/").reverse();
   });
 
-  // Start with 1 segment, increase until all are unique
-  for (let depth = 1; depth <= 20; depth++) {
-    const suffixes = segmentsList.map((segs) => {
-      const taken = segs.slice(0, depth).reverse();
-      return taken.join("/");
-    });
+  const maxDepth = Math.max(...segmentsList.map((s) => s.length));
+  let suffixes;
 
-    // Check if all suffixes are unique
-    const unique = new Set(suffixes);
-    if (unique.size === suffixes.length) {
-      for (let j = 0; j < indices.length; j++) {
-        result.set(indices[j], suffixes[j]);
-      }
-      return;
-    }
+  for (let depth = 1; depth <= maxDepth; depth++) {
+    suffixes = segmentsList.map((segs) =>
+      segs.slice(0, depth).reverse().join("/"),
+    );
+    if (new Set(suffixes).size === suffixes.length) break;
+  }
 
-    // If we've exhausted all segments for every entry, stop
-    if (segmentsList.every((segs) => depth >= segs.length)) {
-      for (let j = 0; j < indices.length; j++) {
-        result.set(indices[j], suffixes[j]);
-      }
-      return;
+  if (suffixes) {
+    for (let j = 0; j < indices.length; j++) {
+      result.set(indices[j], suffixes[j]);
     }
   }
 }
