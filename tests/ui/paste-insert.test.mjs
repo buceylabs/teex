@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   insertWithFormattingUndo,
+  redoPasteFormatting,
   undoPasteFormatting,
 } from "../../src/ui/paste-insert.js";
 
@@ -113,7 +114,7 @@ describe("undoPasteFormatting", () => {
 
     assert.equal(editor.value, "existing");
     assert.equal(editor.selectionStart, 8);
-    assert.equal(final, null);
+    assert.equal(final.phase, "pre-paste");
   });
 
   it("returns null when undoState is null", () => {
@@ -134,5 +135,84 @@ describe("undoPasteFormatting", () => {
 
     undoPasteFormatting(editor, next);
     assert.equal(editor.selectionStart, 3);
+  });
+
+  it("returns null when phase is already pre-paste", () => {
+    const editor = createMockEditor();
+    const raw = '{"a":1}';
+    const formatted = '{\n  "a": 1\n}';
+
+    const { undoState } = insertWithFormattingUndo(editor, raw, formatted);
+    const s1 = undoPasteFormatting(editor, undoState);
+    const s2 = undoPasteFormatting(editor, s1);
+
+    assert.equal(s2.phase, "pre-paste");
+    assert.equal(undoPasteFormatting(editor, s2), null);
+  });
+});
+
+describe("redoPasteFormatting", () => {
+  it("first redo restores raw text from pre-paste", () => {
+    const editor = createMockEditor();
+    const raw = '{"a":1}';
+    const formatted = '{\n  "a": 1\n}';
+
+    const { undoState } = insertWithFormattingUndo(editor, raw, formatted);
+    const s1 = undoPasteFormatting(editor, undoState);
+    const s2 = undoPasteFormatting(editor, s1);
+
+    assert.equal(editor.value, "");
+    const next = redoPasteFormatting(editor, s2);
+
+    assert.equal(editor.value, raw);
+    assert.equal(next.phase, "raw");
+  });
+
+  it("second redo restores formatted text from raw", () => {
+    const editor = createMockEditor();
+    const raw = '{"a":1}';
+    const formatted = '{\n  "a": 1\n}';
+
+    const { undoState } = insertWithFormattingUndo(editor, raw, formatted);
+    const s1 = undoPasteFormatting(editor, undoState);
+    const s2 = undoPasteFormatting(editor, s1);
+
+    const r1 = redoPasteFormatting(editor, s2);
+    const r2 = redoPasteFormatting(editor, r1);
+
+    assert.equal(editor.value, formatted);
+    assert.equal(r2.phase, "formatted");
+  });
+
+  it("returns null when undoState is null", () => {
+    const editor = createMockEditor();
+    assert.equal(redoPasteFormatting(editor, null), null);
+  });
+
+  it("returns null when phase is already formatted", () => {
+    const editor = createMockEditor();
+    const raw = '{"a":1}';
+    const formatted = '{\n  "a": 1\n}';
+
+    const { undoState } = insertWithFormattingUndo(editor, raw, formatted);
+    assert.equal(redoPasteFormatting(editor, undoState), null);
+  });
+
+  it("places cursor correctly after each redo step", () => {
+    const editor = createMockEditor("abcdef", 3);
+    const raw = '{"x":2}';
+    const formatted = '{\n  "x": 2\n}';
+
+    const { undoState } = insertWithFormattingUndo(editor, raw, formatted);
+    const s1 = undoPasteFormatting(editor, undoState);
+    const s2 = undoPasteFormatting(editor, s1);
+
+    assert.equal(editor.selectionStart, 3);
+
+    const r1 = redoPasteFormatting(editor, s2);
+    assert.equal(editor.selectionStart, 3 + raw.length);
+
+    redoPasteFormatting(editor, r1);
+    assert.equal(editor.selectionStart, 3 + formatted.length);
   });
 });

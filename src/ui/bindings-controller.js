@@ -8,6 +8,7 @@ import {
 } from "./paste-format.js";
 import {
   insertWithFormattingUndo,
+  redoPasteFormatting,
   undoPasteFormatting,
 } from "./paste-insert.js";
 import { showToast } from "./toast.js";
@@ -141,13 +142,34 @@ export function bindUiEvents({
     if (
       pasteUndoState &&
       event.metaKey &&
+      event.shiftKey &&
+      event.key.toLowerCase() === "z"
+    ) {
+      const next = redoPasteFormatting(el.editor, pasteUndoState);
+      if (next) {
+        event.preventDefault();
+        pasteUndoState = next;
+        state.content = el.editor.value;
+        state.isDirty = true;
+        if (typeof onDirtyStateChanged === "function") {
+          onDirtyStateChanged();
+        }
+      }
+      return;
+    }
+
+    if (
+      pasteUndoState &&
+      pasteUndoState.phase !== "pre-paste" &&
+      event.metaKey &&
       !event.shiftKey &&
       event.key.toLowerCase() === "z"
     ) {
       event.preventDefault();
       pasteUndoState = undoPasteFormatting(el.editor, pasteUndoState);
       state.content = el.editor.value;
-      state.isDirty = pasteUndoState !== null || el.editor.value !== "";
+      state.isDirty =
+        pasteUndoState.phase !== "pre-paste" || el.editor.value !== "";
       if (typeof onDirtyStateChanged === "function") {
         onDirtyStateChanged();
       }
