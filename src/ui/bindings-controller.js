@@ -176,6 +176,27 @@ export function bindUiEvents({
       return;
     }
 
+    if (event.metaKey && event.key.toLowerCase() === "a") {
+      const isPreviewVisible = !el.preview.classList.contains("hidden");
+      if (isPreviewVisible) {
+        event.preventDefault();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(el.preview);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+
+      const isEditorVisible = !el.editor.classList.contains("hidden");
+      if (isEditorVisible && document.activeElement !== el.editor) {
+        event.preventDefault();
+        el.editor.focus();
+        el.editor.select();
+        return;
+      }
+    }
+
     if (event.metaKey && event.key.toLowerCase() === "e") {
       event.preventDefault();
       toggleMarkdownMode();
