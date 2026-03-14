@@ -120,7 +120,7 @@ export function bindUiEvents({
   el.editor.addEventListener("input", (event) => {
     pasteUndoState = null;
     state.content = event.target.value;
-    state.isDirty = true;
+    state.isDirty = state.content !== state.savedContent;
     if (typeof onDirtyStateChanged === "function") {
       onDirtyStateChanged();
     }
@@ -168,8 +168,7 @@ export function bindUiEvents({
       event.preventDefault();
       pasteUndoState = undoPasteFormatting(el.editor, pasteUndoState);
       state.content = el.editor.value;
-      state.isDirty =
-        pasteUndoState.phase !== "pre-paste" || el.editor.value !== "";
+      state.isDirty = el.editor.value !== state.savedContent;
       if (typeof onDirtyStateChanged === "function") {
         onDirtyStateChanged();
       }

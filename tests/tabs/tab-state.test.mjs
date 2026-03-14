@@ -20,6 +20,7 @@ test("buildTabFromPayload initializes clean tab state and markdown mode", () => 
     {
       path: "/a.md",
       content: "# a",
+      savedContent: "# a",
       kind: "markdown",
       writable: true,
       isDirty: false,
@@ -41,6 +42,7 @@ test("buildTabFromPayload initializes clean tab state and markdown mode", () => 
     {
       path: "/a.txt",
       content: "a",
+      savedContent: "a",
       kind: "text",
       writable: false,
       isDirty: false,
@@ -57,6 +59,7 @@ test("buildUntitledTab creates a clean markdown editor tab", () => {
   assert.deepEqual(buildUntitledTab(), {
     path: null,
     content: "",
+    savedContent: "",
     kind: "markdown",
     writable: true,
     isDirty: false,
@@ -82,6 +85,7 @@ test("snapshotActiveStateAsTab normalizes active file state", () => {
     {
       path: "/notes.md",
       content: "# Notes",
+      savedContent: "# Notes",
       kind: "markdown",
       writable: true,
       isDirty: true,

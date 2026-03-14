@@ -2,6 +2,7 @@ export function buildTabFromPayload(payload) {
   return {
     path: payload.path,
     content: payload.content,
+    savedContent: payload.content,
     kind: payload.kind,
     writable: payload.writable,
     isDirty: false,
@@ -17,6 +18,7 @@ export function buildUntitledTab() {
   return {
     path: null,
     content: "",
+    savedContent: "",
     kind: "markdown",
     writable: true,
     isDirty: false,
@@ -36,6 +38,7 @@ export function snapshotActiveStateAsTab(state) {
   return {
     path: state.activePath,
     content: state.content,
+    savedContent: state.savedContent ?? state.content,
     kind: state.activeKind,
     writable: true,
     isDirty: Boolean(state.isDirty),

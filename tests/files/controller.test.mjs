@@ -196,6 +196,7 @@ test("openFolderEntryInTabs snapshots active file before opening another tab", a
   assert.deepEqual(harness.state.openFiles[0], {
     path: "/project/current.md",
     content: "# Current",
+    savedContent: "# Current",
     kind: "markdown",
     writable: true,
     isDirty: true,

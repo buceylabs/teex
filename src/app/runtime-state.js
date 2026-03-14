@@ -33,6 +33,7 @@ export function createRuntimeState() {
       activePath: null,
       activeKind: null,
       content: "",
+      savedContent: "",
       markdownViewMode: "preview",
       activeEditorScrollTop: 0,
       activePreviewScrollTop: 0,

@@ -13,6 +13,7 @@ export function applyFilePayloadToState(state, payload, options) {
   state.activePath = payload.path;
   state.activeKind = payload.kind;
   state.content = payload.content;
+  state.savedContent = payload.content;
   state.isDirty = false;
   state.activeEditorScrollTop = 0;
   state.activePreviewScrollTop = 0;
@@ -37,6 +38,7 @@ export function clearActiveFileInState(state) {
   state.activePath = null;
   state.activeKind = null;
   state.content = "";
+  state.savedContent = "";
   state.isDirty = false;
   state.markdownViewMode = "preview";
   state.activeEditorScrollTop = 0;
@@ -55,6 +57,7 @@ export function flushStateToActiveTabInState(state) {
     return;
   }
   tab.content = state.content;
+  tab.savedContent = state.savedContent;
   tab.isDirty = state.isDirty;
   tab.markdownViewMode = state.markdownViewMode;
   tab.scrollState = {
@@ -78,6 +81,7 @@ export function syncActiveTabToStateFromTabs(state) {
   state.activePath = tab.path;
   state.activeKind = tab.kind;
   state.content = tab.content;
+  state.savedContent = tab.savedContent ?? tab.content;
   state.isDirty = tab.isDirty;
   state.markdownViewMode = tab.markdownViewMode;
   state.activeEditorScrollTop = Number.isFinite(
@@ -104,6 +108,12 @@ export function normalizeTransferTab(rawTab) {
   return {
     path: rawTab.path ?? null,
     content: typeof rawTab.content === "string" ? rawTab.content : "",
+    savedContent:
+      typeof rawTab.savedContent === "string"
+        ? rawTab.savedContent
+        : typeof rawTab.content === "string"
+          ? rawTab.content
+          : "",
     kind,
     writable: rawTab.writable !== false,
     isDirty: Boolean(rawTab.isDirty),
@@ -132,6 +142,7 @@ export function snapshotActiveFileAsTransferTab(state) {
   return normalizeTransferTab({
     path: state.activePath,
     content: state.content,
+    savedContent: state.savedContent ?? state.content,
     kind: state.activeKind,
     writable: true,
     isDirty: state.isDirty,

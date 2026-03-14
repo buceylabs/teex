@@ -106,10 +106,12 @@ export function createEditorController({
         path: state.activePath,
         content: state.content,
       });
+      state.savedContent = state.content;
       state.isDirty = false;
       if (hasTabSession() && state.openFiles[state.activeTabIndex]) {
         state.openFiles[state.activeTabIndex].isDirty = false;
         state.openFiles[state.activeTabIndex].content = state.content;
+        state.openFiles[state.activeTabIndex].savedContent = state.content;
       }
       if (typeof onFileSaved === "function") {
         onFileSaved(state.activePath);
@@ -144,6 +146,7 @@ export function createEditorController({
         content: state.content,
       });
       state.activePath = chosenPath;
+      state.savedContent = state.content;
       state.isDirty = false;
 
       const ext = chosenPath.split(".").pop()?.toLowerCase();
