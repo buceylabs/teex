@@ -153,7 +153,7 @@ fn build_app_menu(
         MENU_TOGGLE_SIDEBAR,
         "Toggle Sidebar",
         true,
-        Some("CmdOrCtrl+\\\\"),
+        Some("CmdOrCtrl+\\"),
     )?;
     let toggle_markdown_mode_item = MenuItem::with_id(
         app,
