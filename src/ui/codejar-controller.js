@@ -18,18 +18,19 @@ export function createCodeJarController({
   onScroll,
 }) {
   let jar = null;
-  let currentExtension = null;
+  let currentLanguage = null;
   let scrollHandler = null;
+  let isSyncing = false;
 
   function attach(extension) {
-    if (jar && currentExtension === extension) {
+    const language = prismLanguageForExtension(extension);
+    if (jar && currentLanguage === language) {
       return;
     }
 
     detach();
-    currentExtension = extension;
+    currentLanguage = language;
 
-    const language = prismLanguageForExtension(extension);
     const highlight = createHighlighter(language);
 
     el.codeEditor.classList.remove("hidden");
@@ -40,6 +41,7 @@ export function createCodeJarController({
     });
 
     jar.onUpdate((code) => {
+      if (isSyncing) return;
       state.content = code;
       state.isDirty = state.content !== state.savedContent;
       if (typeof onContentChange === "function") {
@@ -52,7 +54,9 @@ export function createCodeJarController({
         onScroll();
       }
     };
-    el.codeEditor.addEventListener("scroll", scrollHandler);
+    el.codeEditor.addEventListener("scroll", scrollHandler, {
+      passive: true,
+    });
   }
 
   function detach() {
@@ -64,7 +68,7 @@ export function createCodeJarController({
       el.codeEditor.removeEventListener("scroll", scrollHandler);
       scrollHandler = null;
     }
-    currentExtension = null;
+    currentLanguage = null;
     if (el.codeEditor) {
       el.codeEditor.classList.add("hidden");
       el.codeEditor.textContent = "";
@@ -74,7 +78,9 @@ export function createCodeJarController({
   function syncContent(content) {
     if (!jar) return;
     if (jar.toString() !== content) {
+      isSyncing = true;
       jar.updateCode(content);
+      isSyncing = false;
     }
   }
 

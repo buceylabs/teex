@@ -1,3 +1,5 @@
+import { fileExtension } from "../app-utils.js";
+
 const JSON_EXTENSIONS = new Set(["json", "jsonc", "geojson"]);
 const YAML_EXTENSIONS = new Set(["yaml", "yml"]);
 const TOML_EXTENSIONS = new Set(["toml"]);
@@ -11,20 +13,6 @@ const COMPOSE_ROOT_KEYS = new Set([
   "secrets",
   "configs",
 ]);
-
-function getExtension(path) {
-  if (typeof path !== "string" || !path) {
-    return "";
-  }
-
-  const fileName = path.split(/[\\/]/).pop() || "";
-  const dotIndex = fileName.lastIndexOf(".");
-  if (dotIndex < 0 || dotIndex === fileName.length - 1) {
-    return "";
-  }
-
-  return fileName.slice(dotIndex + 1).toLowerCase();
-}
 
 function looksLikeJson(text) {
   return /^\s*[[{]/.test(text);
@@ -57,7 +45,7 @@ export function detectStructuredPasteKind({ activePath, text }) {
     return null;
   }
 
-  const extension = getExtension(activePath);
+  const extension = fileExtension(activePath);
   if (JSON_EXTENSIONS.has(extension)) {
     return "json";
   }

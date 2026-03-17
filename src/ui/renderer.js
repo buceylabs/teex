@@ -1,4 +1,9 @@
-import { baseName, dirName, isCursorOutsideWindow } from "../app-utils.js";
+import {
+  baseName,
+  dirName,
+  fileExtension,
+  isCursorOutsideWindow,
+} from "../app-utils.js";
 import { canGoBack, canGoForward } from "../tabs/navigation.js";
 import { buildTabDisambiguations } from "../tabs/tab-disambiguation.js";
 import { hasActiveContent, isUntitledTab } from "./behavior.js";
@@ -302,7 +307,7 @@ export function createUiRenderer({
     if (!hasActiveContent(state)) {
       el.editor.classList.add("hidden");
       el.preview.classList.add("hidden");
-      if (codeJarController) codeJarController.detach();
+      codeJarController.detach();
       return;
     }
 
@@ -312,7 +317,7 @@ export function createUiRenderer({
     ) {
       el.editor.classList.add("hidden");
       el.preview.classList.remove("hidden");
-      if (codeJarController) codeJarController.detach();
+      codeJarController.detach();
       el.preview.innerHTML = renderMarkdown(state.content);
       if (state.activePath) {
         rewritePreviewImages(el.preview, dirName(state.activePath));
@@ -323,10 +328,10 @@ export function createUiRenderer({
       return;
     }
 
-    if (state.activeKind === "code" && codeJarController) {
+    if (state.activeKind === "code") {
       el.editor.classList.add("hidden");
       el.preview.classList.add("hidden");
-      const ext = state.activePath ? state.activePath.split(".").pop() : null;
+      const ext = fileExtension(state.activePath) || null;
       codeJarController.attach(ext);
       codeJarController.syncContent(state.content);
       if (shouldFocusEditor) {
@@ -337,8 +342,7 @@ export function createUiRenderer({
 
     el.preview.classList.add("hidden");
     el.editor.classList.remove("hidden");
-    if (codeJarController) codeJarController.detach();
-    el.editor.classList.toggle("editor-code", state.activeKind === "code");
+    codeJarController.detach();
 
     if (el.editor.value !== state.content) {
       el.editor.value = state.content;

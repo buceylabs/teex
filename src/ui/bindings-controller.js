@@ -1,5 +1,5 @@
 import { saveSidebarWidth } from "../app/sidebar-width-persistence.js";
-import { clamp } from "../app-utils.js";
+import { clamp, selectAllContents } from "../app-utils.js";
 import { hasFileDragData } from "../path-input.js";
 import { renderMarkdown } from "./markdown-renderer.js";
 import {
@@ -134,22 +134,14 @@ export function bindUiEvents({
         el.codeEditor && !el.codeEditor.classList.contains("hidden");
       if (isCodeEditorVisible) {
         event.preventDefault();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(el.codeEditor);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        selectAllContents(el.codeEditor);
         return;
       }
 
       const isPreviewVisible = !el.preview.classList.contains("hidden");
       if (isPreviewVisible) {
         event.preventDefault();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(el.preview);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        selectAllContents(el.preview);
         return;
       }
 
