@@ -21,6 +21,7 @@ export function setupControllers({
   osOpenDeduper,
   pendingOutgoingTabTransfers,
   dropOverlayDragState,
+  codeJarController,
   callbacks,
 }) {
   let sidebarController;
@@ -47,6 +48,7 @@ export function setupControllers({
     closeTab: callbacks.closeTab,
     closeActiveFileOrWindow: callbacks.closeActiveFileOrWindow,
     crossWindowDrag: crossWindowDragController,
+    codeJarController,
   });
 
   const editorController = createEditorController({

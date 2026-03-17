@@ -120,14 +120,22 @@ export function createScrollSyncController({ state, el }) {
     return Array.isArray(state.openFiles) && state.openFiles.length > 0;
   }
 
+  function activeEditorElement() {
+    if (el.codeEditor && !el.codeEditor.classList.contains("hidden")) {
+      return el.codeEditor;
+    }
+    return el.editor;
+  }
+
   function onEditorScroll() {
-    if (!el.editor) {
+    const scrollEl = activeEditorElement();
+    if (!scrollEl) {
       return;
     }
     if (scrollCaptureGate.blocked) {
       return;
     }
-    setEditorScrollTop(el.editor.scrollTop);
+    setEditorScrollTop(scrollEl.scrollTop);
     rememberActiveFileScroll();
   }
 
@@ -352,11 +360,12 @@ export function createScrollSyncController({ state, el }) {
         return;
       }
 
-      if (el.editor) {
-        el.editor.scrollTop = clamp(
+      const scrollEl = activeEditorElement();
+      if (scrollEl) {
+        scrollEl.scrollTop = clamp(
           state.activeEditorScrollTop || 0,
           0,
-          getMaxScrollTop(el.editor),
+          getMaxScrollTop(scrollEl),
         );
       }
     };

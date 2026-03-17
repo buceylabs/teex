@@ -27,6 +27,7 @@ import {
   bindElements as bindElementsImported,
   bindUiEvents as bindUiEventsImported,
 } from "./ui/bindings-controller.js";
+import { createCodeJarController } from "./ui/codejar-controller.js";
 import {
   confirmDelete,
   confirmReloadExternalChange,
@@ -59,6 +60,13 @@ let externalFileWatchController;
 let sessionRestoreController;
 let sessionSaveEnabled = false;
 
+const codeJarController = createCodeJarController({
+  el,
+  state,
+  onContentChange: () => renderChrome(),
+  onScroll: () => scrollSyncController?.onEditorScroll(),
+});
+
 ({
   sidebarController,
   uiRenderer,
@@ -81,6 +89,7 @@ let sessionSaveEnabled = false;
   osOpenDeduper,
   pendingOutgoingTabTransfers,
   dropOverlayDragState,
+  codeJarController,
   callbacks: {
     switchTab,
     moveTab,

@@ -16,6 +16,7 @@ export function createUiRenderer({
   closeTab,
   closeActiveFileOrWindow,
   crossWindowDrag,
+  codeJarController,
 }) {
   function syncWindowTitle() {
     const { nextTitle, nextRepresentedPath } = buildWindowTitleState(state);
@@ -301,6 +302,7 @@ export function createUiRenderer({
     if (!hasActiveContent(state)) {
       el.editor.classList.add("hidden");
       el.preview.classList.add("hidden");
+      if (codeJarController) codeJarController.detach();
       return;
     }
 
@@ -310,6 +312,7 @@ export function createUiRenderer({
     ) {
       el.editor.classList.add("hidden");
       el.preview.classList.remove("hidden");
+      if (codeJarController) codeJarController.detach();
       el.preview.innerHTML = renderMarkdown(state.content);
       if (state.activePath) {
         rewritePreviewImages(el.preview, dirName(state.activePath));
@@ -320,8 +323,21 @@ export function createUiRenderer({
       return;
     }
 
+    if (state.activeKind === "code" && codeJarController) {
+      el.editor.classList.add("hidden");
+      el.preview.classList.add("hidden");
+      const ext = state.activePath ? state.activePath.split(".").pop() : null;
+      codeJarController.attach(ext);
+      codeJarController.syncContent(state.content);
+      if (shouldFocusEditor) {
+        codeJarController.focus();
+      }
+      return;
+    }
+
     el.preview.classList.add("hidden");
     el.editor.classList.remove("hidden");
+    if (codeJarController) codeJarController.detach();
     el.editor.classList.toggle("editor-code", state.activeKind === "code");
 
     if (el.editor.value !== state.content) {

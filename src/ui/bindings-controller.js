@@ -23,6 +23,7 @@ export function bindElements(el) {
   el.navForward = document.querySelector("#nav-forward");
   el.editorState = document.querySelector("#editor-state");
   el.editor = document.querySelector("#editor");
+  el.codeEditor = document.querySelector("#code-editor");
   el.preview = document.querySelector("#preview");
   el.statusBar = document.querySelector("#status-bar");
   el.statusBarLines = document.querySelector("#status-bar-lines");
@@ -129,6 +130,18 @@ export function bindUiEvents({
 
   document.addEventListener("keydown", async (event) => {
     if (event.metaKey && event.key.toLowerCase() === "a") {
+      const isCodeEditorVisible =
+        el.codeEditor && !el.codeEditor.classList.contains("hidden");
+      if (isCodeEditorVisible) {
+        event.preventDefault();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(el.codeEditor);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+
       const isPreviewVisible = !el.preview.classList.contains("hidden");
       if (isPreviewVisible) {
         event.preventDefault();

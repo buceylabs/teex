@@ -8,6 +8,8 @@
     <script src="/vendor/markdown-it.min.js" defer></script>
     <script src="/vendor/markdown-it-task-lists.min.js" defer></script>
     <script src="/vendor/mermaid.min.js" defer></script>
+    <script>window.Prism = window.Prism || {}; Prism.manual = true;</script>
+    <script src="/vendor/prism.js" defer></script>
     <script type="module" src="/main.js" defer></script>
   </head>
   <body>
@@ -38,6 +40,7 @@
           </div>
           <div id="editor-state" class="editor-state">
             <textarea id="editor" class="editor" spellcheck="false"></textarea>
+            <div id="code-editor" class="code-editor hidden"></div>
             <article id="preview" class="preview hidden"></article>
           </div>
           <div id="status-bar" class="status-bar hidden">
