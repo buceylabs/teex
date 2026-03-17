@@ -1,5 +1,81 @@
 import { hasActiveContent } from "./behavior.js";
 
+const CODE_EXTENSIONS = new Set([
+  "json",
+  "jsonc",
+  "jsonl",
+  "yaml",
+  "yml",
+  "toml",
+  "xml",
+  "csv",
+  "ini",
+  "cfg",
+  "conf",
+  "js",
+  "ts",
+  "jsx",
+  "tsx",
+  "mjs",
+  "cjs",
+  "html",
+  "css",
+  "scss",
+  "less",
+  "rs",
+  "py",
+  "go",
+  "java",
+  "kt",
+  "swift",
+  "c",
+  "cpp",
+  "h",
+  "hpp",
+  "cc",
+  "cs",
+  "rb",
+  "php",
+  "lua",
+  "zig",
+  "sql",
+  "graphql",
+  "gql",
+  "proto",
+  "r",
+  "m",
+  "pl",
+  "pm",
+  "ex",
+  "exs",
+  "hs",
+  "ml",
+  "mli",
+  "scala",
+  "clj",
+  "cljs",
+  "dart",
+  "v",
+  "nim",
+  "tf",
+  "hcl",
+  "el",
+  "vim",
+  "sh",
+  "zsh",
+  "bash",
+  "dockerfile",
+  "makefile",
+]);
+
+export function fileKindFromExtension(ext) {
+  if (!ext) return "text";
+  const lower = ext.toLowerCase();
+  if (lower === "md" || lower === "markdown") return "markdown";
+  if (CODE_EXTENSIONS.has(lower)) return "code";
+  return "text";
+}
+
 export function isEditableState(state) {
   if (!hasActiveContent(state)) {
     return false;
@@ -146,8 +222,8 @@ export function createEditorController({
       state.savedContent = state.content;
       state.isDirty = false;
 
-      const ext = chosenPath.split(".").pop()?.toLowerCase();
-      const kind = ext === "md" || ext === "markdown" ? "markdown" : "text";
+      const ext = chosenPath.split(".").pop();
+      const kind = fileKindFromExtension(ext);
       state.activeKind = kind;
 
       const tab = state.openFiles[state.activeTabIndex];

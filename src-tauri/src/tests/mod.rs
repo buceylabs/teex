@@ -2,7 +2,7 @@
 use super::cli_install::{
     ensure_cli_source_path_is_stable, path_contains_dir, preferred_cli_install_dir,
 };
-use super::path_utils::is_markdown;
+use super::path_utils::{is_code, is_markdown};
 use super::*;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};

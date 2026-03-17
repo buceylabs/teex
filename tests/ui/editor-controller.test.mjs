@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildMenuStatePayload,
   createEditorController,
+  fileKindFromExtension,
   isEditableState,
   shouldAutosaveOnToggle,
 } from "../../src/ui/editor-controller.js";
@@ -64,6 +65,24 @@ test("buildMenuStatePayload reflects folder and markdown toggles", () => {
     buildMenuStatePayload({ mode: "file", activeKind: "text" }),
     { canToggleSidebar: false, canToggleMarkdownMode: false },
   );
+});
+
+test("fileKindFromExtension classifies markdown, code, and text", () => {
+  assert.equal(fileKindFromExtension("md"), "markdown");
+  assert.equal(fileKindFromExtension("markdown"), "markdown");
+  assert.equal(fileKindFromExtension("MD"), "markdown");
+
+  assert.equal(fileKindFromExtension("json"), "code");
+  assert.equal(fileKindFromExtension("rs"), "code");
+  assert.equal(fileKindFromExtension("swift"), "code");
+  assert.equal(fileKindFromExtension("cpp"), "code");
+  assert.equal(fileKindFromExtension("JS"), "code");
+  assert.equal(fileKindFromExtension("py"), "code");
+
+  assert.equal(fileKindFromExtension("txt"), "text");
+  assert.equal(fileKindFromExtension("log"), "text");
+  assert.equal(fileKindFromExtension(null), "text");
+  assert.equal(fileKindFromExtension(undefined), "text");
 });
 
 test("toggleMarkdownMode does not force editor focus when switching preview to edit", () => {

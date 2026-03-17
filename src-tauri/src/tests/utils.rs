@@ -13,6 +13,16 @@ fn file_type_helpers_are_case_insensitive_for_supported_extensions() {
 
     assert_eq!(file_kind(Path::new("post.md")), "markdown");
     assert_eq!(file_kind(Path::new("post.txt")), "text");
+    assert_eq!(file_kind(Path::new("main.rs")), "code");
+    assert_eq!(file_kind(Path::new("app.swift")), "code");
+    assert_eq!(file_kind(Path::new("data.json")), "code");
+    assert_eq!(file_kind(Path::new("main.cpp")), "code");
+    assert_eq!(file_kind(Path::new("style.CSS")), "code");
+
+    assert!(is_code(Path::new("lib.rs")));
+    assert!(is_code(Path::new("index.JS")));
+    assert!(!is_code(Path::new("readme.txt")));
+    assert!(!is_code(Path::new("notes.md")));
 }
 
 #[test]

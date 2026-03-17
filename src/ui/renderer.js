@@ -322,6 +322,7 @@ export function createUiRenderer({
 
     el.preview.classList.add("hidden");
     el.editor.classList.remove("hidden");
+    el.editor.classList.toggle("editor-code", state.activeKind === "code");
 
     if (el.editor.value !== state.content) {
       el.editor.value = state.content;

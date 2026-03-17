@@ -560,6 +560,11 @@ body {
   overscroll-behavior: contain;
 }
 
+.editor-code {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
 .preview {
   overflow: auto;
   overscroll-behavior: contain;
