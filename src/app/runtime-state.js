@@ -17,6 +17,7 @@ export const EVENTS = {
   contextMenuDelete: "teex://context-menu-delete",
   openRecentFile: "teex://open-recent-file",
   openRecentFolder: "teex://open-recent-folder",
+  toggleStatusBar: "teex://toggle-status-bar",
 };
 
 export function createRuntimeState() {
@@ -49,6 +50,7 @@ export function createRuntimeState() {
       windowTitle: "",
       windowRepresentedPath: null,
       windowLabel: "",
+      statusBarVisible: false,
     },
     el: {},
     sidebarRenderState: {

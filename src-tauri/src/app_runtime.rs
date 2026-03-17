@@ -164,6 +164,13 @@ pub(crate) fn build_app_menu(
         true,
         Some("CmdOrCtrl+E"),
     )?;
+    let toggle_status_bar_item = MenuItem::with_id(
+        app,
+        MENU_TOGGLE_STATUS_BAR,
+        "Toggle Status Bar",
+        true,
+        Some("CmdOrCtrl+/"),
+    )?;
 
     let theme_system_item =
         CheckMenuItem::with_id(app, MENU_THEME_SYSTEM, "System", true, true, None::<&str>)?;
@@ -210,6 +217,7 @@ pub(crate) fn build_app_menu(
     let view_submenu = SubmenuBuilder::new(app, "View")
         .items(&[
             &toggle_sidebar_item,
+            &toggle_status_bar_item,
             &PredefinedMenuItem::separator(app)?,
             &toggle_markdown_mode_item,
             &PredefinedMenuItem::separator(app)?,

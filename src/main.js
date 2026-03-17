@@ -111,6 +111,7 @@ let sessionSaveEnabled = false;
     handleProjectFileChanged,
     toggleSidebarVisibility,
     toggleMarkdownMode,
+    toggleStatusBar,
     closeActiveFileOrWindow,
     closeTabByPath,
     createNewTab,
@@ -137,6 +138,10 @@ function applySavedTheme() {
 
 function applySavedSidebarWidth() {
   state.sidebarWidth = loadSidebarWidth();
+}
+
+function applySavedStatusBar() {
+  state.statusBarVisible = localStorage.getItem("teex-status-bar") === "true";
 }
 
 sessionRestoreController = createSessionRestoreController({
@@ -171,6 +176,7 @@ externalFileWatchController = createExternalFileWatchController({
 window.addEventListener("DOMContentLoaded", async () => {
   applySavedTheme();
   applySavedSidebarWidth();
+  applySavedStatusBar();
   bindElements();
   scrollSyncController = createScrollSyncController({ state, el });
   bindUiEvents();
@@ -207,6 +213,7 @@ function bindUiEvents() {
     setStatus,
     toggleMarkdownMode,
     toggleSidebarVisibility,
+    toggleStatusBar,
     toggleCollapseAllFolders: () =>
       sidebarController.toggleCollapseAllFolders(),
     expandAllFolders: () => sidebarController.expandAllFolders(),
@@ -440,6 +447,15 @@ function onBeforeToggleMarkdownMode() {
 
 function onAfterToggleMarkdownMode() {
   // post-render scroll restoration is centralized in render()
+}
+
+function toggleStatusBar() {
+  state.statusBarVisible = !state.statusBarVisible;
+  localStorage.setItem(
+    "teex-status-bar",
+    state.statusBarVisible ? "true" : "false",
+  );
+  render();
 }
 
 function toggleSidebarVisibility() {

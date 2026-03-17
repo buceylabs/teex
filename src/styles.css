@@ -526,6 +526,20 @@ body {
   min-height: 0;
 }
 
+.status-bar {
+  flex-shrink: 0;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 12px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  font-family: var(--ui);
+  font-size: 12px;
+  color: var(--subtle);
+}
+
 .editor,
 .preview {
   width: 100%;

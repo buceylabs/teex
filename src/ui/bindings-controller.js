@@ -24,6 +24,8 @@ export function bindElements(el) {
   el.editorState = document.querySelector("#editor-state");
   el.editor = document.querySelector("#editor");
   el.preview = document.querySelector("#preview");
+  el.statusBar = document.querySelector("#status-bar");
+  el.statusBarLines = document.querySelector("#status-bar-lines");
 }
 
 export function bindUiEvents({
@@ -33,6 +35,7 @@ export function bindUiEvents({
   setStatus,
   toggleMarkdownMode,
   toggleSidebarVisibility,
+  toggleStatusBar,
   toggleCollapseAllFolders,
   expandAllFolders,
   saveNow,
@@ -149,6 +152,11 @@ export function bindUiEvents({
     if (event.metaKey && event.key.toLowerCase() === "e") {
       event.preventDefault();
       toggleMarkdownMode();
+    }
+
+    if (event.metaKey && event.key === "/") {
+      event.preventDefault();
+      toggleStatusBar();
     }
 
     if (event.metaKey && event.shiftKey && event.code === "Backslash") {

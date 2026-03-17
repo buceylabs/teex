@@ -334,9 +334,19 @@ export function createUiRenderer({
     }
   }
 
+  function renderStatusBar() {
+    const visible = state.statusBarVisible && hasActiveContent(state);
+    el.statusBar.classList.toggle("hidden", !visible);
+    if (visible) {
+      const lines = state.content.split("\n").length;
+      el.statusBarLines.textContent = `${lines} line${lines !== 1 ? "s" : ""}`;
+    }
+  }
+
   function renderChrome() {
     syncWindowTitle();
     renderTabBar();
+    renderStatusBar();
   }
 
   function render(options = {}) {

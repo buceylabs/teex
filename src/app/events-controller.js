@@ -21,6 +21,7 @@ export function createAppEventsController({
   handleCrossWindowDragLeave,
   handleContextMenuDelete,
   openRecentFolder,
+  toggleStatusBar,
 }) {
   async function bindAppEvents() {
     const label = await invoke("get_window_label");
@@ -79,6 +80,9 @@ export function createAppEventsController({
       }),
       listen(`${events.openRecentFolder}/${label}`, async (event) => {
         await openRecentFolder(event.payload);
+      }),
+      listen(`${events.toggleStatusBar}/${label}`, () => {
+        toggleStatusBar();
       }),
       bindWindowDragDropEvents(),
     ]);
