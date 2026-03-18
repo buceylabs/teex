@@ -139,6 +139,9 @@ export function createFindController({ state, el, codeJarController }) {
     isOpen = false;
 
     const domContainer = getDomContainer();
+    const scrollTarget = domContainer || el.editor;
+    const savedScrollTop = scrollTarget?.scrollTop ?? 0;
+
     if (domContainer) {
       clearHighlights(domContainer);
     }
@@ -154,9 +157,13 @@ export function createFindController({ state, el, codeJarController }) {
     activeIndex = -1;
     el.findCount.textContent = "";
 
-    const focusTarget = domContainer || el.editor;
+    if (scrollTarget) {
+      scrollTarget.scrollTop = savedScrollTop;
+    }
+
+    const focusTarget = scrollTarget;
     if (focusTarget && typeof focusTarget.focus === "function") {
-      focusTarget.focus();
+      focusTarget.focus({ preventScroll: true });
     }
   }
 
