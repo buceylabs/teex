@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 
 const PREVIEW_LABEL: &str = "teex-drag-preview";
 const PREVIEW_WIDTH: f64 = 240.0;
@@ -110,9 +110,7 @@ pub(crate) struct DragPreviewContent {
 }
 
 #[tauri::command]
-pub(crate) fn get_drag_preview_content(
-    app: tauri::AppHandle,
-) -> Option<DragPreviewContent> {
+pub(crate) fn get_drag_preview_content(app: tauri::AppHandle) -> Option<DragPreviewContent> {
     let preview_state = app.state::<TabDragPreviewState>();
     let guard = preview_state.content.lock().ok()?;
     let content = guard.as_ref()?;
@@ -159,13 +157,12 @@ pub(crate) fn create_window_from_drag(
     let scale = get_scale(&app);
     let (x, y) = full_window_position(physical_x, physical_y, scale);
 
-    let new_window =
-        tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::default())
-            .title("Teex")
-            .inner_size(FULL_WIDTH, FULL_HEIGHT)
-            .position(x, y)
-            .build()
-            .map_err(|e| format!("Unable to create window: {e}"))?;
+    let new_window = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::default())
+        .title("Teex")
+        .inner_size(FULL_WIDTH, FULL_HEIGHT)
+        .position(x, y)
+        .build()
+        .map_err(|e| format!("Unable to create window: {e}"))?;
 
     let window_label = new_window.label().to_string();
     set_tracked_window_label(&app, window_label.clone());

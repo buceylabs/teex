@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 
 pub(crate) struct CrossWindowDragEntry {
     source_label: String,
@@ -18,11 +18,7 @@ impl CrossWindowDragRegistry {
     }
 }
 
-fn window_contains_point(
-    window: &tauri::WebviewWindow,
-    physical_x: i32,
-    physical_y: i32,
-) -> bool {
+fn window_contains_point(window: &tauri::WebviewWindow, physical_x: i32, physical_y: i32) -> bool {
     let Ok(pos) = window.outer_position() else {
         return false;
     };
@@ -43,7 +39,7 @@ fn find_window_at_position(
     physical_y: i32,
 ) -> Option<String> {
     for (label, window) in app.webview_windows() {
-        if label == source_label || label == tab_drag_preview::PREVIEW_WINDOW_LABEL {
+        if label == source_label || label == super::drag_preview::PREVIEW_WINDOW_LABEL {
             continue;
         }
         if window_contains_point(&window, physical_x, physical_y) {

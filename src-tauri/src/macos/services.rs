@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 use std::sync::Mutex;
 
 type Id = *mut c_void;
@@ -9,11 +9,7 @@ extern "C" {
     fn objc_getClass(name: *const c_char) -> Class;
     fn sel_registerName(name: *const c_char) -> Sel;
     fn objc_msgSend();
-    fn objc_allocateClassPair(
-        superclass: Class,
-        name: *const c_char,
-        extra_bytes: usize,
-    ) -> Class;
+    fn objc_allocateClassPair(superclass: Class, name: *const c_char, extra_bytes: usize) -> Class;
     fn objc_registerClassPair(cls: Class);
     fn class_addMethod(cls: Class, name: Sel, imp: *const c_void, types: *const c_char) -> i8;
 }
@@ -44,8 +40,7 @@ unsafe fn msg1(obj: Id, sel: Sel, arg: Id) -> Id {
 }
 
 unsafe fn msg1_void(obj: Id, sel: Sel, arg: Id) {
-    let f: unsafe extern "C" fn(Id, Sel, Id) =
-        std::mem::transmute(objc_msgSend as *const c_void);
+    let f: unsafe extern "C" fn(Id, Sel, Id) = std::mem::transmute(objc_msgSend as *const c_void);
     f(obj, sel, arg);
 }
 
@@ -82,7 +77,11 @@ unsafe fn ns_string(text: &str) -> Option<Id> {
     let sel = sel_registerName(c"stringWithUTF8String:".as_ptr());
     let c_text = CString::new(text).ok()?;
     let value = msg1_ptr(cls as Id, sel, c_text.as_ptr());
-    if value.is_null() { None } else { Some(value) }
+    if value.is_null() {
+        None
+    } else {
+        Some(value)
+    }
 }
 
 unsafe fn path_from_ns_string(value: Id) -> Option<PathBuf> {
@@ -183,7 +182,9 @@ unsafe extern "C" fn service_new_tab_here(
     _user_data: Id,
     error: *mut Id,
 ) {
-    if !capture_request(ServiceAction::NewFileTabHere, pasteboard, |path| path.is_file()) {
+    if !capture_request(ServiceAction::NewFileTabHere, pasteboard, |path| {
+        path.is_file()
+    }) {
         set_service_error(error, "No suitable file found in selection.");
     }
 }

@@ -23,29 +23,23 @@ use tauri_plugin_dialog::MessageDialogKind;
 use walkdir::{DirEntry, WalkDir};
 
 mod app_runtime;
-#[cfg(target_os = "macos")]
-mod apple_events;
-#[cfg(target_os = "macos")]
-mod cli_install;
-#[cfg(target_os = "macos")]
-mod default_handler;
+mod context_menu;
 mod files;
 mod git_status;
 mod launch;
 #[cfg(target_os = "macos")]
-mod mac_services;
+mod macos;
 mod menu_events;
 mod path_utils;
-mod context_menu;
 mod recent_files;
-mod cross_window_drag;
-mod tab_drag_preview;
-mod tab_transfer;
+mod tabs;
 mod watchers;
 mod window_title;
 
 use context_menu::show_sidebar_context_menu;
-use files::{format_structured_text, list_project_entries, read_text_file, trash_file, write_text_file};
+use files::{
+    format_structured_text, list_project_entries, read_text_file, trash_file, write_text_file,
+};
 use git_status::git_status;
 use launch::{
     categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths,
@@ -57,20 +51,17 @@ use menu_events::{
 #[cfg(test)]
 use menu_events::{next_transfer_request_id, window_event};
 use path_utils::{file_kind, is_text_like, path_to_string, should_traverse};
-use cross_window_drag::{
-    cancel_cross_window_drag_hover, cleanup_drag_entries_for_window, report_drag_position,
-    CrossWindowDragRegistry,
+use recent_files::{add_recent_file, add_recent_folder};
+use tabs::{
+    cancel_cross_window_drag_hover, cleanup_drag_entries_for_window, create_window_from_drag,
+    get_drag_preview_content, hide_tab_drag_preview, report_drag_position, route_tab_transfer,
+    route_tab_transfer_result, show_tab_drag_preview, CrossWindowDragRegistry,
+    RequestExportAllTabsPayload, TabDragPreviewState,
 };
-use tab_drag_preview::{
-    create_window_from_drag, get_drag_preview_content, hide_tab_drag_preview,
-    show_tab_drag_preview, TabDragPreviewState,
-};
-use tab_transfer::{route_tab_transfer, route_tab_transfer_result, RequestExportAllTabsPayload};
 use watchers::{
     clear_project_file_watch_for_label, clear_project_folder_watch_for_label,
     install_project_file_watch, install_project_folder_watch,
 };
-use recent_files::{add_recent_file, add_recent_folder};
 use window_title::set_window_title;
 
 const EVENT_OPEN_FILE_SELECTED: &str = "teex://open-file-selected";

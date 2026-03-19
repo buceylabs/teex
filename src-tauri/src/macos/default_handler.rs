@@ -1,4 +1,4 @@
-use super::*;
+use crate::*;
 
 type Id = *mut c_void;
 
@@ -7,11 +7,7 @@ extern "C" {
     fn sel_registerName(name: *const c_char) -> *const c_void;
     fn objc_msgSend();
 
-    fn LSSetDefaultRoleHandlerForContentType(
-        content_type: Id,
-        role: u32,
-        bundle_id: Id,
-    ) -> i32;
+    fn LSSetDefaultRoleHandlerForContentType(content_type: Id, role: u32, bundle_id: Id) -> i32;
 }
 
 const ROLES_ALL: u32 = 0xFFFF_FFFF;
@@ -27,7 +23,11 @@ unsafe fn ns_string(text: &str) -> Option<Id> {
     let f: unsafe extern "C" fn(Id, *const c_void, *const i8) -> Id =
         std::mem::transmute(objc_msgSend as *const c_void);
     let value = f(cls as Id, sel, c_text.as_ptr());
-    if value.is_null() { None } else { Some(value) }
+    if value.is_null() {
+        None
+    } else {
+        Some(value)
+    }
 }
 
 fn set_default_handler(uti: &str, bundle_id: &str) -> Result<(), String> {
@@ -38,12 +38,14 @@ fn set_default_handler(uti: &str, bundle_id: &str) -> Result<(), String> {
         if status == 0 {
             Ok(())
         } else {
-            Err(format!("LSSetDefaultRoleHandlerForContentType returned error {status}"))
+            Err(format!(
+                "LSSetDefaultRoleHandlerForContentType returned error {status}"
+            ))
         }
     }
 }
 
-pub(super) fn set_default_markdown_from_menu(app: &tauri::AppHandle) {
+pub(crate) fn set_default_markdown_from_menu(app: &tauri::AppHandle) {
     let app = app.clone();
     let window = target_window(&app);
 

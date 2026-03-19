@@ -21,8 +21,7 @@ pub(crate) fn parse_porcelain_line(line: &str) -> Option<GitFileStatus> {
     let rest = &line[3..];
 
     // Renamed/copied: "R  old -> new" — use the new path
-    let is_rename = (x == b'R' || x == b'C' || y == b'R' || y == b'C')
-        && rest.contains(" -> ");
+    let is_rename = (x == b'R' || x == b'C' || y == b'R' || y == b'C') && rest.contains(" -> ");
     let rel_path = if is_rename {
         rest.rsplit(" -> ").next()?.to_string()
     } else {

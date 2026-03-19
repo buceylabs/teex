@@ -15,16 +15,14 @@ pub(crate) fn show_sidebar_context_menu(window: tauri::Window, path: String) -> 
         "Reveal File"
     };
 
-    let reveal_item =
-        MenuItem::with_id(&app, "context_reveal", reveal_label, true, None::<&str>)
-            .map_err(|e| format!("Unable to create menu item: {e}"))?;
+    let reveal_item = MenuItem::with_id(&app, "context_reveal", reveal_label, true, None::<&str>)
+        .map_err(|e| format!("Unable to create menu item: {e}"))?;
 
     let separator = PredefinedMenuItem::separator(&app)
         .map_err(|e| format!("Unable to create separator: {e}"))?;
 
-    let delete_item =
-        MenuItem::with_id(&app, "context_delete", "Delete", true, None::<&str>)
-            .map_err(|e| format!("Unable to create menu item: {e}"))?;
+    let delete_item = MenuItem::with_id(&app, "context_delete", "Delete", true, None::<&str>)
+        .map_err(|e| format!("Unable to create menu item: {e}"))?;
 
     let menu = MenuBuilder::new(&app)
         .item(&reveal_item)

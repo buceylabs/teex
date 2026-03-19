@@ -1,6 +1,6 @@
-use super::*;
+use crate::*;
 
-pub(super) fn install_cli_from_menu(app: &tauri::AppHandle) {
+pub(crate) fn install_cli_from_menu(app: &tauri::AppHandle) {
     match install_cli_symlink() {
         Ok((link_path, bin_dir_on_path)) => {
             let mut message = format!(

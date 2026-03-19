@@ -66,19 +66,14 @@ pub(crate) fn display_name_for_file(path: &str, all_paths: &[String]) -> String 
     let duplicates: Vec<&String> = all_paths
         .iter()
         .filter(|other| {
-            Path::new(other.as_str())
-                .file_name()
-                .unwrap_or_default()
+            Path::new(other.as_str()).file_name().unwrap_or_default()
                 == p.file_name().unwrap_or_default()
         })
         .collect();
 
     if duplicates.len() > 1 {
         if let Some(parent) = p.parent() {
-            let dir = parent
-                .file_name()
-                .unwrap_or_default()
-                .to_string_lossy();
+            let dir = parent.file_name().unwrap_or_default().to_string_lossy();
             return format!("{name} — {dir}");
         }
     }

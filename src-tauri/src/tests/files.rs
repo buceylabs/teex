@@ -243,8 +243,8 @@ fn format_structured_text_returns_unchanged_for_already_formatted_csv() {
 #[test]
 fn format_structured_text_auto_detects_json() {
     let input = "{\"a\":1}".to_string();
-    let result = format_structured_text(input, None)
-        .expect("format structured text should succeed");
+    let result =
+        format_structured_text(input, None).expect("format structured text should succeed");
 
     assert_eq!(result.detected_kind.as_deref(), Some("json"));
     assert!(result.changed);
@@ -254,8 +254,8 @@ fn format_structured_text_auto_detects_json() {
 #[test]
 fn format_structured_text_auto_detects_yaml_mapping() {
     let input = "{host: localhost, port: 8080}".to_string();
-    let result = format_structured_text(input, None)
-        .expect("format structured text should succeed");
+    let result =
+        format_structured_text(input, None).expect("format structured text should succeed");
 
     // JSON is tried first but this isn't valid JSON, so YAML picks it up
     assert_eq!(result.detected_kind.as_deref(), Some("yaml"));

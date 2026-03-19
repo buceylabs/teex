@@ -78,14 +78,12 @@ fn parse_short_line_returns_none() {
 fn git_status_non_git_dir_returns_empty() {
     let temp = TempTestDir::new();
     temp.write_text("file.txt", "hello");
-    let result =
-        git_status(temp.path().to_string_lossy().to_string()).expect("should succeed");
+    let result = git_status(temp.path().to_string_lossy().to_string()).expect("should succeed");
     assert!(result.is_empty());
 }
 
 #[test]
 fn git_status_nonexistent_dir_returns_empty() {
-    let result =
-        git_status("/nonexistent/path/xyz".to_string()).expect("should succeed");
+    let result = git_status("/nonexistent/path/xyz".to_string()).expect("should succeed");
     assert!(result.is_empty());
 }
