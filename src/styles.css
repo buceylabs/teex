@@ -212,6 +212,11 @@ body {
   left: calc(8px + (var(--indent) * 16px));
   width: 1px;
   background: color-mix(in oklab, var(--ink) 10%, transparent);
+  transition: background 150ms ease;
+}
+
+.folder-toggle:hover + .folder-children::before {
+  background: color-mix(in oklab, var(--ink) 25%, transparent);
 }
 
 .folder-toggle {
