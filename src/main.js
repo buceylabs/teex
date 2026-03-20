@@ -28,7 +28,8 @@ import {
   bindElements as bindElementsImported,
   bindUiEvents as bindUiEventsImported,
 } from "./ui/bindings-controller.js";
-import { createCodeJarController } from "./ui/codejar-controller.js";
+import { createCodeMirrorController } from "./ui/codemirror-controller.js";
+import { createDiffController } from "./ui/diff-controller.js";
 import {
   confirmDelete,
   confirmReloadExternalChange,
@@ -60,9 +61,10 @@ let scrollSyncController;
 let externalFileWatchController;
 let sessionRestoreController;
 let findController;
+let diffController;
 let sessionSaveEnabled = false;
 
-const codeJarController = createCodeJarController({
+const codeJarController = createCodeMirrorController({
   el,
   state,
   onContentChange: () => renderChrome(),
@@ -202,7 +204,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   applySavedStatusBar();
   applySavedShowHiddenFiles();
   bindElements();
-  findController = createFindController({ state, el, codeJarController });
+  findController = createFindController({ state, el });
+  diffController = createDiffController({
+    state,
+    invoke,
+    codeEditorController: codeJarController,
+  });
   scrollSyncController = createScrollSyncController({ state, el });
   bindUiEvents();
   await bindAppEvents();
@@ -530,6 +537,7 @@ function render(options = {}) {
   uiRenderer.render(options);
   scrollSyncController?.scheduleRestoreAfterRender();
   externalFileWatchController.syncWatchedProjectFiles();
+  diffController?.refresh();
   if (sessionSaveEnabled) {
     flushStateToActiveTab();
     saveWindowSession(state, state.windowLabel);
@@ -549,4 +557,5 @@ function setStatus(message, isError = false) {
 
 function onFileSaved(path) {
   externalFileWatchController.onFileSaved(path);
+  diffController?.scheduleRefresh();
 }

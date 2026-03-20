@@ -689,158 +689,90 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 18px;
+  padding: 0;
+  background: var(--bg);
+  overflow: hidden;
+  border: 0;
+}
+
+.code-editor .cm-editor {
+  height: 100%;
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.6;
-  color: var(--ink);
-  background: var(--bg);
-  overflow: auto;
-  overscroll-behavior: contain;
-  outline: none;
-  border: 0;
   tab-size: 2;
 }
 
-.code-editor .token.comment,
-.code-editor .token.prolog,
-.code-editor .token.doctype,
-.code-editor .token.cdata {
-  color: #5c6370;
+.code-editor .cm-editor.cm-focused {
+  outline: none;
 }
 
-.code-editor .token.punctuation {
+.code-editor .cm-scroller {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.code-editor .cm-content {
+  padding: 18px 18px 18px 8px;
+  caret-color: var(--ink);
+}
+
+.code-editor .cm-gutters {
+  background: var(--bg);
+  border-right: 1px solid var(--line);
   color: var(--subtle);
+  padding-top: 18px;
+  font-size: 12px;
+  min-width: 3em;
 }
 
-.code-editor .token.property,
-.code-editor .token.tag,
-.code-editor .token.boolean,
-.code-editor .token.number,
-.code-editor .token.constant,
-.code-editor .token.symbol {
-  color: #d19a66;
+.code-editor .cm-activeLineGutter {
+  background: transparent;
 }
 
-.code-editor .token.selector,
-.code-editor .token.attr-name,
-.code-editor .token.string,
-.code-editor .token.char,
-.code-editor .token.builtin {
-  color: #98c379;
+.code-editor .cm-selectionBackground {
+  background: rgba(100, 150, 255, 0.2) !important;
 }
 
-.code-editor .token.operator,
-.code-editor .token.entity,
-.code-editor .token.url {
-  color: #56b6c2;
+.code-editor .cm-cursor {
+  border-left-color: var(--ink);
 }
 
-.code-editor .token.atrule,
-.code-editor .token.attr-value,
-.code-editor .token.keyword {
-  color: #c678dd;
+/* Git diff line highlighting */
+.cm-diff-added {
+  background-color: rgba(152, 195, 121, 0.15);
 }
 
-.code-editor .token.function,
-.code-editor .token.class-name {
-  color: #61afef;
+.cm-diff-removed {
+  background-color: rgba(224, 108, 117, 0.15);
 }
 
-.code-editor .token.regex,
-.code-editor .token.important,
-.code-editor .token.variable {
-  color: #e06c75;
+.cm-diff-modified {
+  background-color: rgba(229, 192, 123, 0.12);
 }
 
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) .code-editor .token.comment,
-  :root:not([data-theme]) .code-editor .token.prolog,
-  :root:not([data-theme]) .code-editor .token.doctype,
-  :root:not([data-theme]) .code-editor .token.cdata {
-    color: #6a737d;
+  :root:not([data-theme]) .cm-diff-added {
+    background-color: rgba(42, 126, 46, 0.12);
   }
-  :root:not([data-theme]) .code-editor .token.punctuation {
-    color: var(--subtle);
+  :root:not([data-theme]) .cm-diff-removed {
+    background-color: rgba(199, 46, 46, 0.12);
   }
-  :root:not([data-theme]) .code-editor .token.property,
-  :root:not([data-theme]) .code-editor .token.tag,
-  :root:not([data-theme]) .code-editor .token.boolean,
-  :root:not([data-theme]) .code-editor .token.number,
-  :root:not([data-theme]) .code-editor .token.constant,
-  :root:not([data-theme]) .code-editor .token.symbol {
-    color: #986801;
-  }
-  :root:not([data-theme]) .code-editor .token.selector,
-  :root:not([data-theme]) .code-editor .token.attr-name,
-  :root:not([data-theme]) .code-editor .token.string,
-  :root:not([data-theme]) .code-editor .token.char,
-  :root:not([data-theme]) .code-editor .token.builtin {
-    color: #50a14f;
-  }
-  :root:not([data-theme]) .code-editor .token.operator,
-  :root:not([data-theme]) .code-editor .token.entity,
-  :root:not([data-theme]) .code-editor .token.url {
-    color: #0184bc;
-  }
-  :root:not([data-theme]) .code-editor .token.atrule,
-  :root:not([data-theme]) .code-editor .token.attr-value,
-  :root:not([data-theme]) .code-editor .token.keyword {
-    color: #a626a4;
-  }
-  :root:not([data-theme]) .code-editor .token.function,
-  :root:not([data-theme]) .code-editor .token.class-name {
-    color: #4078f2;
-  }
-  :root:not([data-theme]) .code-editor .token.regex,
-  :root:not([data-theme]) .code-editor .token.important,
-  :root:not([data-theme]) .code-editor .token.variable {
-    color: #e45649;
+  :root:not([data-theme]) .cm-diff-modified {
+    background-color: rgba(176, 136, 0, 0.1);
   }
 }
 
-:root[data-theme="light"] .code-editor .token.comment,
-:root[data-theme="light"] .code-editor .token.prolog,
-:root[data-theme="light"] .code-editor .token.doctype,
-:root[data-theme="light"] .code-editor .token.cdata {
-  color: #6a737d;
+:root[data-theme="light"] .cm-diff-added {
+  background-color: rgba(42, 126, 46, 0.12);
 }
-:root[data-theme="light"] .code-editor .token.punctuation {
-  color: var(--subtle);
+
+:root[data-theme="light"] .cm-diff-removed {
+  background-color: rgba(199, 46, 46, 0.12);
 }
-:root[data-theme="light"] .code-editor .token.property,
-:root[data-theme="light"] .code-editor .token.tag,
-:root[data-theme="light"] .code-editor .token.boolean,
-:root[data-theme="light"] .code-editor .token.number,
-:root[data-theme="light"] .code-editor .token.constant,
-:root[data-theme="light"] .code-editor .token.symbol {
-  color: #986801;
-}
-:root[data-theme="light"] .code-editor .token.selector,
-:root[data-theme="light"] .code-editor .token.attr-name,
-:root[data-theme="light"] .code-editor .token.string,
-:root[data-theme="light"] .code-editor .token.char,
-:root[data-theme="light"] .code-editor .token.builtin {
-  color: #50a14f;
-}
-:root[data-theme="light"] .code-editor .token.operator,
-:root[data-theme="light"] .code-editor .token.entity,
-:root[data-theme="light"] .code-editor .token.url {
-  color: #0184bc;
-}
-:root[data-theme="light"] .code-editor .token.atrule,
-:root[data-theme="light"] .code-editor .token.attr-value,
-:root[data-theme="light"] .code-editor .token.keyword {
-  color: #a626a4;
-}
-:root[data-theme="light"] .code-editor .token.function,
-:root[data-theme="light"] .code-editor .token.class-name {
-  color: #4078f2;
-}
-:root[data-theme="light"] .code-editor .token.regex,
-:root[data-theme="light"] .code-editor .token.important,
-:root[data-theme="light"] .code-editor .token.variable {
-  color: #e45649;
+
+:root[data-theme="light"] .cm-diff-modified {
+  background-color: rgba(176, 136, 0, 0.1);
 }
 
 .preview {

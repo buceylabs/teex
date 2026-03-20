@@ -50,7 +50,8 @@ pub(crate) fn run_app() {
             set_show_hidden_files_checked,
             add_recent_file,
             add_recent_folder,
-            git_status
+            git_status,
+            git_diff
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

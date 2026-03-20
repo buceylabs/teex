@@ -7,7 +7,7 @@ import {
   setActiveHighlight,
 } from "./find-highlights.js";
 
-export function createFindController({ state, el, codeJarController }) {
+export function createFindController({ state, el }) {
   let matches = [];
   let activeIndex = -1;
   let isOpen = false;
@@ -58,7 +58,6 @@ export function createFindController({ state, el, codeJarController }) {
 
   function getDomContainer() {
     const view = getActiveView();
-    if (view === "code") return el.codeEditor;
     if (view === "preview") return el.preview;
     return null;
   }
@@ -88,7 +87,7 @@ export function createFindController({ state, el, codeJarController }) {
       return;
     }
 
-    if (view === "editor") {
+    if (view === "editor" || view === "code") {
       matches = findMatches(state.content, query);
     } else {
       const count = highlightMatches(domContainer, query, 0);
@@ -108,6 +107,8 @@ export function createFindController({ state, el, codeJarController }) {
       const m = matches[0];
       el.editor.setSelectionRange(m.index, m.index + m.length);
       updateBackdrop(query);
+    } else if (view === "code") {
+      // CodeMirror: use counter only, no DOM highlights
     } else {
       scrollToActiveMatch(domContainer);
     }
@@ -131,6 +132,9 @@ export function createFindController({ state, el, codeJarController }) {
       el.editor.focus();
       el.findInput.focus();
       updateBackdrop(el.findInput.value);
+    } else if (view === "code") {
+      // CodeMirror: counter only
+      el.findInput.focus();
     } else {
       setActiveHighlight(getDomContainer(), activeIndex);
     }
@@ -184,11 +188,6 @@ export function createFindController({ state, el, codeJarController }) {
       clearHighlights(domContainer);
     }
     hideBackdrop();
-
-    const view = getActiveView();
-    if (view === "code" && codeJarController?.isAttached()) {
-      codeJarController.syncContent(state.content);
-    }
 
     el.findBar.classList.add("hidden");
     el.findInput.value = "";

@@ -146,14 +146,6 @@ export function bindUiEvents({
     }
 
     if (event.metaKey && event.key.toLowerCase() === "a") {
-      const isCodeEditorVisible =
-        el.codeEditor && !el.codeEditor.classList.contains("hidden");
-      if (isCodeEditorVisible) {
-        event.preventDefault();
-        selectAllContents(el.codeEditor);
-        return;
-      }
-
       const isPreviewVisible = !el.preview.classList.contains("hidden");
       if (isPreviewVisible) {
         event.preventDefault();

@@ -25,6 +25,7 @@ use walkdir::{DirEntry, WalkDir};
 mod app_runtime;
 mod context_menu;
 mod files;
+mod git_diff;
 mod git_status;
 mod launch;
 #[cfg(target_os = "macos")]
@@ -40,6 +41,7 @@ use context_menu::show_sidebar_context_menu;
 use files::{
     format_structured_text, list_project_entries, read_text_file, trash_file, write_text_file,
 };
+use git_diff::git_diff;
 use git_status::git_status;
 use launch::{
     categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths,
