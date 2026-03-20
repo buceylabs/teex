@@ -94,14 +94,21 @@ export function createFileController({
         }
 
         if (entriesChanged) {
+          const previousFolders = collectFolderPaths(state.entries);
           state.entries = entries;
 
           const validFolderPaths = collectFolderPaths(entries);
-          state.collapsedFolders = new Set(
+          const pruned = new Set(
             [...state.collapsedFolders].filter((folderPath) =>
               validFolderPaths.has(folderPath),
             ),
           );
+          for (const folder of validFolderPaths) {
+            if (!previousFolders.has(folder)) {
+              pruned.add(folder);
+            }
+          }
+          state.collapsedFolders = pruned;
         }
 
         state.gitStatusMap = nextGitStatus;

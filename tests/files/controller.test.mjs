@@ -324,3 +324,45 @@ test("openFolder passes showHidden true when state.showHiddenFiles is true", asy
   assert.ok(listCall, "should have called list_project_entries");
   assert.equal(listCall.args.showHidden, true);
 });
+
+test("refreshOpenFolderEntries collapses newly appearing folders", async () => {
+  let refreshCount = 0;
+  const harness = createFileControllerHarness({
+    stateOverrides: {
+      mode: "folder",
+      rootPath: "/project",
+      showHiddenFiles: true,
+      entries: [{ path: "/project/src/a.js", relPath: "src/a.js" }],
+      collapsedFolders: new Set(),
+    },
+    invoke: async (command) => {
+      if (command === "list_project_entries") {
+        refreshCount++;
+        if (refreshCount === 1) {
+          return [
+            { path: "/project/src/a.js", relPath: "src/a.js" },
+            {
+              path: "/project/.github/workflow.yaml",
+              relPath: ".github/workflow.yaml",
+            },
+          ];
+        }
+        return [];
+      }
+      if (command === "git_status") {
+        return {};
+      }
+    },
+  });
+
+  await harness.controller.refreshOpenFolderEntries();
+
+  assert.ok(
+    harness.state.collapsedFolders.has(".github"),
+    "newly appearing .github folder should be collapsed",
+  );
+  assert.ok(
+    !harness.state.collapsedFolders.has("src"),
+    "previously expanded src folder should remain expanded",
+  );
+});
