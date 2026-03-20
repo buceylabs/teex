@@ -68,15 +68,7 @@ fn simplify_status(x: u8, y: u8) -> String {
 }
 
 fn is_git_repo(root: &Path) -> bool {
-    let mut dir = root.to_path_buf();
-    loop {
-        if dir.join(".git").exists() {
-            return true;
-        }
-        if !dir.pop() {
-            return false;
-        }
-    }
+    crate::git_diff::find_git_root(root).is_some()
 }
 
 #[tauri::command]

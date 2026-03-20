@@ -537,7 +537,7 @@ function render(options = {}) {
   uiRenderer.render(options);
   scrollSyncController?.scheduleRestoreAfterRender();
   externalFileWatchController.syncWatchedProjectFiles();
-  diffController?.refresh();
+  diffController?.scheduleRefresh();
   if (sessionSaveEnabled) {
     flushStateToActiveTab();
     saveWindowSession(state, state.windowLabel);

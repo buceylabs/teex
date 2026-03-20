@@ -39,104 +39,80 @@ const diffField = StateField.define({
 });
 
 const diffAdded = Decoration.line({ class: "cm-diff-added" });
-const diffRemoved = Decoration.line({ class: "cm-diff-removed" });
-const diffModified = Decoration.line({ class: "cm-diff-modified" });
 
 const DIFF_TYPES = {
   added: diffAdded,
-  removed: diffRemoved,
-  modified: diffModified,
 };
 
-function buildDarkHighlightStyle() {
-  return HighlightStyle.define([
-    { tag: tags.comment, color: "#5c6370" },
-    { tag: tags.lineComment, color: "#5c6370" },
-    { tag: tags.blockComment, color: "#5c6370" },
-    { tag: tags.docComment, color: "#5c6370" },
-    {
-      tag: [tags.punctuation, tags.bracket, tags.separator],
-      color: "#abb2bf",
-    },
-    { tag: [tags.propertyName, tags.labelName], color: "#d19a66" },
-    { tag: [tags.tagName], color: "#e06c75" },
-    {
-      tag: [tags.bool, tags.number, tags.integer, tags.float],
-      color: "#d19a66",
-    },
-    { tag: [tags.atom, tags.constant(tags.variableName)], color: "#d19a66" },
-    {
-      tag: [tags.string, tags.character, tags.special(tags.string)],
-      color: "#98c379",
-    },
-    { tag: [tags.attributeName], color: "#d19a66" },
-    { tag: [tags.attributeValue], color: "#98c379" },
-    { tag: [tags.operator, tags.url], color: "#56b6c2" },
-    {
-      tag: [tags.keyword, tags.modifier, tags.operatorKeyword],
-      color: "#c678dd",
-    },
-    { tag: [tags.controlKeyword], color: "#c678dd" },
-    { tag: [tags.definitionKeyword], color: "#c678dd" },
-    {
-      tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
-      color: "#61afef",
-    },
-    {
-      tag: [tags.className, tags.definition(tags.typeName)],
-      color: "#61afef",
-    },
-    { tag: [tags.typeName], color: "#e5c07b" },
-    { tag: [tags.variableName], color: "#e06c75" },
-    { tag: [tags.definition(tags.variableName)], color: "#e06c75" },
-    { tag: [tags.regexp], color: "#e06c75" },
-    { tag: [tags.self], color: "#e06c75" },
-  ]);
-}
+const DARK_COLORS = {
+  comment: "#5c6370",
+  punctuation: "#abb2bf",
+  property: "#d19a66",
+  tag: "#e06c75",
+  string: "#98c379",
+  operator: "#56b6c2",
+  keyword: "#c678dd",
+  function: "#61afef",
+  type: "#e5c07b",
+  variable: "#e06c75",
+};
 
-function buildLightHighlightStyle() {
+const LIGHT_COLORS = {
+  comment: "#6a737d",
+  punctuation: "#6b7280",
+  property: "#986801",
+  tag: "#e45649",
+  string: "#50a14f",
+  operator: "#0184bc",
+  keyword: "#a626a4",
+  function: "#4078f2",
+  type: "#b08800",
+  variable: "#e45649",
+};
+
+function buildHighlightStyle(c) {
   return HighlightStyle.define([
-    { tag: tags.comment, color: "#6a737d" },
-    { tag: tags.lineComment, color: "#6a737d" },
-    { tag: tags.blockComment, color: "#6a737d" },
-    { tag: tags.docComment, color: "#6a737d" },
+    { tag: tags.comment, color: c.comment },
+    { tag: tags.lineComment, color: c.comment },
+    { tag: tags.blockComment, color: c.comment },
+    { tag: tags.docComment, color: c.comment },
     {
       tag: [tags.punctuation, tags.bracket, tags.separator],
-      color: "#6b7280",
+      color: c.punctuation,
     },
-    { tag: [tags.propertyName, tags.labelName], color: "#986801" },
-    { tag: [tags.tagName], color: "#e45649" },
+    { tag: [tags.propertyName, tags.labelName], color: c.property },
+    { tag: [tags.tagName], color: c.tag },
     {
       tag: [tags.bool, tags.number, tags.integer, tags.float],
-      color: "#986801",
+      color: c.property,
     },
-    { tag: [tags.atom, tags.constant(tags.variableName)], color: "#986801" },
+    { tag: [tags.atom, tags.constant(tags.variableName)], color: c.property },
     {
       tag: [tags.string, tags.character, tags.special(tags.string)],
-      color: "#50a14f",
+      color: c.string,
     },
-    { tag: [tags.attributeName], color: "#986801" },
-    { tag: [tags.attributeValue], color: "#50a14f" },
-    { tag: [tags.operator, tags.url], color: "#0184bc" },
+    { tag: [tags.attributeName], color: c.property },
+    { tag: [tags.attributeValue], color: c.string },
+    { tag: [tags.operator, tags.url], color: c.operator },
     {
       tag: [tags.keyword, tags.modifier, tags.operatorKeyword],
-      color: "#a626a4",
+      color: c.keyword,
     },
-    { tag: [tags.controlKeyword], color: "#a626a4" },
-    { tag: [tags.definitionKeyword], color: "#a626a4" },
+    { tag: [tags.controlKeyword], color: c.keyword },
+    { tag: [tags.definitionKeyword], color: c.keyword },
     {
       tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
-      color: "#4078f2",
+      color: c.function,
     },
     {
       tag: [tags.className, tags.definition(tags.typeName)],
-      color: "#4078f2",
+      color: c.function,
     },
-    { tag: [tags.typeName], color: "#b08800" },
-    { tag: [tags.variableName], color: "#e45649" },
-    { tag: [tags.definition(tags.variableName)], color: "#e45649" },
-    { tag: [tags.regexp], color: "#e45649" },
-    { tag: [tags.self], color: "#e45649" },
+    { tag: [tags.typeName], color: c.type },
+    { tag: [tags.variableName], color: c.variable },
+    { tag: [tags.definition(tags.variableName)], color: c.variable },
+    { tag: [tags.regexp], color: c.variable },
+    { tag: [tags.self], color: c.variable },
   ]);
 }
 
@@ -160,8 +136,8 @@ export function createCodeMirrorController({
 
   function currentHighlightExt() {
     const style = isDark()
-      ? buildDarkHighlightStyle()
-      : buildLightHighlightStyle();
+      ? buildHighlightStyle(DARK_COLORS)
+      : buildHighlightStyle(LIGHT_COLORS);
     return syntaxHighlighting(style);
   }
 

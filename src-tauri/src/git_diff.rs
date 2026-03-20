@@ -54,7 +54,7 @@ pub(crate) fn parse_unified_diff(diff_output: &str) -> Vec<LineDiff> {
     result
 }
 
-fn find_git_root(path: &Path) -> Option<std::path::PathBuf> {
+pub(crate) fn find_git_root(path: &Path) -> Option<std::path::PathBuf> {
     let mut dir = if path.is_file() {
         path.parent()?.to_path_buf()
     } else {
