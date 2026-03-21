@@ -30,6 +30,7 @@ import {
 } from "./ui/bindings-controller.js";
 import { createCodeMirrorController } from "./ui/codemirror-controller.js";
 import { createDiffController } from "./ui/diff-controller.js";
+import { createDiffMapController } from "./ui/diff-map-controller.js";
 import {
   confirmDelete,
   confirmReloadExternalChange,
@@ -62,6 +63,7 @@ let externalFileWatchController;
 let sessionRestoreController;
 let findController;
 let diffController;
+let diffMapController;
 let sessionSaveEnabled = false;
 
 const codeJarController = createCodeMirrorController({
@@ -205,10 +207,15 @@ window.addEventListener("DOMContentLoaded", async () => {
   applySavedShowHiddenFiles();
   bindElements();
   findController = createFindController({ state, el });
+  diffMapController = createDiffMapController({
+    el,
+    codeEditorController: codeJarController,
+  });
   diffController = createDiffController({
     state,
     invoke,
     codeEditorController: codeJarController,
+    diffMapController,
   });
   scrollSyncController = createScrollSyncController({ state, el });
   bindUiEvents();

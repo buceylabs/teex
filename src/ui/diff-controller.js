@@ -1,4 +1,9 @@
-export function createDiffController({ state, invoke, codeEditorController }) {
+export function createDiffController({
+  state,
+  invoke,
+  codeEditorController,
+  diffMapController,
+}) {
   let debounceTimer = null;
 
   async function refresh() {
@@ -6,6 +11,7 @@ export function createDiffController({ state, invoke, codeEditorController }) {
 
     if (!path || state.activeKind !== "code") {
       codeEditorController.clearDiffDecorations();
+      diffMapController?.hide();
       return;
     }
 
@@ -14,9 +20,14 @@ export function createDiffController({ state, invoke, codeEditorController }) {
       // Only apply if the active file hasn't changed during the async call
       if (state.activePath === path) {
         codeEditorController.setDiffDecorations(annotations);
+        diffMapController?.update(
+          annotations,
+          codeEditorController.getLineCount(),
+        );
       }
     } catch {
       codeEditorController.clearDiffDecorations();
+      diffMapController?.hide();
     }
   }
 
@@ -28,6 +39,7 @@ export function createDiffController({ state, invoke, codeEditorController }) {
   function clear() {
     clearTimeout(debounceTimer);
     codeEditorController.clearDiffDecorations();
+    diffMapController?.hide();
   }
 
   return { refresh, scheduleRefresh, clear };

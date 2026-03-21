@@ -775,6 +775,45 @@ body {
   background-color: rgba(176, 136, 0, 0.1);
 }
 
+/* Diff map (scrollbar overview ruler) */
+.diff-map {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.diff-map-tick {
+  position: absolute;
+  right: 1px;
+  width: 6px;
+  height: 3px;
+  border-radius: 1px;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.diff-map-tick:hover {
+  opacity: 1;
+  width: 8px;
+}
+
+.diff-map-tick--added {
+  background-color: var(--git-added);
+}
+
+.diff-map-tick--modified {
+  background-color: var(--git-modified);
+}
+
+.diff-map-tick--deleted {
+  background-color: var(--git-deleted);
+}
+
 .preview {
   overflow: auto;
   overscroll-behavior: contain;

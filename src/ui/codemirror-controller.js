@@ -261,6 +261,20 @@ export function createCodeMirrorController({
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => refreshTheme());
 
+  function scrollToLine(lineNumber) {
+    if (!view) return;
+    const doc = view.state.doc;
+    if (lineNumber < 1 || lineNumber > doc.lines) return;
+    const line = doc.line(lineNumber);
+    view.dispatch({
+      effects: EditorView.scrollIntoView(line.from, { y: "start" }),
+    });
+  }
+
+  function getLineCount() {
+    return view ? view.state.doc.lines : 0;
+  }
+
   return {
     attach,
     detach,
@@ -269,5 +283,7 @@ export function createCodeMirrorController({
     isAttached,
     setDiffDecorations,
     clearDiffDecorations,
+    scrollToLine,
+    getLineCount,
   };
 }
