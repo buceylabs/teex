@@ -275,6 +275,7 @@ function bindUiEvents() {
     toggleMarkdownMode,
     toggleSidebarVisibility,
     toggleStatusBar,
+    toggleModifiedOnly,
     toggleCollapseAllFolders: () =>
       sidebarController.toggleCollapseAllFolders(),
     expandAllFolders: () => sidebarController.expandAllFolders(),

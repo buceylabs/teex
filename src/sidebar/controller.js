@@ -322,6 +322,26 @@ export function createSidebarController({
     }
   }
 
+  function updateModifiedToggleButton() {
+    if (!el.modifiedToggleBtn) {
+      return;
+    }
+
+    const isFolderMode = state.mode === "folder";
+    el.modifiedToggleBtn.style.visibility = isFolderMode ? "" : "hidden";
+    el.modifiedToggleBtn.classList.toggle("active", state.filterModifiedOnly);
+    el.modifiedToggleBtn.setAttribute(
+      "aria-pressed",
+      state.filterModifiedOnly ? "true" : "false",
+    );
+
+    const label = state.filterModifiedOnly
+      ? "Show all files"
+      : "Show modified files only";
+    el.modifiedToggleBtn.title = label;
+    el.modifiedToggleBtn.setAttribute("aria-label", label);
+  }
+
   function renderSidebar() {
     if (state.mode !== "folder") {
       el.projectRootLabel.textContent = "Folder";
@@ -329,6 +349,7 @@ export function createSidebarController({
       el.projectList.innerHTML = "";
       sidebarRenderState.activePath = null;
       sidebarRenderState.treeDirty = true;
+      updateModifiedToggleButton();
       updateCollapseToggleButton();
       return;
     }
@@ -358,6 +379,7 @@ export function createSidebarController({
     }
 
     syncSidebarActiveItem();
+    updateModifiedToggleButton();
     updateCollapseToggleButton();
   }
 

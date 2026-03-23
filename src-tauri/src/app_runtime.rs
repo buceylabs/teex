@@ -184,10 +184,10 @@ pub(crate) fn build_app_menu(
     let show_modified_only_item = CheckMenuItem::with_id(
         app,
         MENU_SHOW_MODIFIED_ONLY,
-        "Show Modified Only",
+        "Show Modified Files Only",
         true,
         false,
-        None::<&str>,
+        Some("CmdOrCtrl+Shift+M"),
     )?;
 
     let theme_system_item =

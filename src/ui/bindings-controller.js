@@ -16,6 +16,7 @@ export function bindElements(el) {
   el.dropOverlay = document.querySelector("#drop-overlay");
   el.projectRootLabel = document.querySelector("#project-root-label");
   el.projectList = document.querySelector("#project-list");
+  el.modifiedToggleBtn = document.querySelector("#modified-toggle-btn");
   el.collapseToggleBtn = document.querySelector("#collapse-toggle-btn");
   el.tabBarRow = document.querySelector(".tab-bar-row");
   el.tabBar = document.querySelector("#tab-bar");
@@ -44,6 +45,7 @@ export function bindUiEvents({
   toggleMarkdownMode,
   toggleSidebarVisibility,
   toggleStatusBar,
+  toggleModifiedOnly,
   toggleCollapseAllFolders,
   expandAllFolders,
   saveNow,
@@ -172,6 +174,12 @@ export function bindUiEvents({
       toggleStatusBar();
     }
 
+    if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "m") {
+      event.preventDefault();
+      toggleModifiedOnly();
+      return;
+    }
+
     if (event.metaKey && event.shiftKey && event.code === "Backslash") {
       event.preventDefault();
       toggleCollapseAllFolders();
@@ -211,6 +219,10 @@ export function bindUiEvents({
         switchTab(index);
       }
     }
+  });
+
+  el.modifiedToggleBtn?.addEventListener("click", () => {
+    toggleModifiedOnly();
   });
 
   el.preview.addEventListener("click", (event) => {

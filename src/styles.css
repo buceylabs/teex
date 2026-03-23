@@ -166,6 +166,12 @@ body {
   user-select: none;
 }
 
+.sidebar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .sidebar-toolbar-btn {
   flex-shrink: 0;
   width: 28px;
@@ -192,6 +198,11 @@ body {
 .sidebar-toolbar-btn:hover {
   background: color-mix(in oklab, var(--ink) 8%, transparent);
   color: var(--subtle);
+}
+
+.sidebar-toolbar-btn.active {
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  color: color-mix(in oklab, var(--accent) 70%, var(--ink));
 }
 
 /* Collapse mode (default): show collapse icon, hide expand */
