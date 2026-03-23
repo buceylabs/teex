@@ -50,7 +50,7 @@ use launch::{
 use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled, target_window};
 #[cfg(test)]
 use menu_events::{next_transfer_request_id, window_event};
-use path_utils::{file_kind, is_text_like, path_to_string, should_traverse_with_hidden};
+use path_utils::{file_kind, is_dotfile_config, is_text_like, path_to_string, should_traverse_with_hidden};
 use recent_files::{add_recent_file, add_recent_folder};
 use tabs::{
     cancel_cross_window_drag_hover, cleanup_drag_entries_for_window, create_window_from_drag,

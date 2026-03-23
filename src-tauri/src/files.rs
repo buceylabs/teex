@@ -181,7 +181,8 @@ pub(crate) fn list_project_entries(
         };
 
         let path = entry.path();
-        if !path.is_file() || !is_text_like(path) {
+        let visible = is_text_like(path) || (show_hidden && is_dotfile_config(path));
+        if !path.is_file() || !visible {
             continue;
         }
         if !show_hidden {

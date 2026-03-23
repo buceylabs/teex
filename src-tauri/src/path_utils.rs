@@ -18,6 +18,13 @@ pub(super) fn should_traverse_with_hidden(entry: &DirEntry, show_hidden: bool) -
     show_hidden || !name.starts_with('.')
 }
 
+pub(super) fn is_dotfile_config(path: &Path) -> bool {
+    let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+        return false;
+    };
+    name.starts_with('.') && path.extension().is_none()
+}
+
 pub(super) fn file_kind(path: &Path) -> &'static str {
     if is_markdown(path) {
         "markdown"

@@ -51,6 +51,8 @@ fn list_project_entries_shows_hidden_when_flag_true() {
     temp.write_text("visible.md", "# visible");
     temp.write_text(".hidden.md", "# hidden");
     temp.write_text(".secret.yaml", "key: val");
+    temp.write_text(".gitignore", "*.log");
+    temp.write_text(".editorconfig", "root = true");
     temp.write_text(".github/workflow.yaml", "on: push");
     temp.write_text(".git/config.txt", "skip");
     temp.write_text("node_modules/pkg.js", "skip");
@@ -84,6 +86,14 @@ fn list_project_entries_shows_hidden_when_flag_true() {
         "should include visible.md"
     );
     assert!(
+        rel_paths.contains(&".gitignore".to_string()),
+        "should include .gitignore"
+    );
+    assert!(
+        rel_paths.contains(&".editorconfig".to_string()),
+        "should include .editorconfig"
+    );
+    assert!(
         !rel_paths.iter().any(|p| p.starts_with(".git/")),
         "should still exclude .git/"
     );
@@ -94,6 +104,32 @@ fn list_project_entries_shows_hidden_when_flag_true() {
     assert!(
         !rel_paths.iter().any(|p| p.starts_with("target/")),
         "should still exclude target/"
+    );
+}
+
+#[test]
+fn list_project_entries_excludes_extensionless_dotfiles_when_hidden_off() {
+    let temp = TempTestDir::new();
+
+    temp.write_text("visible.md", "# hi");
+    temp.write_text(".gitignore", "*.log");
+    temp.write_text(".editorconfig", "root = true");
+
+    let entries = list_project_entries(temp.path().to_string_lossy().to_string(), false)
+        .expect("list project entries should succeed");
+    let rel_paths: Vec<String> = entries.iter().map(|e| e.rel_path.clone()).collect();
+
+    assert!(
+        rel_paths.contains(&"visible.md".to_string()),
+        "should include visible.md"
+    );
+    assert!(
+        !rel_paths.contains(&".gitignore".to_string()),
+        "should exclude .gitignore when show_hidden is false"
+    );
+    assert!(
+        !rel_paths.contains(&".editorconfig".to_string()),
+        "should exclude .editorconfig when show_hidden is false"
     );
 }
 
