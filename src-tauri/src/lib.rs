@@ -44,10 +44,10 @@ use files::{
 use git_diff::git_diff;
 use git_status::git_status;
 use launch::{
-    categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths_for_window,
-    take_pending_open_paths,
+    categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths,
+    queue_open_paths_for_window, take_pending_open_paths,
 };
-use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled};
+use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled, target_window};
 #[cfg(test)]
 use menu_events::{next_transfer_request_id, window_event};
 use path_utils::{file_kind, is_text_like, path_to_string, should_traverse_with_hidden};
@@ -100,6 +100,8 @@ const MENU_TOGGLE_STATUS_BAR: &str = "toggle_status_bar";
 const EVENT_TOGGLE_STATUS_BAR: &str = "teex://toggle-status-bar";
 const MENU_SHOW_HIDDEN_FILES: &str = "show_hidden_files";
 const EVENT_TOGGLE_HIDDEN_FILES: &str = "teex://toggle-hidden-files";
+const MENU_SHOW_MODIFIED_ONLY: &str = "show_modified_only";
+const EVENT_TOGGLE_MODIFIED_ONLY: &str = "teex://toggle-modified-only";
 const MENU_FIND: &str = "find";
 const EVENT_FIND: &str = "teex://find";
 const MENU_THEME_SYSTEM: &str = "theme_system";
@@ -263,6 +265,22 @@ fn set_show_hidden_files_checked(app: tauri::AppHandle, checked: bool) -> Result
         return Ok(());
     };
     let Some(item) = menu.get(MENU_SHOW_HIDDEN_FILES) else {
+        return Ok(());
+    };
+    if let Some(check_item) = item.as_check_menuitem() {
+        check_item
+            .set_checked(checked)
+            .map_err(|e| format!("{e}"))?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn set_show_modified_only_checked(app: tauri::AppHandle, checked: bool) -> Result<(), String> {
+    let Some(menu) = app.menu() else {
+        return Ok(());
+    };
+    let Some(item) = menu.get(MENU_SHOW_MODIFIED_ONLY) else {
         return Ok(());
     };
     if let Some(check_item) = item.as_check_menuitem() {

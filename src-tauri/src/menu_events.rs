@@ -258,6 +258,9 @@ pub(super) fn handle_app_menu_event(app: &tauri::AppHandle, event: tauri::menu::
         MENU_SHOW_HIDDEN_FILES => {
             let _ = app.emit(EVENT_TOGGLE_HIDDEN_FILES, ());
         }
+        MENU_SHOW_MODIFIED_ONLY => {
+            let _ = app.emit(EVENT_TOGGLE_MODIFIED_ONLY, ());
+        }
         MENU_FIND => {
             if let Some(window) = target_window(app) {
                 emit_to_window(app, window.label(), EVENT_FIND, ());

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   didGitStatusChange,
+  filterEntriesByGitStatus,
   gitStatusClass,
   propagateFolderStatus,
 } from "../../src/sidebar/git-status.js";
@@ -91,6 +92,67 @@ describe("didGitStatusChange", () => {
 
   it("returns false for two empty maps", () => {
     assert.equal(didGitStatusChange({}, {}), false);
+  });
+});
+
+describe("filterEntriesByGitStatus", () => {
+  it("returns empty array for empty entries", () => {
+    assert.deepStrictEqual(filterEntriesByGitStatus([], { "a.md": "M" }), []);
+  });
+
+  it("returns empty array for null/undefined gitStatusMap", () => {
+    const entries = [{ path: "/root/a.md", relPath: "a.md" }];
+    assert.deepStrictEqual(filterEntriesByGitStatus(entries, null), []);
+    assert.deepStrictEqual(filterEntriesByGitStatus(entries, undefined), []);
+  });
+
+  it("returns empty array for non-array entries", () => {
+    assert.deepStrictEqual(filterEntriesByGitStatus(null, {}), []);
+  });
+
+  it("returns empty array when no entries have git status", () => {
+    const entries = [
+      { path: "/root/a.md", relPath: "a.md" },
+      { path: "/root/b.md", relPath: "b.md" },
+    ];
+    assert.deepStrictEqual(filterEntriesByGitStatus(entries, {}), []);
+  });
+
+  it("returns only entries with git status", () => {
+    const entries = [
+      { path: "/root/a.md", relPath: "a.md" },
+      { path: "/root/b.md", relPath: "b.md" },
+      { path: "/root/c.md", relPath: "c.md" },
+    ];
+    const gitStatusMap = { "a.md": "M", "c.md": "?" };
+    const result = filterEntriesByGitStatus(entries, gitStatusMap);
+    assert.deepStrictEqual(result, [
+      { path: "/root/a.md", relPath: "a.md" },
+      { path: "/root/c.md", relPath: "c.md" },
+    ]);
+  });
+
+  it("returns all entries when all have git status", () => {
+    const entries = [
+      { path: "/root/a.md", relPath: "a.md" },
+      { path: "/root/b.md", relPath: "b.md" },
+    ];
+    const gitStatusMap = { "a.md": "M", "b.md": "A" };
+    const result = filterEntriesByGitStatus(entries, gitStatusMap);
+    assert.equal(result.length, 2);
+  });
+
+  it("includes nested files and preserves folder structure via tree builder", () => {
+    const entries = [
+      { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+      { path: "/root/docs/ref.md", relPath: "docs/ref.md" },
+      { path: "/root/a.md", relPath: "a.md" },
+    ];
+    const gitStatusMap = { "docs/guide.md": "M" };
+    const result = filterEntriesByGitStatus(entries, gitStatusMap);
+    assert.deepStrictEqual(result, [
+      { path: "/root/docs/guide.md", relPath: "docs/guide.md" },
+    ]);
   });
 });
 
