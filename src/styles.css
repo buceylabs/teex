@@ -743,8 +743,13 @@ body {
   border-right: 1px solid var(--line);
   color: var(--subtle);
   padding-top: 18px;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.6;
   min-width: 3em;
+}
+
+.code-editor .cm-lineNumbers .cm-gutterElement {
+  line-height: 1.6;
 }
 
 .code-editor .cm-activeLineGutter {
