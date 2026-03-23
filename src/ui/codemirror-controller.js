@@ -265,10 +265,16 @@ export function createCodeMirrorController({
     if (!view) return;
     const doc = view.state.doc;
     if (lineNumber < 1 || lineNumber > doc.lines) return;
+
     const line = doc.line(lineNumber);
-    view.dispatch({
-      effects: EditorView.scrollIntoView(line.from, { y: "start" }),
-    });
+    const block = view.lineBlockAt(line.from);
+    const content = view.contentDOM;
+    const paddingTop = content
+      ? Number.parseFloat(window.getComputedStyle(content).paddingTop) || 0
+      : 0;
+    const targetTop = Math.max(0, block.top - paddingTop);
+
+    view.scrollDOM.scrollTop = targetTop;
   }
 
   function getLineCount() {
