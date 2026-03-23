@@ -171,6 +171,11 @@ function applySavedShowHiddenFiles() {
   state.showHiddenFiles = saved === null ? true : saved === "true";
 }
 
+function applySavedModifiedOnly() {
+  state.filterModifiedOnly =
+    localStorage.getItem("teex-filter-modified-only") === "true";
+}
+
 sessionRestoreController = createSessionRestoreController({
   state,
   invoke,
@@ -205,6 +210,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   applySavedSidebarWidth();
   applySavedStatusBar();
   applySavedShowHiddenFiles();
+  applySavedModifiedOnly();
   bindElements();
   findController = createFindController({ state, el });
   diffMapController = createDiffMapController({
@@ -233,6 +239,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     checked: state.showHiddenFiles,
   }).catch(() => {});
 
+  invoke("set_show_modified_only_checked", {
+    checked: state.filterModifiedOnly,
+  }).catch(() => {});
+
   listen("teex://set-theme", (event) => {
     const theme = event.payload;
     localStorage.setItem("teex-theme", theme);
@@ -245,6 +255,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   listen("teex://toggle-hidden-files", () => {
     toggleHiddenFiles();
+  });
+
+  listen("teex://toggle-modified-only", () => {
+    toggleModifiedOnly();
   });
 });
 
@@ -518,6 +532,19 @@ function toggleHiddenFiles() {
     checked: state.showHiddenFiles,
   }).catch(() => {});
   fileController.refreshOpenFolderEntries();
+}
+
+function toggleModifiedOnly() {
+  state.filterModifiedOnly = !state.filterModifiedOnly;
+  localStorage.setItem(
+    "teex-filter-modified-only",
+    state.filterModifiedOnly ? "true" : "false",
+  );
+  invoke("set_show_modified_only_checked", {
+    checked: state.filterModifiedOnly,
+  }).catch(() => {});
+  sidebarController.markTreeDirty();
+  render();
 }
 
 function toggleSidebarVisibility() {

@@ -52,3 +52,8 @@ const STATUS_CSS_CLASS = {
 export function gitStatusClass(status) {
   return STATUS_CSS_CLASS[status] || "";
 }
+
+export function filterEntriesByGitStatus(entries, gitStatusMap) {
+  if (!Array.isArray(entries) || !gitStatusMap) return [];
+  return entries.filter((entry) => gitStatusMap[entry.relPath]);
+}

@@ -7,7 +7,10 @@ import {
   sidebarClickModifierAction,
 } from "../ui/behavior.js";
 import { bindSidebarDragEvents } from "./drag.js";
-import { propagateFolderStatus } from "./git-status.js";
+import {
+  filterEntriesByGitStatus,
+  propagateFolderStatus,
+} from "./git-status.js";
 import {
   buildEntryTree,
   collectFolderPaths,
@@ -304,7 +307,7 @@ export function createSidebarController({
     if (!el.collapseToggleBtn) return;
     const hasFolders =
       state.mode === "folder" && hasFoldersInEntries(state.entries);
-    el.collapseToggleBtn.hidden = !hasFolders;
+    el.collapseToggleBtn.style.visibility = hasFolders ? "" : "hidden";
     if (hasFolders) {
       const allCollapsed = isAllCollapsed(
         state.entries,
@@ -339,7 +342,10 @@ export function createSidebarController({
     }
 
     if (sidebarRenderState.treeDirty) {
-      const tree = buildEntryTree(state.entries);
+      const entriesToRender = state.filterModifiedOnly
+        ? filterEntriesByGitStatus(state.entries, state.gitStatusMap)
+        : state.entries;
+      const tree = buildEntryTree(entriesToRender);
       const augmentedGitMap = propagateFolderStatus(state.gitStatusMap);
       el.projectList.innerHTML = renderTreeHtml(
         tree,

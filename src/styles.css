@@ -139,7 +139,7 @@ body {
   min-height: 28px;
   margin-bottom: 10px;
   position: sticky;
-  top: 0;
+  top: -3px;
   padding-top: 6px;
   z-index: 1;
   background: var(--bg);
@@ -168,15 +168,25 @@ body {
 
 .sidebar-toolbar-btn {
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
   border: 0;
   background: transparent;
   color: color-mix(in oklab, var(--subtle) 80%, transparent);
-  padding: 4px 6px;
+  padding: 0;
   border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   transition:
     background 100ms ease,
     color 100ms ease;
+}
+
+.sidebar-toolbar-btn svg {
+  display: block;
 }
 
 .sidebar-toolbar-btn:hover {

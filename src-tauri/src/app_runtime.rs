@@ -48,6 +48,7 @@ pub(crate) fn run_app() {
             trash_file,
             show_sidebar_context_menu,
             set_show_hidden_files_checked,
+            set_show_modified_only_checked,
             add_recent_file,
             add_recent_folder,
             git_status,
@@ -180,6 +181,14 @@ pub(crate) fn build_app_menu(
         true,
         Some("CmdOrCtrl+Shift+."),
     )?;
+    let show_modified_only_item = CheckMenuItem::with_id(
+        app,
+        MENU_SHOW_MODIFIED_ONLY,
+        "Show Modified Only",
+        true,
+        false,
+        None::<&str>,
+    )?;
 
     let theme_system_item =
         CheckMenuItem::with_id(app, MENU_THEME_SYSTEM, "System", true, true, None::<&str>)?;
@@ -231,6 +240,7 @@ pub(crate) fn build_app_menu(
             &toggle_sidebar_item,
             &toggle_status_bar_item,
             &show_hidden_files_item,
+            &show_modified_only_item,
             &PredefinedMenuItem::separator(app)?,
             &toggle_markdown_mode_item,
             &PredefinedMenuItem::separator(app)?,
