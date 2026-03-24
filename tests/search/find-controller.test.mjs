@@ -56,7 +56,29 @@ function mockElement() {
   };
 }
 
-function setup(stateOverrides = {}) {
+function mockCodeEditorController() {
+  const calls = [];
+  return {
+    calls,
+    isAttached() {
+      return true;
+    },
+    search(query) {
+      calls.push({ method: "search", query });
+    },
+    searchNext() {
+      calls.push({ method: "searchNext" });
+    },
+    searchPrev() {
+      calls.push({ method: "searchPrev" });
+    },
+    clearSearch() {
+      calls.push({ method: "clearSearch" });
+    },
+  };
+}
+
+function setup(stateOverrides = {}, { codeEditorController = null } = {}) {
   const state = {
     activePath: null,
     activeKind: "markdown",
@@ -82,10 +104,10 @@ function setup(stateOverrides = {}) {
   const controller = createFindController({
     state,
     el,
-    codeJarController: null,
+    codeEditorController,
   });
   if (origAdd) globalThis.document.addEventListener = origAdd;
-  return { state, el, controller };
+  return { state, el, controller, codeEditorController };
 }
 
 function typeQuery(el, value) {
@@ -134,7 +156,10 @@ test("close hides backdrop", () => {
 });
 
 test("search in editor mode populates backdrop with marks", () => {
-  const { el, controller } = setup({ content: "hello world hello", activeKind: "text" });
+  const { el, controller } = setup({
+    content: "hello world hello",
+    activeKind: "text",
+  });
   controller.open();
   typeQuery(el, "hello");
   assert.ok(el.editorBackdrop.innerHTML.includes("<mark"));
@@ -241,4 +266,86 @@ test("edit→preview→search→edit keeps markdown edit find results without te
   controller.refresh();
   assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
   assert.equal(el.findCount.textContent, "1 of 2");
+});
+
+// --- CodeMirror search integration tests ---
+
+test("search in code view calls codeEditorController.search", () => {
+  const codeCtr = mockCodeEditorController();
+  const { el, controller } = setup(
+    { content: "hello world hello", activeKind: "code" },
+    { codeEditorController: codeCtr },
+  );
+  controller.open();
+  typeQuery(el, "hello");
+  assert.equal(el.findCount.textContent, "1 of 2");
+  const searchCalls = codeCtr.calls.filter((c) => c.method === "search");
+  assert.equal(searchCalls.length, 1);
+  assert.equal(searchCalls[0].query, "hello");
+});
+
+test("navigate next/prev in code view calls searchNext/searchPrev", () => {
+  const codeCtr = mockCodeEditorController();
+  const { el, controller } = setup(
+    { content: "aa bb aa cc aa", activeKind: "code" },
+    { codeEditorController: codeCtr },
+  );
+  controller.open();
+  typeQuery(el, "aa");
+  assert.equal(el.findCount.textContent, "1 of 3");
+
+  // Click next
+  const nextHandlers = el.findNext._listeners.click || [];
+  for (const h of nextHandlers) h();
+  assert.equal(el.findCount.textContent, "2 of 3");
+  assert.ok(codeCtr.calls.some((c) => c.method === "searchNext"));
+
+  // Click prev
+  const prevHandlers = el.findPrev._listeners.click || [];
+  for (const h of prevHandlers) h();
+  assert.equal(el.findCount.textContent, "1 of 3");
+  assert.ok(codeCtr.calls.some((c) => c.method === "searchPrev"));
+});
+
+test("close find in code view calls clearSearch", () => {
+  const codeCtr = mockCodeEditorController();
+  const { el, controller } = setup(
+    { content: "hello", activeKind: "code" },
+    { codeEditorController: codeCtr },
+  );
+  controller.open();
+  typeQuery(el, "hello");
+  controller.close();
+  assert.ok(codeCtr.calls.some((c) => c.method === "clearSearch"));
+});
+
+test("markdown edit mode delegates search to codeEditorController", () => {
+  const codeCtr = mockCodeEditorController();
+  const { el, controller } = setup(
+    {
+      content: "foo bar foo",
+      activeKind: "markdown",
+      markdownViewMode: "edit",
+    },
+    { codeEditorController: codeCtr },
+  );
+  controller.open();
+  typeQuery(el, "foo");
+  assert.equal(el.findCount.textContent, "1 of 2");
+  assert.ok(
+    codeCtr.calls.some((c) => c.method === "search" && c.query === "foo"),
+  );
+});
+
+test("clearing query in code view calls clearSearch", () => {
+  const codeCtr = mockCodeEditorController();
+  const { el, controller } = setup(
+    { content: "hello world", activeKind: "code" },
+    { codeEditorController: codeCtr },
+  );
+  controller.open();
+  typeQuery(el, "hello");
+  assert.ok(codeCtr.calls.some((c) => c.method === "search"));
+  typeQuery(el, "");
+  assert.ok(codeCtr.calls.some((c) => c.method === "clearSearch"));
 });

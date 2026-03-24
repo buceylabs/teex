@@ -1,6 +1,8 @@
 import {
   bracketMatching,
   Compartment,
+  findNext as cmFindNext,
+  findPrevious as cmFindPrevious,
   Decoration,
   defaultKeymap,
   drawSelection,
@@ -15,8 +17,11 @@ import {
   keymap,
   lineNumbers,
   RangeSet,
+  SearchQuery,
   StateEffect,
   StateField,
+  search as searchExtension,
+  setSearchQuery,
   syntaxHighlighting,
   tags,
 } from "/vendor/codemirror.js";
@@ -177,6 +182,19 @@ export function createCodeMirrorController({
           keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
           langCompartment.of(lang ? lang : []),
           highlightCompartment.of(currentHighlightExt()),
+          searchExtension({
+            createPanel: () => ({ dom: document.createElement("span") }),
+          }),
+          EditorView.theme({
+            ".cm-searchMatch": {
+              background: "rgba(255, 200, 50, 0.35)",
+              borderRadius: "2px",
+            },
+            ".cm-searchMatch.cm-searchMatch-selected": {
+              background: "rgba(255, 165, 0, 0.7)",
+              outline: "1px solid rgba(255, 165, 0, 0.9)",
+            },
+          }),
           diffField,
           updateListener,
           scrollListener,
@@ -284,6 +302,32 @@ export function createCodeMirrorController({
     return view ? view.state.doc.lines : 0;
   }
 
+  function search(query) {
+    if (!view) return;
+    const sq = new SearchQuery({ search: query, caseSensitive: false });
+    view.dispatch({
+      effects: setSearchQuery.of(sq),
+      selection: { anchor: 0 },
+    });
+    cmFindNext(view);
+  }
+
+  function searchNext() {
+    if (!view) return;
+    cmFindNext(view);
+  }
+
+  function searchPrev() {
+    if (!view) return;
+    cmFindPrevious(view);
+  }
+
+  function clearSearch() {
+    if (!view) return;
+    const sq = new SearchQuery({ search: "" });
+    view.dispatch({ effects: setSearchQuery.of(sq) });
+  }
+
   return {
     attach,
     detach,
@@ -294,5 +338,9 @@ export function createCodeMirrorController({
     clearDiffDecorations,
     scrollToLine,
     getLineCount,
+    search,
+    searchNext,
+    searchPrev,
+    clearSearch,
   };
 }

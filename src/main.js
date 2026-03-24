@@ -190,7 +190,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   applySavedShowHiddenFiles(state);
   applySavedModifiedOnly(state);
   bindElementsImported(el);
-  findController = createFindController({ state, el });
+  findController = createFindController({
+    state,
+    el,
+    codeEditorController: codeJarController,
+  });
   diffMapController = createDiffMapController({
     el,
     codeEditorController: codeJarController,
