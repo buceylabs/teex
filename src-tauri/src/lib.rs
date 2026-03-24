@@ -45,10 +45,12 @@ use files::{
 use git::git_diff;
 use git::git_status;
 use launch::{
-    categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths,
+    categorize_paths, get_launch_context, open_paths_in_new_window,
     queue_open_paths_for_window, take_pending_open_paths,
 };
-use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled, target_window};
+#[cfg(target_os = "macos")]
+use launch::queue_open_paths;
+use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled};
 #[cfg(test)]
 use menu_events::{next_transfer_request_id, window_event};
 use path_utils::{file_kind, is_dotfile_config, is_text_like, path_to_string, should_traverse_with_hidden};
