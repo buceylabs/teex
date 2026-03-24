@@ -32,11 +32,18 @@ pub(super) fn is_dotfile_config(path: &Path) -> bool {
 pub(super) fn file_kind(path: &Path) -> &'static str {
     if is_markdown(path) {
         "markdown"
-    } else if is_code(path) {
+    } else if is_code(path) || is_named_code_file(path) {
         "code"
     } else {
         "text"
     }
+}
+
+fn is_named_code_file(path: &Path) -> bool {
+    let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+        return false;
+    };
+    matches!(name, ".gitignore" | ".dockerignore" | ".gitattributes")
 }
 
 pub(super) fn is_code(path: &Path) -> bool {

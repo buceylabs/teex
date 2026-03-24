@@ -18,6 +18,8 @@ fn file_type_helpers_are_case_insensitive_for_supported_extensions() {
     assert_eq!(file_kind(Path::new("data.json")), "code");
     assert_eq!(file_kind(Path::new("main.cpp")), "code");
     assert_eq!(file_kind(Path::new("style.CSS")), "code");
+    assert_eq!(file_kind(Path::new(".gitignore")), "code");
+    assert_eq!(file_kind(Path::new(".dockerignore")), "code");
 
     assert!(is_code(Path::new("lib.rs")));
     assert!(is_code(Path::new("index.JS")));
