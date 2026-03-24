@@ -1,3 +1,4 @@
+use crate::menu_events::target_window;
 use crate::*;
 
 pub(crate) fn install_cli_from_menu(app: &tauri::AppHandle) {
