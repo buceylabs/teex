@@ -231,7 +231,6 @@ function bindUiEvents() {
     toggleModifiedOnly,
     toggleCollapseAllFolders: () =>
       sidebarController.toggleCollapseAllFolders(),
-    expandAllFolders: () => sidebarController.expandAllFolders(),
     saveNow,
     hasTabSession,
     switchTab,
