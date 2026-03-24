@@ -351,3 +351,44 @@ test("folder to tabs promotion preserves first file scroll and repeated tab swit
     assert.equal(el.editor.scrollTop, 180);
   });
 });
+
+test("markdown edit mode uses CodeMirror scroller for scroll capture and restore", () => {
+  withFakeRaf(({ flushRaf }) => {
+    const scroller = { scrollTop: 160, scrollHeight: 1000, clientHeight: 300 };
+    const state = {
+      activePath: "/folder/file1.md",
+      activeKind: "markdown",
+      content: "one",
+      markdownViewMode: "edit",
+      activeEditorScrollTop: 0,
+      activePreviewScrollTop: 0,
+      activeMarkdownScrollAnchor: null,
+      fileScrollMemory: new Map(),
+      openFiles: [],
+    };
+    const el = {
+      editor: { scrollTop: 0, scrollHeight: 1000, clientHeight: 300 },
+      codeEditor: {
+        classList: { contains: () => false },
+        querySelector: (selector) =>
+          selector === ".cm-scroller" ? scroller : null,
+      },
+      preview: { scrollTop: 0, scrollHeight: 1000, clientHeight: 300 },
+    };
+    const ctrl = createScrollSyncController({ state, el });
+
+    ctrl.onEditorScroll();
+    assert.equal(state.activeEditorScrollTop, 160);
+    assert.equal(
+      state.fileScrollMemory.get("/folder/file1.md")?.editorScrollTop,
+      160,
+    );
+
+    state.activeEditorScrollTop = 90;
+    scroller.scrollTop = 0;
+    ctrl.afterRender();
+    flushRaf();
+    assert.equal(scroller.scrollTop, 90);
+    assert.equal(el.editor.scrollTop, 0);
+  });
+});

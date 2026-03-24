@@ -122,7 +122,7 @@ export function createScrollSyncController({ state, el }) {
 
   function activeEditorElement() {
     if (el.codeEditor && !el.codeEditor.classList.contains("hidden")) {
-      return el.codeEditor;
+      return el.codeEditor.querySelector?.(".cm-scroller") || el.codeEditor;
     }
     return el.editor;
   }

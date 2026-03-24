@@ -47,11 +47,8 @@ export function createFindController({ state, el }) {
     if (state.activeKind === "code") {
       return "code";
     }
-    if (
-      state.activeKind === "markdown" &&
-      state.markdownViewMode === "preview"
-    ) {
-      return "preview";
+    if (state.activeKind === "markdown") {
+      return state.markdownViewMode === "preview" ? "preview" : "code";
     }
     return "editor";
   }

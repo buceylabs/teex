@@ -119,14 +119,14 @@ test("open works on saved file with activePath set", () => {
 // --- Backdrop tests ---
 
 test("open in editor mode shows backdrop", () => {
-  const { el, controller } = setup({ content: "hello" });
+  const { el, controller } = setup({ content: "hello", activeKind: "text" });
   controller.open();
   assert.equal(el.editorBackdrop.classList.contains("hidden"), false);
   assert.equal(el.editor.classList.contains("find-active-editor"), true);
 });
 
 test("close hides backdrop", () => {
-  const { el, controller } = setup({ content: "hello" });
+  const { el, controller } = setup({ content: "hello", activeKind: "text" });
   controller.open();
   controller.close();
   assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
@@ -134,7 +134,7 @@ test("close hides backdrop", () => {
 });
 
 test("search in editor mode populates backdrop with marks", () => {
-  const { el, controller } = setup({ content: "hello world hello" });
+  const { el, controller } = setup({ content: "hello world hello", activeKind: "text" });
   controller.open();
   typeQuery(el, "hello");
   assert.ok(el.editorBackdrop.innerHTML.includes("<mark"));
@@ -143,30 +143,34 @@ test("search in editor mode populates backdrop with marks", () => {
 
 // --- View mode toggle tests ---
 
-test("refresh after edit→preview hides backdrop and clears counter", () => {
+test("refresh after markdown edit→preview hides textarea backdrop and keeps find open", () => {
   const { state, el, controller } = setup({ content: "hello world" });
   controller.open();
   typeQuery(el, "hello");
   assert.equal(el.findCount.textContent, "1 of 1");
-  assert.equal(el.editorBackdrop.classList.contains("hidden"), false);
+  assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
 
   // Simulate toggle to preview
   state.markdownViewMode = "preview";
   controller.refresh();
 
-  // Backdrop should be hidden
+  // Backdrop stays hidden, but find remains active across the mode switch.
   assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
   assert.equal(el.editor.classList.contains("find-active-editor"), false);
-  // Find bar should still be open
   assert.equal(controller.isOpen, true);
   assert.equal(el.findBar.classList.contains("hidden"), false);
 });
 
-test("refresh after preview→edit shows backdrop with highlights", () => {
+test("refresh after preview→edit keeps markdown edit in code search mode", () => {
   const { state, el, controller } = setup({
     content: "hello world",
     markdownViewMode: "preview",
   });
+  let selectedRange = null;
+  el.editor.setSelectionRange = (...args) => {
+    selectedRange = args;
+  };
+
   controller.open();
   typeQuery(el, "hello");
   // In preview mode, backdrop should be hidden
@@ -176,10 +180,10 @@ test("refresh after preview→edit shows backdrop with highlights", () => {
   state.markdownViewMode = "edit";
   controller.refresh();
 
-  // Backdrop should now be visible with highlights
-  assert.equal(el.editorBackdrop.classList.contains("hidden"), false);
-  assert.equal(el.editor.classList.contains("find-active-editor"), true);
-  assert.ok(el.editorBackdrop.innerHTML.includes("<mark"));
+  // Markdown edit now uses CodeMirror, so textarea backdrop/selection should stay unused.
+  assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
+  assert.equal(el.editor.classList.contains("find-active-editor"), false);
+  assert.equal(selectedRange, null);
   assert.equal(el.findCount.textContent, "1 of 1");
 });
 
@@ -219,13 +223,13 @@ test("refresh when find is closed is a no-op", () => {
   assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
 });
 
-test("edit→preview→search→edit shows editor highlights", () => {
+test("edit→preview→search→edit keeps markdown edit find results without textarea highlights", () => {
   const { state, el, controller } = setup({ content: "abc def abc" });
 
   // Start in edit, open find, search
   controller.open();
   typeQuery(el, "abc");
-  assert.ok(el.editorBackdrop.innerHTML.includes("<mark"));
+  assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
 
   // Toggle to preview
   state.markdownViewMode = "preview";
@@ -235,7 +239,6 @@ test("edit→preview→search→edit shows editor highlights", () => {
   // Toggle back to edit
   state.markdownViewMode = "edit";
   controller.refresh();
-  assert.equal(el.editorBackdrop.classList.contains("hidden"), false);
-  assert.ok(el.editorBackdrop.innerHTML.includes("<mark"));
+  assert.equal(el.editorBackdrop.classList.contains("hidden"), true);
   assert.equal(el.findCount.textContent, "1 of 2");
 });
