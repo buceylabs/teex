@@ -136,7 +136,8 @@ const codeJarController = createCodeMirrorController({
     toggleSidebarVisibility,
     toggleMarkdownMode,
     toggleStatusBar,
-    toggleCollapseAllFolders: () => sidebarController.toggleCollapseAllFolders(),
+    toggleCollapseAllFolders: () =>
+      sidebarController.toggleCollapseAllFolders(),
     closeActiveFileOrWindow,
     closeTabByPath,
     createNewTab,
