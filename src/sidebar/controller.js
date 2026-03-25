@@ -143,34 +143,40 @@ export function createSidebarController({
       const entriesToRender = state.filterModifiedOnly
         ? filterEntriesByGitStatus(state.entries, state.gitStatusMap)
         : state.entries;
-      const tree = buildEntryTree(entriesToRender);
-      const augmentedGitMap = propagateFolderStatus(state.gitStatusMap);
-      el.projectList.innerHTML = renderTreeHtml(
-        tree,
-        0,
-        state.collapsedFolders,
-        augmentedGitMap,
-        state.folderIconUrl,
-      );
-      bindSidebarItemEvents({
-        el,
-        state,
-        sidebarClickState,
-        normalizeTransferTab,
-        snapshotActiveFileAsTransferTab,
-        hasTabSession,
-        syncActiveTabToState,
-        saveNow,
-        replaceActiveTab,
-        openEntry,
-        openFolderEntryInTabs,
-        render,
-        updateMenuState,
-        invoke,
-        crossWindowDrag,
-        markTreeDirty,
-        renderSidebar,
-      });
+
+      if (state.filterModifiedOnly && entriesToRender.length === 0) {
+        el.projectList.innerHTML =
+          '<p class="sidebar-empty-state">No modified files.</p>';
+      } else {
+        const tree = buildEntryTree(entriesToRender);
+        const augmentedGitMap = propagateFolderStatus(state.gitStatusMap);
+        el.projectList.innerHTML = renderTreeHtml(
+          tree,
+          0,
+          state.collapsedFolders,
+          augmentedGitMap,
+          state.folderIconUrl,
+        );
+        bindSidebarItemEvents({
+          el,
+          state,
+          sidebarClickState,
+          normalizeTransferTab,
+          snapshotActiveFileAsTransferTab,
+          hasTabSession,
+          syncActiveTabToState,
+          saveNow,
+          replaceActiveTab,
+          openEntry,
+          openFolderEntryInTabs,
+          render,
+          updateMenuState,
+          invoke,
+          crossWindowDrag,
+          markTreeDirty,
+          renderSidebar,
+        });
+      }
       sidebarRenderState.treeDirty = false;
     }
 

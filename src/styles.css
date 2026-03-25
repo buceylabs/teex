@@ -236,6 +236,14 @@ input[type="text"] {
   min-width: 0;
 }
 
+.sidebar-empty-state {
+  color: color-mix(in oklab, var(--subtle) 60%, transparent);
+  font-size: 12px;
+  text-align: center;
+  padding: 24px 16px;
+  margin: 0;
+}
+
 .folder-children {
   position: relative;
 }
