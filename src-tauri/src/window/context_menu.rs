@@ -60,9 +60,14 @@ pub(crate) fn show_tab_context_menu(window: tauri::Window, index: usize) -> Resu
     let close_item = MenuItem::with_id(&app, "tab_context_close", "Close", true, None::<&str>)
         .map_err(|e| format!("Unable to create menu item: {e}"))?;
 
-    let close_others_item =
-        MenuItem::with_id(&app, "tab_context_close_others", "Close Others", true, None::<&str>)
-            .map_err(|e| format!("Unable to create menu item: {e}"))?;
+    let close_others_item = MenuItem::with_id(
+        &app,
+        "tab_context_close_others",
+        "Close Others",
+        true,
+        None::<&str>,
+    )
+    .map_err(|e| format!("Unable to create menu item: {e}"))?;
 
     let menu = MenuBuilder::new(&app)
         .item(&close_item)

@@ -25,14 +25,20 @@ fn list_project_entries_includes_empty_folders() {
     );
 
     let empty_entry = entries.iter().find(|e| e.rel_path == "also_empty").unwrap();
-    assert!(empty_entry.is_dir, "empty folder entry should have is_dir=true");
+    assert!(
+        empty_entry.is_dir,
+        "empty folder entry should have is_dir=true"
+    );
 
     assert!(
         !entries.iter().any(|e| e.rel_path == "has_file" && e.is_dir),
         "has_file should not appear as an empty dir entry"
     );
 
-    let file_entry = entries.iter().find(|e| e.rel_path.contains("note.md")).unwrap();
+    let file_entry = entries
+        .iter()
+        .find(|e| e.rel_path.contains("note.md"))
+        .unwrap();
     assert!(!file_entry.is_dir, "file entry should have is_dir=false");
 }
 
