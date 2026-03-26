@@ -870,13 +870,86 @@ input[type="text"] {
 .unified-diff {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   font-family: var(--mono);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.udiff-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.udiff-toc {
+  width: 168px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.udiff-toc-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 10px 5px 12px;
+  text-decoration: none;
+  color: var(--subtle);
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color 0.1s;
+  border-left: 2px solid transparent;
+}
+
+.udiff-toc-item:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.udiff-toc-item.udiff-toc-active {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border-left-color: var(--accent);
+  padding-left: 10px;
+}
+
+.udiff-toc-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.udiff-toc-stats {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.udiff-toc-added {
+  color: var(--git-added);
+}
+
+.udiff-toc-removed {
+  color: var(--git-deleted);
+}
+
+.udiff-content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-width: 0;
+  scroll-behavior: smooth;
 }
 
 .udiff-file {
