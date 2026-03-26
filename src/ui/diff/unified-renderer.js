@@ -29,7 +29,7 @@ function countLines(file) {
  */
 export function buildUnifiedDiffHtml(fileDiffs) {
   if (!fileDiffs || fileDiffs.length === 0) {
-    return '<div class="udiff-empty-state">No changes to review</div>';
+    return '<div class="udiff-empty-state">No changes to review.</div>';
   }
 
   let toc = '<nav class="udiff-toc" aria-label="Changed files">';

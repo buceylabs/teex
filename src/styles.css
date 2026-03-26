@@ -1002,9 +1002,9 @@ input[type="text"] {
 .udiff-empty-state {
   padding: 48px 18px;
   text-align: center;
-  color: var(--subtle);
+  color: color-mix(in oklab, var(--subtle) 60%, transparent);
   font-family: var(--ui);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .preview {

@@ -6,13 +6,13 @@ import { buildUnifiedDiffHtml } from "../../../src/ui/diff/unified-renderer.js";
 describe("buildUnifiedDiffHtml", () => {
   it("returns empty state message for empty array", () => {
     const html = buildUnifiedDiffHtml([]);
-    assert.ok(html.includes("No changes to review"));
+    assert.ok(html.includes("No changes to review."));
     assert.ok(html.includes("udiff-empty-state"));
   });
 
   it("returns empty state message for null input", () => {
     const html = buildUnifiedDiffHtml(null);
-    assert.ok(html.includes("No changes to review"));
+    assert.ok(html.includes("No changes to review."));
   });
 
   it("renders a single file with one hunk", () => {
@@ -161,5 +161,110 @@ describe("buildUnifiedDiffHtml", () => {
       },
     ]);
     assert.ok(html.includes('data-path="src/lib.rs"'));
+  });
+
+  it("TOC item uses basename not full path as label", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "src/ui/foo.js",
+        hunks: [
+          { header: "@@", lines: [{ content: "x", line_type: "added" }] },
+        ],
+      },
+    ]);
+    assert.ok(html.includes('class="udiff-toc-name">foo.js<'));
+  });
+
+  it("TOC item title attribute contains full path", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "src/ui/foo.js",
+        hunks: [
+          { header: "@@", lines: [{ content: "x", line_type: "added" }] },
+        ],
+      },
+    ]);
+    assert.ok(html.includes('title="src/ui/foo.js"'));
+  });
+
+  it("TOC item href and data-target match file id", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "a.txt",
+        hunks: [
+          { header: "@@", lines: [{ content: "x", line_type: "added" }] },
+        ],
+      },
+    ]);
+    assert.ok(html.includes('href="#udiff-file-0"'));
+    assert.ok(html.includes('data-target="udiff-file-0"'));
+    assert.ok(html.includes('id="udiff-file-0"'));
+  });
+
+  it("first TOC item gets udiff-toc-active, others do not", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "a.txt",
+        hunks: [
+          { header: "@@", lines: [{ content: "x", line_type: "added" }] },
+        ],
+      },
+      {
+        rel_path: "b.txt",
+        hunks: [
+          { header: "@@", lines: [{ content: "y", line_type: "added" }] },
+        ],
+      },
+    ]);
+    // Exactly one active item
+    const activeCount = html.split("udiff-toc-active").length - 1;
+    assert.equal(activeCount, 1);
+    // The active item is for file 0
+    assert.ok(
+      html.includes('href="#udiff-file-0" data-target="udiff-file-0"') ||
+        html.includes("udiff-toc-active"),
+    );
+    // Second file id exists but is not active
+    assert.ok(html.includes('href="#udiff-file-1"'));
+  });
+
+  it("TOC shows correct added and removed counts", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "x.js",
+        hunks: [
+          {
+            header: "@@",
+            lines: [
+              { content: "a", line_type: "added" },
+              { content: "b", line_type: "added" },
+              { content: "c", line_type: "removed" },
+              { content: "d", line_type: "context" },
+            ],
+          },
+        ],
+      },
+    ]);
+    assert.ok(html.includes(">+2<"));
+    assert.ok(html.includes(">-1<"));
+  });
+
+  it("TOC omits zero counts", () => {
+    const html = buildUnifiedDiffHtml([
+      {
+        rel_path: "x.js",
+        hunks: [
+          {
+            header: "@@",
+            lines: [
+              { content: "a", line_type: "added" },
+              { content: "b", line_type: "added" },
+            ],
+          },
+        ],
+      },
+    ]);
+    assert.ok(html.includes(">+2<"));
+    assert.ok(!html.includes("udiff-toc-removed"));
   });
 });
