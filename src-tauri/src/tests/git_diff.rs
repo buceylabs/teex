@@ -1,5 +1,5 @@
-use crate::git::{parse_unified_diff, LineDiff};
 use crate::git::{parse_full_unified_diff, DiffLine};
+use crate::git::{parse_unified_diff, LineDiff};
 
 #[test]
 fn empty_diff_produces_no_annotations() {
