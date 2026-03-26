@@ -15,6 +15,15 @@ function bindScrollspy(container) {
 
   let activeId = null;
 
+  function setActive(id) {
+    if (id === activeId) return;
+    activeId = id;
+    for (const item of tocItems) {
+      item.classList.toggle("udiff-toc-active", item.dataset.target === activeId);
+    }
+    tocMap.get(activeId)?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }
+
   function update() {
     const scrollTop = content.scrollTop;
     let found = files[0];
@@ -25,24 +34,33 @@ function bindScrollspy(container) {
         break;
       }
     }
-    const newId = found?.id ?? null;
-    if (newId !== activeId) {
-      activeId = newId;
-      for (const item of tocItems) {
-        item.classList.toggle(
-          "udiff-toc-active",
-          item.dataset.target === activeId,
-        );
-      }
-      tocMap
-        .get(activeId)
-        ?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    setActive(found?.id ?? null);
+  }
+
+  function onTocClick(e) {
+    e.preventDefault();
+    const targetId = e.currentTarget.dataset.target;
+    const targetEl = container.querySelector(`#${targetId}`);
+    if (targetEl) {
+      content.style.scrollBehavior = "auto";
+      content.scrollTop = targetEl.offsetTop;
+      content.style.scrollBehavior = "";
     }
+    setActive(targetId);
+  }
+
+  for (const item of tocItems) {
+    item.addEventListener("click", onTocClick);
   }
 
   update();
   content.addEventListener("scroll", update, { passive: true });
-  return () => content.removeEventListener("scroll", update);
+  return () => {
+    content.removeEventListener("scroll", update);
+    for (const item of tocItems) {
+      item.removeEventListener("click", onTocClick);
+    }
+  };
 }
 
 export function createUnifiedDiffController({ state, el, invoke }) {
