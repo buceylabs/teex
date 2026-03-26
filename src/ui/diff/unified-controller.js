@@ -1,4 +1,14 @@
+import { isTextInputActive } from "../behavior.js";
 import { buildUnifiedDiffHtml } from "./unified-renderer.js";
+
+export function getAdjacentTocId(tocItems, activeId, direction) {
+  if (!tocItems.length) return activeId;
+  const ids = tocItems.map((item) => item.dataset.target);
+  const currentIndex = ids.indexOf(activeId);
+  if (currentIndex === -1) return activeId;
+  if (direction === "up") return ids[Math.max(0, currentIndex - 1)];
+  return ids[Math.min(ids.length - 1, currentIndex + 1)];
+}
 
 function bindScrollspy(container) {
   const content = container.querySelector?.(".udiff-content");
@@ -49,14 +59,33 @@ function bindScrollspy(container) {
     setActive(targetId);
   }
 
+  function onKeyDown(e) {
+    if (container.classList.contains("hidden")) return;
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    if (isTextInputActive(document.activeElement)) return;
+    e.preventDefault();
+    const direction = e.key === "ArrowDown" ? "down" : "up";
+    const nextId = getAdjacentTocId(tocItems, activeId, direction);
+    if (nextId === activeId) return;
+    const targetEl = container.querySelector(`#${nextId}`);
+    if (targetEl) {
+      content.style.scrollBehavior = "auto";
+      content.scrollTop = targetEl.offsetTop;
+      content.style.scrollBehavior = "";
+    }
+    setActive(nextId);
+  }
+
   for (const item of tocItems) {
     item.addEventListener("click", onTocClick);
   }
 
   update();
   content.addEventListener("scroll", update, { passive: true });
+  document.addEventListener("keydown", onKeyDown);
   return () => {
     content.removeEventListener("scroll", update);
+    document.removeEventListener("keydown", onKeyDown);
     for (const item of tocItems) {
       item.removeEventListener("click", onTocClick);
     }
