@@ -9,7 +9,11 @@ const noopInvoke = () => Promise.resolve();
 test("toggleModifiedOnly turns filter on", () => {
   const state = { filterModifiedOnly: false, collapsedFolders: new Set() };
   const ls = { store: {} };
-  global.localStorage = { setItem: (k, v) => { ls.store[k] = v; } };
+  global.localStorage = {
+    setItem: (k, v) => {
+      ls.store[k] = v;
+    },
+  };
 
   toggleModifiedOnly(state, noopInvoke, noop, noop);
 
