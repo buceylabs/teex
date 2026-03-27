@@ -7,7 +7,11 @@ const noop = () => {};
 const noopInvoke = () => Promise.resolve();
 
 test("toggleModifiedOnly turns filter on", () => {
-  const state = { filterModifiedOnly: false, collapsedFolders: new Set(), savedCollapsedFolders: null };
+  const state = {
+    filterModifiedOnly: false,
+    collapsedFolders: new Set(),
+    savedCollapsedFolders: null,
+  };
   const ls = { store: {} };
   global.localStorage = {
     setItem: (k, v) => {
@@ -33,7 +37,10 @@ test("toggleModifiedOnly expands all folders when turning filter on", () => {
 
   assert.equal(state.filterModifiedOnly, true);
   assert.equal(state.collapsedFolders.size, 0);
-  assert.deepEqual(state.savedCollapsedFolders, new Set(["docs", "docs/api", "src"]));
+  assert.deepEqual(
+    state.savedCollapsedFolders,
+    new Set(["docs", "docs/api", "src"]),
+  );
 });
 
 test("toggleModifiedOnly restores folder state when turning filter off", () => {
