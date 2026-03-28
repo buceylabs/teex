@@ -27,12 +27,6 @@ export function createOpenPathsController({
   createNewTab,
   deduper,
 }) {
-  function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
-
   function shouldSkipDuplicateOsOpen(paths) {
     return shouldSkipDuplicateOsOpenForDeduper(deduper, paths);
   }
@@ -155,11 +149,6 @@ export function createOpenPathsController({
 
       if (launch.mode === "folder" && launch.path) {
         await openFolder(launch.path);
-        return;
-      }
-
-      await sleep(250);
-      if (await drainPendingOpenPaths()) {
         return;
       }
     } catch (error) {

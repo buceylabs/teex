@@ -33,6 +33,36 @@ test("OS open deduper suppresses only matching signatures within time window", (
   assert.equal(deduper.signature, "/b.txt");
 });
 
+test("bootstrap resolves quickly when no paths are pending", async () => {
+  const invoke = async (command) => {
+    if (command === "take_pending_open_paths") return [];
+    if (command === "get_launch_context") return { mode: "empty" };
+    return null;
+  };
+
+  const controller = createOpenPathsController({
+    state: { mode: "empty" },
+    invoke,
+    setStatus: () => {},
+    openFile: async () => {},
+    openFileInTabs: async () => {},
+    openSingleFileFromUi: async () => {},
+    openMultipleFiles: async () => {},
+    openFolder: async () => {},
+    createNewTab: () => {},
+    deduper: { signature: "", timestamp: 0 },
+  });
+
+  const start = performance.now();
+  await controller.bootstrap();
+  const elapsed = performance.now() - start;
+
+  assert.ok(
+    elapsed < 50,
+    `bootstrap took ${elapsed.toFixed(0)}ms, expected < 50ms`,
+  );
+});
+
 test("bootstrap creates a new tab when no paths are pending and launch context is empty", async () => {
   let newTabCalled = false;
 
