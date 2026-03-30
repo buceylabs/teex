@@ -606,10 +606,20 @@ test("replaceActiveTab records initial file so back button works after first swi
     },
     invoke: async (command, payload) => {
       if (command === "read_text_file" && payload?.path === "/tmp/b.md") {
-        return { path: "/tmp/b.md", content: "# b", kind: "markdown", writable: true };
+        return {
+          path: "/tmp/b.md",
+          content: "# b",
+          kind: "markdown",
+          writable: true,
+        };
       }
       if (command === "read_text_file" && payload?.path === "/tmp/a.md") {
-        return { path: "/tmp/a.md", content: "# a", kind: "markdown", writable: true };
+        return {
+          path: "/tmp/a.md",
+          content: "# a",
+          kind: "markdown",
+          writable: true,
+        };
       }
     },
     applyFilePayload: (payload) => {
@@ -651,10 +661,20 @@ test("replaceActiveTab preserves navigation history for back/forward", async () 
     },
     invoke: async (command, payload) => {
       if (command === "read_text_file" && payload?.path === "/tmp/b.md") {
-        return { path: "/tmp/b.md", content: "# b", kind: "markdown", writable: true };
+        return {
+          path: "/tmp/b.md",
+          content: "# b",
+          kind: "markdown",
+          writable: true,
+        };
       }
       if (command === "read_text_file" && payload?.path === "/tmp/a.md") {
-        return { path: "/tmp/a.md", content: "# a", kind: "markdown", writable: true };
+        return {
+          path: "/tmp/a.md",
+          content: "# a",
+          kind: "markdown",
+          writable: true,
+        };
       }
     },
     applyFilePayload: (payload) => {

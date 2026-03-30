@@ -71,7 +71,7 @@ export function createOpenPathsController({
 
     try {
       const launch = await invoke("categorize_paths", { paths: normalized });
-      if (!launch || !launch.mode) {
+      if (!launch?.mode) {
         return;
       }
 
