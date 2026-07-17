@@ -4,7 +4,32 @@ import test from "node:test";
 import {
   buildStartupTabHtml,
   startupViewFromPayload,
+  waitForStartupPaint,
 } from "../../src/app/startup-view.js";
+
+test("waitForStartupPaint yields through a frame and a task", async () => {
+  const order = [];
+  const pendingFrames = [];
+  const pendingTasks = [];
+  const painted = waitForStartupPaint({
+    scheduleFrame: (callback) => pendingFrames.push(callback),
+    scheduleTask: (callback) => pendingTasks.push(callback),
+  }).then(() => order.push("resolved"));
+
+  order.push("scheduled");
+  assert.deepEqual(order, ["scheduled"]);
+  assert.equal(pendingFrames.length, 1);
+
+  pendingFrames.shift()();
+  await Promise.resolve();
+  order.push("frame-complete");
+  assert.deepEqual(order, ["scheduled", "frame-complete"]);
+  assert.equal(pendingTasks.length, 1);
+
+  pendingTasks.shift()();
+  await painted;
+  assert.deepEqual(order, ["scheduled", "frame-complete", "resolved"]);
+});
 
 test("startupViewFromPayload exposes a preloaded file immediately", () => {
   assert.deepEqual(

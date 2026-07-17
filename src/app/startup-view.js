@@ -1,6 +1,15 @@
 import { escapeAttr, escapeHtml } from "../ui/html-utils.js";
 import { baseName } from "../utils/app-utils.js";
 
+export function waitForStartupPaint({
+  scheduleFrame = requestAnimationFrame,
+  scheduleTask = (callback) => setTimeout(callback, 0),
+} = {}) {
+  return new Promise((resolve) => {
+    scheduleFrame(() => scheduleTask(resolve));
+  });
+}
+
 export function startupViewFromPayload(startupPayload) {
   const context = startupPayload?.context;
   const file = startupPayload?.file;
@@ -51,7 +60,6 @@ export function renderStartupView(startupPayload, el) {
   const view = startupViewFromPayload(startupPayload);
   document.title = view.title;
   document.documentElement.dataset.startupPhase = "document-visible";
-  performance.mark("teex:document-visible");
 
   el.tabBarRow?.classList.toggle("hidden", !view.hasDocument);
   if (el.tabBar) {

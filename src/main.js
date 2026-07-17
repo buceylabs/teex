@@ -1,13 +1,11 @@
-import { bindStartupElements, renderStartupView } from "./app/startup-view.js";
+import {
+  bindStartupElements,
+  renderStartupView,
+  waitForStartupPaint,
+} from "./app/startup-view.js";
 
 const { invoke } = window.__TAURI__.core;
 performance.mark("teex:startup-entry");
-
-function afterNextPaint() {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => resolve());
-  });
-}
 
 async function start() {
   let startupPayload = null;
@@ -19,7 +17,9 @@ async function start() {
   }
 
   renderStartupView(startupPayload, bindStartupElements());
-  await afterNextPaint();
+  performance.mark("teex:startup-shell-ready");
+  await waitForStartupPaint();
+  performance.mark("teex:document-visible");
 
   try {
     const { startApplication } = await import("./app/application.js");
