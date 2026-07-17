@@ -4,7 +4,6 @@ import {
   buildKeyboardShortcuts,
   handleKeyboardShortcut,
 } from "./keyboard-shortcuts.js";
-import { addCopyButtons, renderMarkdown } from "./markdown-renderer.js";
 import {
   detectStructuredPasteKind,
   formatStructuredPasteText,
@@ -211,6 +210,9 @@ export function bindUiEvents({
         if (state.activePath) {
           saveNow();
         }
+        const { addCopyButtons, renderMarkdown } = await import(
+          "./markdown-renderer.js"
+        );
         el.preview.innerHTML = await renderMarkdown(state.content);
         addCopyButtons(el.preview);
       }

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildWindowTitleState,
+  shouldUseEnhancedEditor,
   shouldUsePlainTextareaEditor,
 } from "../../src/ui/renderer.js";
 
@@ -26,6 +27,39 @@ test("shouldUsePlainTextareaEditor still uses CodeMirror for saved markdown file
       markdownViewMode: "edit",
       activePath: "/notes/today.md",
       openFiles: [{ path: "/notes/today.md" }],
+      activeTabIndex: 0,
+    }),
+    false,
+  );
+});
+
+test("shouldUseEnhancedEditor enhances code and saved markdown but not untitled markdown", () => {
+  assert.equal(
+    shouldUseEnhancedEditor({
+      activeKind: "code",
+      markdownViewMode: "edit",
+      activePath: "/src/main.js",
+      openFiles: [],
+      activeTabIndex: 0,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldUseEnhancedEditor({
+      activeKind: "markdown",
+      markdownViewMode: "edit",
+      activePath: "/notes/today.md",
+      openFiles: [{ path: "/notes/today.md" }],
+      activeTabIndex: 0,
+    }),
+    true,
+  );
+  assert.equal(
+    shouldUseEnhancedEditor({
+      activeKind: "markdown",
+      markdownViewMode: "edit",
+      activePath: null,
+      openFiles: [{ path: null }],
       activeTabIndex: 0,
     }),
     false,

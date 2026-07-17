@@ -41,7 +41,7 @@ import {
 import { createDiffController } from "./ui/diff/controller.js";
 import { createDiffMapController } from "./ui/diff/map-controller.js";
 import { createUnifiedDiffController } from "./ui/diff/unified-controller.js";
-import { createCodeMirrorController } from "./ui/editor/codemirror-controller.js";
+import { createDeferredEditorController } from "./ui/editor/deferred-controller.js";
 import { createFormatController } from "./ui/format-controller.js";
 import { confirmReloadExternalChange } from "./ui/native-dialog.js";
 import { createScrollSyncController } from "./ui/scroll/sync.js";
@@ -77,11 +77,18 @@ let diffMapController;
 let unifiedDiffController;
 let sessionSaveEnabled = false;
 
-const codeJarController = createCodeMirrorController({
-  el,
-  state,
-  onContentChange: () => renderChrome(),
-  onScroll: () => scrollSyncController?.onEditorScroll(),
+const codeEditorController = createDeferredEditorController({
+  load: async () => {
+    const { createCodeMirrorController } = await import(
+      "./ui/editor/codemirror-controller.js"
+    );
+    return createCodeMirrorController({
+      el,
+      state,
+      onContentChange: () => renderChrome(),
+      onScroll: () => scrollSyncController?.onEditorScroll(),
+    });
+  },
 });
 
 ({
@@ -105,7 +112,7 @@ const codeJarController = createCodeMirrorController({
   osOpenDeduper,
   pendingOutgoingTabTransfers,
   dropOverlayDragState,
-  codeJarController,
+  codeEditorController,
   callbacks: {
     switchTab,
     moveTab,
@@ -214,22 +221,22 @@ window.addEventListener("DOMContentLoaded", async () => {
   findController = createFindController({
     state,
     el,
-    codeEditorController: codeJarController,
+    codeEditorController,
   });
   formatController = createFormatController({
     state,
     invoke,
-    codeEditorController: codeJarController,
+    codeEditorController,
     onDirtyStateChanged: () => renderChrome(),
   });
   diffMapController = createDiffMapController({
     el,
-    codeEditorController: codeJarController,
+    codeEditorController,
   });
   diffController = createDiffController({
     state,
     invoke,
-    codeEditorController: codeJarController,
+    codeEditorController,
     diffMapController,
   });
   unifiedDiffController = createUnifiedDiffController({ state, el, invoke });

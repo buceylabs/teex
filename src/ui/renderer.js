@@ -10,11 +10,6 @@ import {
   isUntitledTab,
 } from "./behavior.js";
 import { rewritePreviewImages } from "./image-paths.js";
-import {
-  addCopyButtons,
-  renderMarkdown,
-  renderMermaidDiagrams,
-} from "./markdown-renderer.js";
 
 export function createUiRenderer({
   state,
@@ -26,8 +21,10 @@ export function createUiRenderer({
   closeTab,
   closeActiveFileOrWindow,
   crossWindowDrag,
-  codeJarController,
+  codeEditorController,
 }) {
+  let mainPaneRenderVersion = 0;
+
   function syncWindowTitle() {
     const { nextTitle, nextRepresentedPath } = buildWindowTitleState(state);
 
@@ -70,6 +67,7 @@ export function createUiRenderer({
   }
 
   async function renderMainPane(options = {}) {
+    const renderVersion = ++mainPaneRenderVersion;
     const shouldFocusEditor = options.focusEditor !== false;
 
     if (el.unifiedDiff) {
@@ -79,14 +77,14 @@ export function createUiRenderer({
     if (state.activeKind === "diff") {
       el.editor.classList.add("hidden");
       el.preview.classList.add("hidden");
-      codeJarController.detach();
+      codeEditorController.detach();
       return;
     }
 
     if (!hasActiveContent(state)) {
       el.editor.classList.add("hidden");
       el.preview.classList.add("hidden");
-      codeJarController.detach();
+      codeEditorController.detach();
       return;
     }
 
@@ -94,40 +92,84 @@ export function createUiRenderer({
       state.activeKind === "markdown" &&
       state.markdownViewMode === "preview"
     ) {
-      el.editor.classList.add("hidden");
-      el.preview.classList.remove("hidden");
-      codeJarController.detach();
-      el.preview.innerHTML = await renderMarkdown(state.content);
-      addCopyButtons(el.preview);
+      codeEditorController.detach();
+      el.preview.classList.add("hidden");
+      el.editor.classList.remove("hidden");
+      if (el.editor.value !== state.content) {
+        el.editor.value = state.content;
+        el.editor.selectionStart = 0;
+        el.editor.selectionEnd = 0;
+      }
+
+      let markdown;
+      let html;
+      try {
+        markdown = await import("./markdown-renderer.js");
+        html = await markdown.renderMarkdown(state.content);
+      } catch (error) {
+        console.error(String(error));
+        return;
+      }
+      if (
+        renderVersion !== mainPaneRenderVersion ||
+        state.activeKind !== "markdown" ||
+        state.markdownViewMode !== "preview"
+      ) {
+        return;
+      }
+
+      el.preview.innerHTML = html;
+      markdown.addCopyButtons(el.preview);
       if (state.activePath) {
         rewritePreviewImages(el.preview, dirName(state.activePath));
       }
-      renderMermaidDiagrams(el.preview).catch((error) => {
+      el.editor.classList.add("hidden");
+      el.preview.classList.remove("hidden");
+      markdown.renderMermaidDiagrams(el.preview).catch((error) => {
         console.error(String(error));
       });
       return;
     }
 
-    if (
-      state.activeKind === "code" ||
-      (state.activeKind === "markdown" &&
-        state.markdownViewMode === "edit" &&
-        !shouldUsePlainTextareaEditor(state))
-    ) {
-      el.editor.classList.add("hidden");
+    if (shouldUseEnhancedEditor(state)) {
       el.preview.classList.add("hidden");
-      const ext = fileLanguageKey(state.activePath);
-      codeJarController.attach(ext);
-      codeJarController.syncContent(state.content);
+      el.editor.classList.remove("hidden");
+      if (el.editor.value !== state.content) {
+        el.editor.value = state.content;
+        el.editor.selectionStart = 0;
+        el.editor.selectionEnd = 0;
+      }
       if (shouldFocusEditor) {
-        codeJarController.focus();
+        el.editor.focus();
+      }
+
+      try {
+        await codeEditorController.load();
+      } catch (error) {
+        console.error(String(error));
+        return;
+      }
+
+      if (
+        renderVersion !== mainPaneRenderVersion ||
+        !shouldUseEnhancedEditor(state)
+      ) {
+        return;
+      }
+
+      const ext = fileLanguageKey(state.activePath);
+      codeEditorController.attach(ext);
+      codeEditorController.syncContent(state.content);
+      el.editor.classList.add("hidden");
+      if (shouldFocusEditor && document.activeElement === el.editor) {
+        codeEditorController.focus();
       }
       return;
     }
 
     el.preview.classList.add("hidden");
     el.editor.classList.remove("hidden");
-    codeJarController.detach();
+    codeEditorController.detach();
 
     if (el.editor.value !== state.content) {
       el.editor.value = state.content;
@@ -188,6 +230,15 @@ export function createUiRenderer({
 
 export function shouldUsePlainTextareaEditor(state) {
   return state.activeKind === "text" || isUntitledMarkdownEditState(state);
+}
+
+export function shouldUseEnhancedEditor(state) {
+  return (
+    state.activeKind === "code" ||
+    (state.activeKind === "markdown" &&
+      state.markdownViewMode === "edit" &&
+      !shouldUsePlainTextareaEditor(state))
+  );
 }
 
 export function buildWindowTitleState(state) {
