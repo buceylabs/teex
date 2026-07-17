@@ -20,6 +20,7 @@ export function createOpenPathsController({
   invoke,
   setStatus,
   openFile,
+  openFilePayload,
   openFileInTabs,
   openSingleFileFromUi,
   openMultipleFiles,
@@ -135,16 +136,17 @@ export function createOpenPathsController({
     }, 150);
   }
 
-  async function bootstrap() {
+  async function bootstrap(startupPayload = null) {
     setStatus("Ready");
 
     try {
-      if (await drainPendingOpenPaths()) {
-        return;
-      }
-
-      const launch = await invoke("get_launch_context");
+      const startup = startupPayload ?? (await invoke("take_startup_payload"));
+      const launch = startup?.context ?? { mode: "empty" };
       if (launch.mode === "file" && launch.path) {
+        if (startup?.file?.path === launch.path) {
+          await openFilePayload(startup.file);
+          return;
+        }
         await openFile(launch.path);
         return;
       }

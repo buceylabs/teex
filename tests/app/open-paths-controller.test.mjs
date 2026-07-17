@@ -35,8 +35,9 @@ test("OS open deduper suppresses only matching signatures within time window", (
 
 test("bootstrap resolves quickly when no paths are pending", async () => {
   const invoke = async (command) => {
-    if (command === "take_pending_open_paths") return [];
-    if (command === "get_launch_context") return { mode: "empty" };
+    if (command === "take_startup_payload") {
+      return { context: { mode: "empty", path: null, paths: [] }, file: null };
+    }
     return null;
   };
 
@@ -49,6 +50,7 @@ test("bootstrap resolves quickly when no paths are pending", async () => {
     openSingleFileFromUi: async () => {},
     openMultipleFiles: async () => {},
     openFolder: async () => {},
+    openFilePayload: async () => {},
     createNewTab: () => {},
     deduper: { signature: "", timestamp: 0 },
   });
@@ -67,11 +69,8 @@ test("bootstrap creates a new tab when no paths are pending and launch context i
   let newTabCalled = false;
 
   const invoke = async (command) => {
-    if (command === "take_pending_open_paths") {
-      return [];
-    }
-    if (command === "get_launch_context") {
-      return { mode: "empty" };
+    if (command === "take_startup_payload") {
+      return { context: { mode: "empty", path: null, paths: [] }, file: null };
     }
     return null;
   };
@@ -87,6 +86,7 @@ test("bootstrap creates a new tab when no paths are pending and launch context i
     openSingleFileFromUi: async () => {},
     openMultipleFiles: async () => {},
     openFolder: async () => {},
+    openFilePayload: async () => {},
     createNewTab: () => {
       newTabCalled = true;
     },
@@ -105,11 +105,8 @@ test("bootstrap does not create a duplicate startup tab when one already exists"
   let newTabCalls = 0;
 
   const invoke = async (command) => {
-    if (command === "take_pending_open_paths") {
-      return [];
-    }
-    if (command === "get_launch_context") {
-      return { mode: "empty" };
+    if (command === "take_startup_payload") {
+      return { context: { mode: "empty", path: null, paths: [] }, file: null };
     }
     return null;
   };
@@ -129,6 +126,7 @@ test("bootstrap does not create a duplicate startup tab when one already exists"
     openSingleFileFromUi: async () => {},
     openMultipleFiles: async () => {},
     openFolder: async () => {},
+    openFilePayload: async () => {},
     createNewTab: () => {
       newTabCalls += 1;
     },
@@ -138,4 +136,49 @@ test("bootstrap does not create a duplicate startup tab when one already exists"
   await controller.bootstrap();
 
   assert.equal(newTabCalls, 0);
+});
+
+test("bootstrap opens a preloaded startup file without another IPC read", async () => {
+  const commands = [];
+  const openedPayloads = [];
+  const payload = {
+    path: "/notes/start.md",
+    content: "# Start",
+    kind: "markdown",
+    writable: true,
+  };
+
+  const controller = createOpenPathsController({
+    state: { mode: "empty", activePath: null, openFiles: [] },
+    invoke: async (command) => {
+      commands.push(command);
+      if (command === "take_startup_payload") {
+        return {
+          context: {
+            mode: "file",
+            path: "/notes/start.md",
+            paths: [],
+          },
+          file: payload,
+        };
+      }
+      throw new Error(`Unexpected command: ${command}`);
+    },
+    setStatus: () => {},
+    openFile: async () => {
+      throw new Error("openFile should not re-read a preloaded startup file");
+    },
+    openFilePayload: async (value) => openedPayloads.push(value),
+    openFileInTabs: async () => {},
+    openSingleFileFromUi: async () => {},
+    openMultipleFiles: async () => {},
+    openFolder: async () => {},
+    createNewTab: () => {},
+    deduper: { signature: "", timestamp: 0 },
+  });
+
+  await controller.bootstrap();
+
+  assert.deepEqual(commands, ["take_startup_payload"]);
+  assert.deepEqual(openedPayloads, [payload]);
 });

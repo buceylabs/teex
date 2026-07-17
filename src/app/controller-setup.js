@@ -143,6 +143,7 @@ export function setupControllers({
     render: callbacks.render,
     updateMenuState: callbacks.updateMenuState,
     openFile: (path) => fileController.openFile(path),
+    openFilePayload: (payload) => fileController.openPreloadedFile(payload),
     openFileInTabs: (path) => tabController.openFileInTabs(path),
     openSingleFileFromUi: (path) => fileController.openSingleFileFromUi(path),
     openMultipleFiles: (paths) => tabController.openMultipleFiles(paths),

@@ -50,7 +50,7 @@ use git::git_status;
 use launch::queue_open_paths;
 use launch::{
     categorize_paths, get_launch_context, open_paths_in_new_window, queue_open_paths_for_window,
-    take_pending_open_paths,
+    take_pending_open_paths, take_startup_payload,
 };
 use menu_events::{emit_to_window, handle_app_menu_event, set_menu_item_enabled};
 #[cfg(test)]

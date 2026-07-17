@@ -140,17 +140,31 @@ export function createFileController({
 
     try {
       const payload = await invoke("read_text_file", { path });
-      switchToSingleFileState({
-        state,
-        payload,
-        applyFilePayload,
-        markSidebarTreeDirty,
-      });
-      setStatus(`Opened ${baseName(path)}`);
+      applySingleFilePayload(payload);
     } catch (error) {
       setStatus(String(error), true);
     }
 
+    render();
+    updateMenuState();
+  }
+
+  function applySingleFilePayload(payload) {
+    switchToSingleFileState({
+      state,
+      payload,
+      applyFilePayload,
+      markSidebarTreeDirty,
+    });
+    setStatus(`Opened ${baseName(payload.path)}`);
+  }
+
+  function openPreloadedFile(payload) {
+    if (!payload?.path) {
+      return;
+    }
+
+    applySingleFilePayload(payload);
     render();
     updateMenuState();
   }
@@ -257,6 +271,7 @@ export function createFileController({
 
   return {
     openFile,
+    openPreloadedFile,
     openSingleFileFromUi,
     openFolder,
     openEntry,

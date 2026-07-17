@@ -1,4 +1,5 @@
 use super::*;
+use crate::files::FilePayload;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -6,6 +7,26 @@ pub(crate) struct LaunchContext {
     pub(crate) mode: String,
     pub(crate) path: Option<String>,
     pub(crate) paths: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct StartupPayload {
+    pub(crate) context: LaunchContext,
+    pub(crate) file: Option<FilePayload>,
+}
+
+pub(crate) fn build_startup_payload(context: LaunchContext) -> StartupPayload {
+    let first_path = match context.mode.as_str() {
+        "file" => context.path.as_ref(),
+        "files" => context.paths.first(),
+        _ => None,
+    };
+    let file = first_path
+        .cloned()
+        .and_then(|path| read_text_file(path).ok());
+
+    StartupPayload { context, file }
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -31,6 +52,24 @@ pub(crate) fn clear_pending_open_paths_for_window(app: &tauri::AppHandle, label:
     if let Ok(mut queued) = pending.by_window.lock() {
         queued.remove(label);
     };
+}
+
+fn take_pending_paths(window: &tauri::Window) -> Vec<String> {
+    let app = window.app_handle();
+    let pending = app.state::<PendingOpenPaths>();
+    let mut drained = Vec::new();
+
+    if let Ok(mut by_window) = pending.by_window.lock() {
+        if let Some(paths) = by_window.remove(window.label()) {
+            drained.extend(paths);
+        }
+    }
+
+    if let Ok(mut global_paths) = pending.global_paths.lock() {
+        drained.extend(std::mem::take(&mut *global_paths));
+    }
+
+    drained
 }
 
 #[tauri::command]
@@ -144,21 +183,19 @@ pub(crate) fn categorize_paths(paths: Vec<String>) -> LaunchContext {
 
 #[tauri::command]
 pub(crate) fn take_pending_open_paths(window: tauri::Window) -> Vec<String> {
-    let app = window.app_handle();
-    let pending = app.state::<PendingOpenPaths>();
-    let mut drained = Vec::new();
+    take_pending_paths(&window)
+}
 
-    if let Ok(mut by_window) = pending.by_window.lock() {
-        if let Some(paths) = by_window.remove(window.label()) {
-            drained.extend(paths);
-        }
-    }
+#[tauri::command]
+pub(crate) fn take_startup_payload(window: tauri::Window) -> StartupPayload {
+    let pending = take_pending_paths(&window);
+    let context = if pending.is_empty() {
+        get_launch_context()
+    } else {
+        categorize_paths(pending)
+    };
 
-    if let Ok(mut global_paths) = pending.global_paths.lock() {
-        drained.extend(std::mem::take(&mut *global_paths));
-    }
-
-    drained
+    build_startup_payload(context)
 }
 
 #[tauri::command]

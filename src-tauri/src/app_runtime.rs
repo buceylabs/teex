@@ -18,6 +18,7 @@ pub(crate) fn run_app() {
         })
         .invoke_handler(tauri::generate_handler![
             get_launch_context,
+            take_startup_payload,
             categorize_paths,
             get_window_label,
             get_all_window_labels,
