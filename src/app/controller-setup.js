@@ -146,7 +146,8 @@ export function setupControllers({
     openFilePayload: (payload) => fileController.openPreloadedFile(payload),
     openFileInTabs: (path) => tabController.openFileInTabs(path),
     openSingleFileFromUi: (path) => fileController.openSingleFileFromUi(path),
-    openMultipleFiles: (paths) => tabController.openMultipleFiles(paths),
+    openMultipleFiles: (paths, preloadedPayload) =>
+      tabController.openMultipleFiles(paths, preloadedPayload),
     openFolder: (path) => fileController.openFolder(path),
     createNewTab: () => tabController.createNewTab(),
     deduper: osOpenDeduper,

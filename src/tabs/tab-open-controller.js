@@ -36,13 +36,16 @@ export function createTabOpenController({
   syncActiveTabToState,
   recordNavOnActiveTab,
 }) {
-  async function openMultipleFiles(paths) {
+  async function openMultipleFiles(paths, preloadedPayload = null) {
     await saveNow();
 
     const loaded = [];
     for (const path of paths) {
       try {
-        const payload = await invoke("read_text_file", { path });
+        const payload =
+          preloadedPayload?.path === path
+            ? preloadedPayload
+            : await invoke("read_text_file", { path });
         loaded.push(buildTabFromPayload(payload));
       } catch (error) {
         setStatus(String(error), true);

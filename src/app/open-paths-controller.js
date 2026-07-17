@@ -152,7 +152,7 @@ export function createOpenPathsController({
       }
 
       if (launch.mode === "files" && launch.paths && launch.paths.length >= 2) {
-        await openMultipleFiles(launch.paths);
+        await openMultipleFiles(launch.paths, startup?.file ?? null);
         return;
       }
 

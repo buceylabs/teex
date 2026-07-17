@@ -802,3 +802,35 @@ test("closeTab restores previous active tab when save is canceled for inactive u
   assert.equal(state.activeTabIndex, 0);
   assert.equal(state.activePath, "/tmp/a.md");
 });
+
+test("openMultipleFiles reuses a preloaded first startup document", async () => {
+  const readPaths = [];
+  const { state, controller } = createControllerHarness({
+    invoke: async (command, args) => {
+      if (command === "read_text_file") {
+        readPaths.push(args.path);
+        return {
+          path: args.path,
+          content: "B",
+          kind: "text",
+          writable: true,
+        };
+      }
+      return null;
+    },
+  });
+  const preloaded = {
+    path: "/a.md",
+    content: "# A",
+    kind: "markdown",
+    writable: true,
+  };
+
+  await controller.openMultipleFiles(["/a.md", "/b.txt"], preloaded);
+
+  assert.deepEqual(readPaths, ["/b.txt"]);
+  assert.equal(state.openFiles.length, 2);
+  assert.equal(state.openFiles[0].path, "/a.md");
+  assert.equal(state.openFiles[0].content, "# A");
+  assert.equal(state.openFiles[1].path, "/b.txt");
+});
