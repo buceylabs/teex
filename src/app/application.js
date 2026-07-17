@@ -190,4 +190,17 @@ export async function startApplication({ startupPayload = null } = {}) {
   listen("teex://toggle-hidden-files", actions.toggleHiddenFiles);
   listen("teex://toggle-modified-only", actions.toggleModifiedOnly);
   listen("teex://toggle-unified-diff", actions.toggleUnifiedDiff);
+
+  document.documentElement.dataset.startupPhase = "hydrated";
+  performance.mark("teex:application-hydrated");
+  performance.measure(
+    "teex:document-visible",
+    "teex:startup-entry",
+    "teex:document-visible",
+  );
+  performance.measure(
+    "teex:application-hydrated",
+    "teex:startup-entry",
+    "teex:application-hydrated",
+  );
 }

@@ -50,6 +50,8 @@ export function bindStartupElements(root = document) {
 export function renderStartupView(startupPayload, el) {
   const view = startupViewFromPayload(startupPayload);
   document.title = view.title;
+  document.documentElement.dataset.startupPhase = "document-visible";
+  performance.mark("teex:document-visible");
 
   el.tabBarRow?.classList.toggle("hidden", !view.hasDocument);
   if (el.tabBar) {

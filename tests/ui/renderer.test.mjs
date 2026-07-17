@@ -37,6 +37,7 @@ test("shouldUseEnhancedEditor enhances code and saved markdown but not untitled 
   assert.equal(
     shouldUseEnhancedEditor({
       activeKind: "code",
+      content: "const ready = true;",
       markdownViewMode: "edit",
       activePath: "/src/main.js",
       openFiles: [],
@@ -47,6 +48,7 @@ test("shouldUseEnhancedEditor enhances code and saved markdown but not untitled 
   assert.equal(
     shouldUseEnhancedEditor({
       activeKind: "markdown",
+      content: "# Today",
       markdownViewMode: "edit",
       activePath: "/notes/today.md",
       openFiles: [{ path: "/notes/today.md" }],
@@ -57,9 +59,21 @@ test("shouldUseEnhancedEditor enhances code and saved markdown but not untitled 
   assert.equal(
     shouldUseEnhancedEditor({
       activeKind: "markdown",
+      content: "",
       markdownViewMode: "edit",
       activePath: null,
       openFiles: [{ path: null }],
+      activeTabIndex: 0,
+    }),
+    false,
+  );
+  assert.equal(
+    shouldUseEnhancedEditor({
+      activeKind: "code",
+      content: "x".repeat(512 * 1024 + 1),
+      markdownViewMode: "edit",
+      activePath: "/tmp/large.js",
+      openFiles: [],
       activeTabIndex: 0,
     }),
     false,

@@ -9,6 +9,7 @@ import {
   isUntitledMarkdownEditState,
   isUntitledTab,
 } from "./behavior.js";
+import { canAutomaticallyEnhance } from "./document-policy.js";
 import { rewritePreviewImages } from "./image-paths.js";
 
 export function createUiRenderer({
@@ -234,7 +235,7 @@ export function shouldUsePlainTextareaEditor(state) {
 
 export function shouldUseEnhancedEditor(state) {
   return (
-    state.activeKind === "code" ||
+    (state.activeKind === "code" && canAutomaticallyEnhance(state.content)) ||
     (state.activeKind === "markdown" &&
       state.markdownViewMode === "edit" &&
       !shouldUsePlainTextareaEditor(state))

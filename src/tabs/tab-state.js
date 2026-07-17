@@ -1,3 +1,5 @@
+import { initialMarkdownViewMode } from "../ui/document-policy.js";
+
 export function buildTabFromPayload(payload) {
   return {
     path: payload.path,
@@ -6,7 +8,10 @@ export function buildTabFromPayload(payload) {
     kind: payload.kind,
     writable: payload.writable,
     isDirty: false,
-    markdownViewMode: payload.kind === "markdown" ? "preview" : "edit",
+    markdownViewMode:
+      payload.kind === "markdown"
+        ? initialMarkdownViewMode(payload.content)
+        : "edit",
     scrollState: {
       editorScrollTop: 0,
       previewScrollTop: 0,

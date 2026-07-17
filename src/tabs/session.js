@@ -1,3 +1,5 @@
+import { initialMarkdownViewMode } from "../ui/document-policy.js";
+
 export function hasTabSession(state) {
   return state.openFiles.length > 0;
 }
@@ -28,7 +30,7 @@ export function applyFilePayloadToState(state, payload, options) {
       previousPath === payload.path;
     state.markdownViewMode = shouldPreserveMarkdownMode
       ? previousMarkdownMode
-      : defaultMarkdownMode;
+      : initialMarkdownViewMode(payload.content, defaultMarkdownMode);
   } else {
     state.markdownViewMode = "edit";
   }

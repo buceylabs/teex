@@ -71,6 +71,17 @@ test("buildUntitledTab creates a clean markdown editor tab", () => {
   });
 });
 
+test("buildTabFromPayload keeps large markdown documents source-first", () => {
+  const tab = buildTabFromPayload({
+    path: "/large.md",
+    content: "x".repeat(512 * 1024 + 1),
+    kind: "markdown",
+    writable: true,
+  });
+
+  assert.equal(tab.markdownViewMode, "edit");
+});
+
 test("snapshotActiveStateAsTab normalizes active file state", () => {
   assert.deepEqual(
     snapshotActiveStateAsTab({
